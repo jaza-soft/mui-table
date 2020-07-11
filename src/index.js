@@ -1,6 +1,5 @@
-import React from 'react'
-import styles from './styles.module.css'
+import MuiTable from './MuiTable'
 
-export const ExampleComponent = ({ text }) => {
-  return <div className={styles.test}>Example Component: {text}</div>
-}
+export { MuiTable }
+
+export default MuiTable
