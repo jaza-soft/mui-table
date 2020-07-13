@@ -1,6 +1,6 @@
 {
   "name": "@jazasoft/mui-table",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Advanced React Data Table using Material UI",
   "author": "zahidraza",
   "license": "MIT",
@@ -25,12 +25,14 @@
   },
   "peerDependencies": {
     "@material-ui/core": "^4.0.0",
+    "@material-ui/icons": "^4.0.0",
     "@material-ui/styles": "^4.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.0.0"
   },
   "devDependencies": {
     "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.10.0",
     "babel-eslint": "^10.0.3",
     "cross-env": "^7.0.2",
@@ -57,6 +59,7 @@
     "dist"
   ],
   "dependencies": {
+    "clsx": "^1.1.1",
     "final-form": "^4.20.1",
     "final-form-arrays": "^3.0.2",
     "react-final-form": "^6.5.0",

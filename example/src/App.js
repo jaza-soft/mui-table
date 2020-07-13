@@ -1,6 +1,6 @@
 import React from 'react'
 
-import MuiTable from '@jazasoft/mui-table'
+import { MuiTable } from '@jazasoft/mui-table'
 
 const columns = [
   { dataKey: 'dessert', title: 'Dessert' },
@@ -10,9 +10,10 @@ const columns = [
   { dataKey: 'protein', title: 'Protein', align: 'right' }
 ]
 
-const rows = Array(10)
+const rows = Array(15)
   .fill('')
   .map((_, idx) => ({
+    id: idx + 1,
     dessert: `Dessert ${idx + 1}`,
     calories: Math.round(Math.random() * 500),
     fat: Math.round(Math.random() * 10),
@@ -21,7 +22,28 @@ const rows = Array(10)
   }))
 
 const App = () => {
-  return <MuiTable columns={columns} rows={rows} />
+  const onSubmit = (values) => {
+    console.log({ values })
+  }
+
+  const onSelectActionClick = (event, action, selectedRows) => {
+    console.log({ action, selectedRows })
+  }
+
+  return (
+    <MuiTable
+      columns={columns}
+      rows={rows}
+      toolbar={false}
+      pageable={true}
+      editable={true}
+      selectable={true}
+      selectActions={['add', 'delete']}
+      selectAll={false}
+      onSubmit={onSubmit}
+      onSelectActionClick={onSelectActionClick}
+    />
+  )
 }
 
 export default App
