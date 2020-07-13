@@ -1,22 +1,24 @@
 import React from 'react'
+
 import { Field } from 'react-final-form'
+
 import Input from '@material-ui/core/Input'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 
-// const required = (value) => (value ? undefined : 'Required')
-
-const TextInput = React.memo(({ name, validate }) => {
+const TextInput = React.memo(({ name, validate, options }) => {
   return (
     <Field name={name} validate={validate}>
       {({ input, meta }) => {
         return (
           <FormControl error={meta.touched && !!meta.error}>
-            <Input inputProps={{ ...input }} />
+            <Input
+              id={`${name}-text-input`}
+              inputProps={{ ...input }}
+              {...options}
+            />
             {meta.touched && meta.error && (
-              <FormHelperText id='component-error-text'>
-                {meta.error}
-              </FormHelperText>
+              <FormHelperText id={`${name}-error`}>{meta.error}</FormHelperText>
             )}
           </FormControl>
         )

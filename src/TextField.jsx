@@ -1,11 +1,14 @@
 import React from 'react'
 import { Field } from 'react-final-form'
 
-const TextField = React.memo(({ name }) => {
+const TextField = React.memo(({ name, render, options }) => {
   return (
     <Field name={name}>
-      {({ input, meta }) => {
-        return <span>{input?.value}</span>
+      {({ input }) => {
+        if (typeof render === 'function') {
+          return render(input?.value)
+        }
+        return <span {...options}>{input?.value}</span>
       }}
     </Field>
   )

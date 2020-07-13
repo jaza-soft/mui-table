@@ -19,8 +19,10 @@ import Button from '@material-ui/core/Button'
 
 import TableHead from './TableHead'
 import Toolbar from './Toolbar'
-// import TextField from './TextField'
+import TextField from './TextField'
 import TextInput from './TextInput'
+import SelectInput from './SelectInput'
+import BooleanInput from './BooleanInput'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -84,6 +86,7 @@ const MuiTable = (props) => {
     tableProps,
     idKey,
     onSubmit,
+    validate,
     onSelectActionClick
   } = props
 
@@ -162,6 +165,8 @@ const MuiTable = (props) => {
     <div style={{ margin: '2em' }}>
       <Form
         onSubmit={onSubmit}
+        validate={validate}
+        validateOnBlur={true}
         mutators={{
           ...arrayMutators
         }}
@@ -230,7 +235,7 @@ const MuiTable = (props) => {
 
                                   {columns.map(
                                     (
-                                      { dataKey, align, rowCellProps },
+                                      { dataKey, render, align, rowCellProps },
                                       colIdx
                                     ) => (
                                       <TableCell
@@ -247,7 +252,9 @@ const MuiTable = (props) => {
                                         align={align}
                                         {...rowCellProps}
                                       >
-                                        {row[dataKey]}
+                                        {typeof render === 'function'
+                                          ? render(row[dataKey])
+                                          : row[dataKey]}
                                       </TableCell>
                                     )
                                   )}
@@ -262,7 +269,16 @@ const MuiTable = (props) => {
                               <TableRow key={rowIdx}>
                                 {columns.map(
                                   (
-                                    { dataKey, title, align, rowCellProps },
+                                    {
+                                      dataKey,
+                                      inputType = 'text-field',
+                                      render,
+                                      choices,
+                                      align,
+                                      rowCellProps,
+                                      options,
+                                      validate
+                                    },
                                     colIdx
                                   ) => (
                                     <TableCell
@@ -270,8 +286,34 @@ const MuiTable = (props) => {
                                       align={align}
                                       {...rowCellProps}
                                     >
-                                      <TextInput name={`${name}.${dataKey}`} />
-                                      {/* <TextField name={`${name}.${dataKey}`} /> */}
+                                      {inputType === 'text-field' && (
+                                        <TextField
+                                          name={`${name}.${dataKey}`}
+                                          options={options}
+                                          render={render}
+                                        />
+                                      )}
+                                      {inputType === 'text-input' && (
+                                        <TextInput
+                                          name={`${name}.${dataKey}`}
+                                          options={options}
+                                          validate={validate}
+                                        />
+                                      )}
+                                      {inputType === 'select-input' && (
+                                        <SelectInput
+                                          name={`${name}.${dataKey}`}
+                                          choices={choices}
+                                          options={options}
+                                          validate={validate}
+                                        />
+                                      )}
+                                      {inputType === 'boolean-input' && (
+                                        <BooleanInput
+                                          name={`${name}.${dataKey}`}
+                                          options={options}
+                                        />
+                                      )}
                                     </TableCell>
                                   )
                                 )}
@@ -354,12 +396,33 @@ const MuiTable = (props) => {
   )
 }
 
+const OptionType = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired
+})
+
 MuiTable.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       dataKey: PropTypes.string,
       title: PropTypes.string,
+      inputType: PropTypes.oneOf([
+        'text-field',
+        'text-input',
+        'select-input',
+        'boolean-input',
+        'date-input',
+        'auto-complete-input'
+      ]),
+      // when inputType is 'select' or 'auto-complete'
+      choices: PropTypes.oneOfType([
+        PropTypes.arrayOf(OptionType),
+        PropTypes.func
+      ]),
+      render: PropTypes.func,
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
+      validate: PropTypes.func, // Validation function for TextInput and SelectInput
+      options: PropTypes.object, // options to be passed to underllying editable component - Input, Select, Switch etc
       headerCellProps: PropTypes.object,
       rowCellProps: PropTypes.object
     })
@@ -377,6 +440,7 @@ MuiTable.propTypes = {
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
 
+  validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
   onSelectActionClick: PropTypes.func, // (event, action, rows) => {}
   comparator: PropTypes.func
