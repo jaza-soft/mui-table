@@ -6,7 +6,7 @@ import Input from '@material-ui/core/Input'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 
-const TextInput = React.memo(({ name, validate, options }) => {
+const TextInput = React.memo(({ name, validate, disabled, options }) => {
   return (
     <Field name={name} validate={validate}>
       {({ input, meta }) => {
@@ -16,6 +16,7 @@ const TextInput = React.memo(({ name, validate, options }) => {
               id={`${name}-text-input`}
               inputProps={{ ...input }}
               {...options}
+              disabled={disabled}
             />
             {meta.touched && meta.error && (
               <FormHelperText id={`${name}-error`}>{meta.error}</FormHelperText>
