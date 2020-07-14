@@ -7,16 +7,25 @@
 ## Features
 
 - [x] Simple Table
-- [ ] Inline Editing - Edit one row at once
 - [x] Collective Editing - Edit entire table at once
-- [x] Sorting & Selection
+- [x] Sorting 
+- [x] Selection
 - [x] Pagination
+- [ ] Inline Editing - Edit one row at once
+- [ ] Filter
 - [ ] Search
 - [ ] Spanning - Row Span & Col Span
 - [ ] Fully Customizable
 - [ ] Tree Data
 - [ ] Drag & Drop for Editable Tree Data
+- [ ] Add/Remove Row
+- [ ] Change Sequence using Drag & Drop
+- [ ] Expandable View/ Modal View/ Sidebar View
+- [ ] Fixed Header
+- [ ] Horizonatl Scroll/ Force Line Wrap on Specified characters
+- [ ] Variant - default, excel
 - [ ] Elements
+  - [x] TextField
   - [x] TextInput
   - [x] SelectInput
   - [x] BooleanInput
@@ -75,7 +84,9 @@ class App extends Component {
 | render        | `function`  |               | render function if custom rendering is required. signature - `(value) => ?any`|
 | validate      | `function`  |               | field validation function. `(value: ?any, allValues: Object, meta: ?FieldState) => ?any` |
 | options       | `object`    | `{}`          | props to be passed to underlying editable component - Input, Select, Switch etc|
+| disabled      | `function`  |               | Disable Editable cells conditionally. Entire columns can be disabled using `options.disabled`. If both are provided, this func will have high priority.  `(row, dataKey) => bool`|
 | align         | `string`    |               | Same as MUI TableCell Values - `inherit, center, justify, left, right`     |
+| linkPath      | `function`  |               | It will turn field to link. `(row, dataKey) => Path:String`                |
 | headerCellProps | `object`  |       `{}`    | MUI Table Cell Props to be passed to Header Cell                           |
 | rowCellProps  | `object`    |      `{}`     | MUI Table Cell Props to be passed to Row Cell                              |
 
@@ -88,10 +99,10 @@ class App extends Component {
 | toolbar       | `bool`      | `false`       | Whether to show toolbar                                                    |
 | title         | `string`    | `Mui Table`   | Toolbar Title                                                              |
 | editable      | `bool`      | `false`       | Table will become editable                                                 |
-| selectable    | `bool`      | `false`       | Table will become Selectable                                               |
+| selectable    | `bool \| func`| `false`     | Selectable Rows. `bool \| (row) => bool`                                   |
 | selectAll     | `bool`      | `true`        | Applicable only when selectable is `true`, Select All Support              |
 | pageable      | `bool`      | `false`       | Table will have pagination                                                 |
-| pageSize      | `number`    | `10`         | Number records to show in one page. Values -  `10, 25`                      |
+| pageSize      | `number`    | `10`          | Number records to show in one page. Values -  `10, 25`                      |
 | sortable      | `bool`      | `false`       | Columns will become sortable                                               |
 | comparator    | `function`  | `(a, b) => 0` | Sort Comparator when sortable is `false`                                   |
 | tableProps    | `object`    | `{}`          | MUI Table props to be passed to Table                                      |

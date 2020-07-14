@@ -50,7 +50,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0])
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: 650
   },
@@ -67,8 +67,12 @@ const useStyles = makeStyles({
   },
   justifyRight: {
     justifyContent: 'flex-end'
+  },
+  link: {
+    color: theme.palette.primary.main,
+    cursor: 'pointer'
   }
-})
+}))
 
 const MuiTable = (props) => {
   const {
@@ -82,7 +86,6 @@ const MuiTable = (props) => {
     pageable,
     toolbar,
     title,
-
     tableProps,
     idKey,
     onSubmit,
@@ -98,11 +101,13 @@ const MuiTable = (props) => {
   const [selected, setSelected] = React.useState([])
   const [page, setPage] = React.useState(0)
   const [pageSize, setPageSize] = React.useState(props.pageSize)
+  const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
+    setKey(key + 1)
   }
 
   const handleSelectActionClick = (event, action) => {
@@ -152,8 +157,11 @@ const MuiTable = (props) => {
 
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
+  const startIdx = page * pageSize
+  const endIdx = pageable ? page * pageSize + pageSize : rows.length
+
   const initialValues = {
-    rows: rows.slice(page * pageSize, page * pageSize + pageSize)
+    rows: stableSort(rows, comparator).slice(startIdx, endIdx)
   }
 
   const totalPage =
@@ -161,9 +169,13 @@ const MuiTable = (props) => {
       ? rows.length / pageSize
       : Math.ceil(rows.length / pageSize)
 
+  const selectedCount = rows?.filter((row) => selected?.includes(row[idKey]))
+    .length
+
   return (
     <div style={{ margin: '2em' }}>
       <Form
+        key={key}
         onSubmit={onSubmit}
         validate={validate}
         validateOnBlur={true}
@@ -180,7 +192,7 @@ const MuiTable = (props) => {
                 {(toolbar || selected.length > 0) && (
                   <Toolbar
                     title={title}
-                    selectedCount={selected.length}
+                    selectedCount={selectedCount}
                     selectActions={selectActions}
                     onSelectActionClick={handleSelectActionClick}
                   />
@@ -194,7 +206,7 @@ const MuiTable = (props) => {
                       sortable={sortable}
                       columns={columns}
                       classes={classes}
-                      selectedCount={selected.length}
+                      selectedCount={selectedCount}
                       order={order}
                       orderBy={orderBy}
                       onSelectAllClick={handleSelectAllClick}
@@ -205,7 +217,7 @@ const MuiTable = (props) => {
                     <TableBody>
                       {!editing
                         ? stableSort(rows, comparator)
-                            .slice(page * pageSize, page * pageSize + pageSize)
+                            .slice(startIdx, endIdx)
                             .map((row, rowIdx) => {
                               const isItemSelected = isSelected(row[idKey])
                               const labelId = `enhanced-table-checkbox-${rowIdx}`
@@ -213,32 +225,46 @@ const MuiTable = (props) => {
                               return (
                                 <TableRow
                                   hover
-                                  onClick={(event) =>
-                                    handleClick(event, row[idKey])
-                                  }
                                   role='checkbox'
                                   aria-checked={isItemSelected}
                                   tabIndex={-1}
                                   key={rowIdx}
                                   selected={isItemSelected}
                                 >
-                                  {selectable && (
+                                  {!!selectable && (
                                     <TableCell padding='checkbox'>
                                       <Checkbox
                                         checked={isItemSelected}
                                         inputProps={{
                                           'aria-labelledby': labelId
                                         }}
+                                        disabled={
+                                          typeof selectable === 'function' &&
+                                          !selectable(row)
+                                        }
+                                        onClick={(event) =>
+                                          handleClick(event, row[idKey])
+                                        }
                                       />
                                     </TableCell>
                                   )}
 
                                   {columns.map(
                                     (
-                                      { dataKey, render, align, rowCellProps },
+                                      {
+                                        dataKey,
+                                        render,
+                                        align,
+                                        linkPath,
+                                        rowCellProps
+                                      },
                                       colIdx
                                     ) => (
                                       <TableCell
+                                        className={clsx({
+                                          [classes.link]:
+                                            typeof linkPath === 'function'
+                                        })}
                                         component={
                                           colIdx === 0 ? 'th' : undefined
                                         }
@@ -250,6 +276,11 @@ const MuiTable = (props) => {
                                         }
                                         key={`${rowIdx}-${colIdx}`}
                                         align={align}
+                                        onClick={() =>
+                                          typeof linkPath === 'function'
+                                            ? linkPath(row, dataKey)
+                                            : null
+                                        }
                                         {...rowCellProps}
                                       >
                                         {typeof render === 'function'
@@ -277,45 +308,57 @@ const MuiTable = (props) => {
                                       align,
                                       rowCellProps,
                                       options,
-                                      validate
+                                      validate,
+                                      disabled: disabledFunc
                                     },
                                     colIdx
-                                  ) => (
-                                    <TableCell
-                                      key={`${rowIdx}-${colIdx}`}
-                                      align={align}
-                                      {...rowCellProps}
-                                    >
-                                      {inputType === 'text-field' && (
-                                        <TextField
-                                          name={`${name}.${dataKey}`}
-                                          options={options}
-                                          render={render}
-                                        />
-                                      )}
-                                      {inputType === 'text-input' && (
-                                        <TextInput
-                                          name={`${name}.${dataKey}`}
-                                          options={options}
-                                          validate={validate}
-                                        />
-                                      )}
-                                      {inputType === 'select-input' && (
-                                        <SelectInput
-                                          name={`${name}.${dataKey}`}
-                                          choices={choices}
-                                          options={options}
-                                          validate={validate}
-                                        />
-                                      )}
-                                      {inputType === 'boolean-input' && (
-                                        <BooleanInput
-                                          name={`${name}.${dataKey}`}
-                                          options={options}
-                                        />
-                                      )}
-                                    </TableCell>
-                                  )
+                                  ) => {
+                                    const row = fields?.value[rowIdx]
+                                    const disabled =
+                                      typeof disabledFunc === 'function'
+                                        ? disabledFunc(row, dataKey)
+                                        : options?.disabled
+
+                                    return (
+                                      <TableCell
+                                        key={`${rowIdx}-${colIdx}`}
+                                        align={align}
+                                        {...rowCellProps}
+                                      >
+                                        {inputType === 'text-field' && (
+                                          <TextField
+                                            name={`${name}.${dataKey}`}
+                                            render={render}
+                                            options={options}
+                                          />
+                                        )}
+                                        {inputType === 'text-input' && (
+                                          <TextInput
+                                            name={`${name}.${dataKey}`}
+                                            validate={validate}
+                                            disabled={disabled}
+                                            options={options}
+                                          />
+                                        )}
+                                        {inputType === 'select-input' && (
+                                          <SelectInput
+                                            name={`${name}.${dataKey}`}
+                                            choices={choices}
+                                            validate={validate}
+                                            disabled={disabled}
+                                            options={options}
+                                          />
+                                        )}
+                                        {inputType === 'boolean-input' && (
+                                          <BooleanInput
+                                            name={`${name}.${dataKey}`}
+                                            disabled={disabled}
+                                            options={options}
+                                          />
+                                        )}
+                                      </TableCell>
+                                    )
+                                  }
                                 )}
                               </TableRow>
                             ))
@@ -327,11 +370,10 @@ const MuiTable = (props) => {
                 </TableContainer>
 
                 <div
-                  className={clsx(
-                    classes.footerContainer,
-                    pageable && editable && classes.justifyBetween,
-                    !(pageable && editable) && classes.justifyRight
-                  )}
+                  className={clsx(classes.footerContainer, {
+                    [classes.justifyBetween]: pageable && editable,
+                    [classes.justifyRight]: !(pageable && editable)
+                  })}
                 >
                   {editable && (
                     <div className={classes.footerActions}>
@@ -420,6 +462,7 @@ MuiTable.propTypes = {
         PropTypes.func
       ]),
       render: PropTypes.func,
+      disabled: PropTypes.func, // (row, dataKey) => boolean . If any normal cell has to disabled conditionally. It will have higher priority than disabled in options
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
       validate: PropTypes.func, // Validation function for TextInput and SelectInput
       options: PropTypes.object, // options to be passed to underllying editable component - Input, Select, Switch etc
@@ -431,7 +474,7 @@ MuiTable.propTypes = {
   title: PropTypes.string,
   toolbar: PropTypes.bool,
   editable: PropTypes.bool,
-  selectable: PropTypes.bool,
+  selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
   selectAll: PropTypes.bool,
   sortable: PropTypes.bool,
   pageable: PropTypes.bool,

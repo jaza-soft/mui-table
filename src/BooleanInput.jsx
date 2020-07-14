@@ -4,7 +4,7 @@ import { Field } from 'react-final-form'
 
 import Switch from '@material-ui/core/Switch'
 
-const TextInput = React.memo(({ name, validate, options }) => {
+const TextInput = React.memo(({ name, validate, disabled, options }) => {
   return (
     <Field name={name} validate={validate}>
       {({ input }) => {
@@ -19,6 +19,7 @@ const TextInput = React.memo(({ name, validate, options }) => {
             }}
             color='primary'
             {...options}
+            disabled={disabled}
           />
         )
       }}

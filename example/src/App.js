@@ -19,14 +19,17 @@ const columns = [
     inputType: 'select-input',
     choices: desserts.map((e) => ({ id: e, name: e })),
     options: { displayEmpty: true, style: { width: 200 } },
-    validate: required
+    validate: required,
+    linkPath: (row, dataKey) => console.log({ row, dataKey }),
+    disabled: (row, dataKey) => row?.idx === 3
   },
   {
     dataKey: 'calories',
     title: 'Calories',
     align: 'right',
     inputType: 'text-input',
-    options: { type: 'number', style: { width: 100 } }
+    options: { type: 'number', style: { width: 100 } },
+    disabled: (row, dataKey) => row?.idx === 1
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   {
@@ -34,7 +37,9 @@ const columns = [
     title: 'Sweet',
     inputType: 'boolean-input',
     render: (value) => (!!value ? 'Yes' : 'No'),
-    options: { color: 'secondary' }
+    options: { color: 'secondary' },
+    align: 'right',
+    disabled: (row, dataKey) => row?.idx === 4
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
@@ -44,7 +49,8 @@ const columns = [
 const rows = Array(15)
   .fill('')
   .map((_, idx) => ({
-    id: idx + 1,
+    idx,
+    id: Math.ceil((idx + 1) / 2),
     dessert: desserts[Math.round(Math.random() * 10) % 5],
     calories: Math.round(Math.random() * 500),
     fat: Math.round(Math.random() * 10),
@@ -55,8 +61,8 @@ const rows = Array(15)
 
 const App = () => {
   const validate = (values) => {
-    console.log('validate')
-    console.log({ values })
+    // console.log('validate')
+    // console.log({ values })
     // return { rows: [{ dessert: 'Required' }] }
   }
   const onSubmit = (values) => {
@@ -74,15 +80,17 @@ const App = () => {
     <MuiTable
       columns={columns}
       rows={rows}
-      toolbar={false}
+      // sortable={true}
+      toolbar={true}
       pageable={true}
       editable={true}
-      selectable={true}
+      selectable={(row) => row?.idx % 2 === 0}
       selectActions={['add', 'delete']}
-      selectAll={false}
+      // selectAll={false}
       onSubmit={onSubmit}
       validate={validate}
       onSelectActionClick={onSelectActionClick}
+      // tableProps={{size: 'small'}}
     />
   )
 }

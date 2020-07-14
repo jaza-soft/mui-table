@@ -14,42 +14,47 @@ const useStyles = makeStyles({
   }
 })
 
-const SelectInput = React.memo(({ name, validate, choices = [], options }) => {
-  const classes = useStyles()
+const SelectInput = React.memo(
+  ({ name, validate, choices = [], disabled, options }) => {
+    const classes = useStyles()
 
-  return (
-    <Field name={name} validate={validate}>
-      {({ input, meta }) => {
-        return (
-          <FormControl
-            className={classes.formControl}
-            error={meta.touched && !!meta.error}
-          >
-            <Select
-              id={`${name}-select-input`}
-              inputProps={{ ...input }}
-              {...options}
+    return (
+      <Field name={name} validate={validate}>
+        {({ input, meta }) => {
+          return (
+            <FormControl
+              className={classes.formControl}
+              error={meta.touched && !!meta.error}
             >
-              {options?.displayEmpty && (
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
-              )}
-              {choices.map((choice, idx) => (
-                <MenuItem key={idx} value={choice.id}>
-                  {choice.name}
-                </MenuItem>
-              ))}
-            </Select>
+              <Select
+                id={`${name}-select-input`}
+                inputProps={{ ...input }}
+                {...options}
+                disabled={disabled}
+              >
+                {options?.displayEmpty && (
+                  <MenuItem value=''>
+                    <em>None</em>
+                  </MenuItem>
+                )}
+                {choices.map((choice, idx) => (
+                  <MenuItem key={idx} value={choice.id}>
+                    {choice.name}
+                  </MenuItem>
+                ))}
+              </Select>
 
-            {meta.touched && meta.error && (
-              <FormHelperText id={`${name}-error`}>{meta.error}</FormHelperText>
-            )}
-          </FormControl>
-        )
-      }}
-    </Field>
-  )
-})
+              {meta.touched && meta.error && (
+                <FormHelperText id={`${name}-error`}>
+                  {meta.error}
+                </FormHelperText>
+              )}
+            </FormControl>
+          )
+        }}
+      </Field>
+    )
+  }
+)
 
 export default SelectInput

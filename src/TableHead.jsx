@@ -44,7 +44,7 @@ const TableHead = ({
   return (
     <MuiTableHead>
       <TableRow>
-        {selectable && !editing && (
+        {!!selectable && !editing && (
           <TableCell padding={selectAll ? 'checkbox' : undefined}>
             {selectAll && (
               <Checkbox
@@ -65,7 +65,7 @@ const TableHead = ({
             sortDirection={orderBy === dataKey ? order : false}
             {...headerCellProps}
           >
-            {sortable ? (
+            {sortable && !editing ? (
               <TableSortLabel
                 active={orderBy === dataKey}
                 direction={orderBy === dataKey ? order : 'asc'}
@@ -91,7 +91,7 @@ const TableHead = ({
 }
 
 TableHead.propTypes = {
-  selectable: PropTypes.bool,
+  selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   selectAll: PropTypes.bool,
   editing: PropTypes.bool, // Remove Selectable Column while editing
   sortable: PropTypes.bool,
