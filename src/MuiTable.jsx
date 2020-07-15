@@ -103,16 +103,28 @@ const MuiTable = (props) => {
   const [pageSize, setPageSize] = React.useState(props.pageSize)
   const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
 
+  /*External handler functions */
+  const handleSelectActionClick = (event, action) => {
+    const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
+    const onActionComplete = () => setSelected([])
+    onSelectActionClick &&
+      onSelectActionClick(event, action, selectedRows, onActionComplete)
+  }
+
+  const handleSubmit = (values, form, complete) => {
+    const onSubmitComplete = () => {
+      setEditing(false)
+      complete()
+    }
+    onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
+  }
+
+  /*Internal Handler functions */
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
     setKey(key + 1)
-  }
-
-  const handleSelectActionClick = (event, action) => {
-    const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
-    onSelectActionClick && onSelectActionClick(event, action, selectedRows)
   }
 
   const handleSelectAllClick = (event) => {
@@ -173,10 +185,10 @@ const MuiTable = (props) => {
     .length
 
   return (
-    <div style={{ margin: '2em' }}>
+    <div>
       <Form
         key={key}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         validate={validate}
         validateOnBlur={true}
         mutators={{

@@ -1,97 +1,76 @@
 import React from 'react'
 
-import { MuiTable } from '@jazasoft/mui-table'
+import { makeStyles } from '@material-ui/styles'
+import Typography from '@material-ui/core/Typography'
+import Button from '@material-ui/core/Button'
 
-const required = (value) => (value ? undefined : 'Required')
+import SimpleTable from './SimpleTable'
+import PageableTable from './PageableTable'
+import SelectableTable from './SelectableTable'
+import SortableTable from "./SortableTable";
+import EditableTable from "./EditableTable";
 
-const desserts = [
-  'Frozen yoghurt',
-  'Ice cream sandwich',
-  'Eclair',
-  'Cupcake',
-  'Gingerbread'
-]
+const tables = {
+  simple: { title: 'Simple Table', table: <SimpleTable /> },
+  pageable: { title: 'Pageable Table', table: <PageableTable /> },
+  selectable: { title: 'Selectable Table', table: <SelectableTable /> },
+  sortable: { title: 'Sortable Table', table: <SortableTable /> },
+  editable: { title: 'Editable Table', table: <EditableTable /> },
+}
 
-const columns = [
-  {
-    dataKey: 'dessert',
-    title: 'Dessert',
-    inputType: 'select-input',
-    choices: desserts.map((e) => ({ id: e, name: e })),
-    options: { displayEmpty: true, style: { width: 200 } },
-    validate: required,
-    linkPath: (row, dataKey) => console.log({ row, dataKey }),
-    disabled: (row, dataKey) => row?.idx === 3
+const useStyles = makeStyles({
+  root: {
+    padding: '1.5em'
   },
-  {
-    dataKey: 'calories',
-    title: 'Calories',
-    align: 'right',
-    inputType: 'text-input',
-    options: { type: 'number', style: { width: 100 } },
-    disabled: (row, dataKey) => row?.idx === 1
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between'
   },
-  { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
-  {
-    dataKey: 'sweet',
-    title: 'Sweet',
-    inputType: 'boolean-input',
-    render: (value) => (!!value ? 'Yes' : 'No'),
-    options: { color: 'secondary' },
-    align: 'right',
-    disabled: (row, dataKey) => row?.idx === 4
+  content: {
+    margin: '1.5em 0'
   },
-  { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
-  { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
-  { dataKey: 'protein', title: 'Protein', align: 'right' }
-]
-
-const rows = Array(15)
-  .fill('')
-  .map((_, idx) => ({
-    idx,
-    id: Math.ceil((idx + 1) / 2),
-    dessert: desserts[Math.round(Math.random() * 10) % 5],
-    calories: Math.round(Math.random() * 500),
-    fat: Math.round(Math.random() * 10),
-    carbs: Math.round(Math.random() * 100),
-    sweet: Math.round(Math.random() * 10) % 2 === 0,
-    protein: (Math.random() * 10).toFixed(1)
-  }))
+  button: {
+    marginRight: '2em',
+    marginBottom: '1em'
+  }
+})
 
 const App = () => {
-  const validate = (values) => {
-    // console.log('validate')
-    // console.log({ values })
-    // return { rows: [{ dessert: 'Required' }] }
-  }
-  const onSubmit = (values) => {
-    console.log('onSubmit')
-    console.log({ values })
-    alert('onSubmit clicked')
-  }
+  const classes = useStyles()
 
-  const onSelectActionClick = (event, action, selectedRows) => {
-    console.log({ action, selectedRows })
-    alert('onSelectActionClick clicked. action - ' + action)
-  }
+  const [table, setTable] = React.useState(null)
 
   return (
-    <MuiTable
-      columns={columns}
-      rows={rows}
-      // sortable={true}
-      toolbar={true}
-      pageable={true}
-      editable={true}
-      selectable={(row) => row?.idx % 2 === 0}
-      selectActions={['add', 'delete']}
-      // selectAll={false}
-      onSubmit={onSubmit}
-      validate={validate}
-      onSelectActionClick={onSelectActionClick}
-      // tableProps={{size: 'small'}}
-    />
+    <div className={classes.root}>
+      {/** Header */}
+      <div className={classes.header}>
+        <Typography variant='h5'>
+          {table ? tables[table]?.title : 'Mui Table Examples'}
+        </Typography>
+
+        {table && (
+          <Button variant='contained' onClick={() => setTable(null)}>
+            Back
+          </Button>
+        )}
+      </div>
+
+      {/**Content */}
+      <div className={classes.content}>
+        {table && tables[table]?.table}
+        {!table &&
+          Object.keys(tables).map((key) => (
+            <Button
+              key={key}
+              className={classes.button}
+              variant='contained'
+              onClick={() => setTable(key)}
+            >
+              {tables[key]?.title}
+            </Button>
+          ))}
+      </div>
+    </div>
   )
 }
 

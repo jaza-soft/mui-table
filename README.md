@@ -107,10 +107,10 @@ class App extends Component {
 | comparator    | `function`  | `(a, b) => 0` | Sort Comparator when sortable is `false`                                   |
 | tableProps    | `object`    | `{}`          | MUI Table props to be passed to Table                                      |
 | idKey         | `string`    | `id`          | Identifier Key in Object. Required when table is selectable                |
-| onSubmit      | `function`  |               | Submit function to be called when table is editable. Refer React Final Form|
+| onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
 | selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |
-| onSelectActionClick | `function` |      | `(event, action, selectedRows) => {}`                                          |
+| onSelectActionClick | `function` |          | Signature - `(event, action, selectedRows, onActionComplete: func) => {}`. call `onActionComplete` to indicate that action is completed|
 
 
 
