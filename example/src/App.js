@@ -7,8 +7,9 @@ import Button from '@material-ui/core/Button'
 import SimpleTable from './SimpleTable'
 import PageableTable from './PageableTable'
 import SelectableTable from './SelectableTable'
-import SortableTable from "./SortableTable";
-import EditableTable from "./EditableTable";
+import SortableTable from './SortableTable'
+import EditableTable from './EditableTable'
+import ScrollableTable from './ScrollableTable'
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },
@@ -16,6 +17,7 @@ const tables = {
   selectable: { title: 'Selectable Table', table: <SelectableTable /> },
   sortable: { title: 'Sortable Table', table: <SortableTable /> },
   editable: { title: 'Editable Table', table: <EditableTable /> },
+  scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> }
 }
 
 const useStyles = makeStyles({
@@ -44,9 +46,7 @@ const App = () => {
     <div className={classes.root}>
       {/** Header */}
       <div className={classes.header}>
-        <Typography variant='h5'>
-          {table ? tables[table]?.title : 'Mui Table Examples'}
-        </Typography>
+        <Typography variant='h5'>{table ? tables[table]?.title : 'Mui Table Examples'}</Typography>
 
         {table && (
           <Button variant='contained' onClick={() => setTable(null)}>
@@ -60,12 +60,7 @@ const App = () => {
         {table && tables[table]?.table}
         {!table &&
           Object.keys(tables).map((key) => (
-            <Button
-              key={key}
-              className={classes.button}
-              variant='contained'
-              onClick={() => setTable(key)}
-            >
+            <Button key={key} className={classes.button} variant='contained' onClick={() => setTable(key)}>
               {tables[key]?.title}
             </Button>
           ))}
