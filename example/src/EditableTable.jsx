@@ -12,7 +12,7 @@ const columns = [
     title: 'Dessert',
     inputType: 'select-input',
     choices: desserts.map((e) => ({ id: e, name: e })),
-    options: { displayEmpty: true, style: { width: 200 } },
+    options: { displayEmpty: true },
     validate: required,
     disabled: (row, dataKey) => row?.id === 3
   },
@@ -21,7 +21,7 @@ const columns = [
     title: 'Calories',
     align: 'right',
     inputType: 'text-input',
-    options: { type: 'number', style: { width: 100 } },
+    options: { type: 'number' },
     disabled: (row, dataKey) => row?.id === 1
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },

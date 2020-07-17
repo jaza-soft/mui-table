@@ -2,8 +2,17 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
+
 const columns = [
-  { dataKey: 'style', title: 'Style' },
+  {
+    dataKey: 'dessert',
+    title: 'Dessert',
+    align: 'left',
+    inputType: 'select-input',
+    choices: desserts.map((e) => ({ id: e, name: e }))
+  },
+  { dataKey: 'style', title: 'Style', inputType: 'text-input' },
   {
     dataKey: 'status',
     title: 'Status',
@@ -22,17 +31,28 @@ const columns = [
     )
   },
   { dataKey: 'label', title: 'Label' },
-  { dataKey: 'color', title: 'Color' },
-  { dataKey: 'fit', title: 'Fit/Block', length: 20 },
-  { dataKey: 'composition', title: 'Fabric\nComposition' },
-  { dataKey: 'placement', title: 'Fabric\nPlacement' },
-  { dataKey: 'csv', title: 'CSV' },
+  { dataKey: 'color', title: 'Color', inputType: 'text-input' },
+  { dataKey: 'fit', title: 'Fit/Block', length: 30, inputType: 'text-input', options: { style: { width: 200 } } },
+  { dataKey: 'composition', title: 'Fabric\nComposition', inputType: 'text-input', options: { style: { width: 200 } } },
+  { dataKey: 'placement', title: 'Fabric\nPlacement', inputType: 'text-input', options: { style: { width: 200 } } },
+  //   { dataKey: 'csv', title: 'CSV', inputType: 'boolean-input', options: { color: 'secondary' } },
+  {
+    dataKey: 'csv',
+    title: 'CSV',
+    inputType: 'select-input',
+    align: 'center',
+    choices: [
+      { id: 'Yes', name: 'Yes' },
+      { id: 'No', name: 'No' }
+    ],
+    options: { style: { width: 75 } }
+  },
   { dataKey: 'width', title: 'Cuttable\nWidth (CM)' },
   { dataKey: 'shrinkage', title: 'Shrinkage' },
   { dataKey: 'mill', title: 'Mill' }
 ]
 
-const rows = [
+const rowList = [
   {
     style: 'Curabitur sed',
     status: 'New',
@@ -257,10 +277,17 @@ const rows = [
     shrinkage: 'massa. Quisque',
     mill: 'quis diam'
   }
-]
+].map((e, idx) => ({ ...e, id: idx + 1, dessert: desserts[Math.round(Math.random() * 10) % 5] }))
 
 const SimpleTable = () => {
-  return <MuiTable columns={columns} rows={rows} pageable={true} cellOverFlow='tooltip' cellLength={100} />
+  const [rows, setRows] = React.useState(rowList)
+
+  const onSubmit = (values, form, onSubmitComplete) => {
+    setRows(values)
+    onSubmitComplete()
+  }
+
+  return <MuiTable columns={columns} rows={rows} pageable={true} editable={true} cellLength={100} variant='excel' onSubmit={onSubmit} />
 }
 
 export default SimpleTable
