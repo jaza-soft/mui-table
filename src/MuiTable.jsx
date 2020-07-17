@@ -19,6 +19,7 @@ import Paper from '@material-ui/core/Paper'
 import Checkbox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
 import Tooltip from '@material-ui/core/Tooltip'
+import Divider from '@material-ui/core/Divider'
 
 // perfect-scroll-bar
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -74,9 +75,31 @@ function stableSort(array, comparator) {
 }
 
 const useStyles = makeStyles((theme) => ({
-  table: {
+  defaultTable: {
     minWidth: 650,
     whiteSpace: 'pre'
+  },
+  excelTable: {
+    minWidth: 650,
+    whiteSpace: 'pre',
+    '& th, & td': {
+      border: '1px solid rgba(224, 224, 224, 1)'
+    }
+  },
+  headerCell: {
+    padding: '12px 8px',
+    fontSize: 12,
+    color: '#3C4858'
+  },
+  rowCell: {
+    padding: '8px',
+    fontSize: 12
+  },
+  defaultInputPadding: {
+    padding: '0px 8px'
+  },
+  excelInputPadding: {
+    padding: 0
   },
   footerContainer: {
     display: 'flex',
@@ -109,12 +132,14 @@ const MuiTable = (props) => {
     sortable,
     pageable,
     toolbar,
+    toolbarDivider,
     title,
     tableProps,
     idKey,
     disabledElement,
     cellLength,
     cellOverFlow,
+    variant,
     onSubmit,
     validate,
     onSelectActionClick
@@ -223,9 +248,10 @@ const MuiTable = (props) => {
                 {(toolbar || selected.length > 0) && (
                   <Toolbar title={title} selectedCount={selectedCount} selectActions={selectActions} onSelectActionClick={handleSelectActionClick} />
                 )}
+                {toolbarDivider && variant !== 'excel' && <Divider light />}
                 <TableContainer>
                   <PerfectScrollbar>
-                    <Table className={clsx(classes.table, tableProps?.className)} {...tableProps}>
+                    <Table className={clsx({ [classes[`${variant}Table`]]: variant }, tableProps?.className)} {...tableProps}>
                       <TableHead
                         editing={editing}
                         selectable={selectable}
@@ -264,7 +290,7 @@ const MuiTable = (props) => {
                                       </TableCell>
                                     )}
 
-                                    {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps }, colIdx) => {
+                                    {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
                                       const finalLength = length || cellLength
                                       let value = row[dataKey]
                                       let shortValue = value
@@ -279,9 +305,13 @@ const MuiTable = (props) => {
                                       const finalValue = typeof render === 'function' ? render(value, shortValue) : shortValue
                                       return (
                                         <TableCell
-                                          className={clsx({
-                                            [classes.link]: typeof linkPath === 'function'
-                                          })}
+                                          className={clsx(
+                                            {
+                                              [classes.link]: typeof linkPath === 'function',
+                                              [classes.rowCell]: true
+                                            },
+                                            options?.className
+                                          )}
                                           component={colIdx === 0 ? 'th' : undefined}
                                           scope={colIdx === 0 ? 'row' : undefined}
                                           padding={selectable && colIdx === 0 ? 'none' : 'default'}
@@ -329,10 +359,24 @@ const MuiTable = (props) => {
                                       const element = disabled && disabledElement === 'field' ? 'text-field' : inputType
 
                                       return (
-                                        <TableCell key={`${rowIdx}-${colIdx}`} align={align} {...rowCellProps}>
+                                        <TableCell
+                                          className={clsx({
+                                            [classes.rowCell]: element === 'text-field',
+                                            [classes[`${variant}InputPadding`]]: element !== 'text-field'
+                                          })}
+                                          key={`${rowIdx}-${colIdx}`}
+                                          align={align}
+                                          {...rowCellProps}
+                                        >
                                           {element === 'text-field' && <TextField name={`${name}.${dataKey}`} render={render} options={options} />}
                                           {element === 'text-input' && (
-                                            <TextInput name={`${name}.${dataKey}`} validate={validate} disabled={disabled} options={options} />
+                                            <TextInput
+                                              name={`${name}.${dataKey}`}
+                                              validate={validate}
+                                              disabled={disabled}
+                                              variant={variant}
+                                              options={options}
+                                            />
                                           )}
                                           {element === 'select-input' && (
                                             <SelectInput
@@ -340,6 +384,7 @@ const MuiTable = (props) => {
                                               choices={choices}
                                               validate={validate}
                                               disabled={disabled}
+                                              variant={variant}
                                               options={options}
                                             />
                                           )}
@@ -441,6 +486,7 @@ MuiTable.propTypes = {
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   title: PropTypes.string,
   toolbar: PropTypes.bool,
+  toolbarDivider: PropTypes.bool,
   editable: PropTypes.bool,
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
   selectAll: PropTypes.bool,
@@ -453,6 +499,7 @@ MuiTable.propTypes = {
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
+  variant: PropTypes.oneOf(['default', 'excel']),
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
@@ -464,6 +511,7 @@ MuiTable.defaultProps = {
   rows: [],
   title: 'Mui Table',
   toolbar: false,
+  toolbarDivider: true,
   editable: false,
   selectable: false,
   selectAll: true,
@@ -475,6 +523,7 @@ MuiTable.defaultProps = {
   disabledElement: 'input',
   cellLength: 30,
   cellOverFlow: 'tooltip',
+  variant: 'default',
   onSubmit: () => {},
   comparator: (a, b) => 0
 }

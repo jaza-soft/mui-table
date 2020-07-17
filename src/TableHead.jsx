@@ -7,6 +7,7 @@ import MuiTableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import TableSortLabel from '@material-ui/core/TableSortLabel'
 import Checkbox from '@material-ui/core/Checkbox'
+import clsx from 'clsx'
 
 const useStyles = makeStyles({
   visuallyHidden: {
@@ -22,20 +23,9 @@ const useStyles = makeStyles({
   }
 })
 
-const TableHead = ({
-  editing,
-  selectable,
-  selectAll,
-  sortable,
-  columns,
-  onSelectAllClick,
-  order,
-  orderBy,
-  selectedCount,
-  rowCount,
-  onRequestSort
-}) => {
+const TableHead = (props) => {
   const classes = useStyles()
+  const { editing, selectable, selectAll, sortable, columns, onSelectAllClick, order, orderBy, selectedCount, rowCount, onRequestSort } = props
 
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property)
@@ -60,24 +50,17 @@ const TableHead = ({
         {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
           <TableCell
             key={idx}
+            className={clsx(props.classes?.headerCell, props.options?.className)}
             align={align}
             padding={selectable && !editing && idx === 0 ? 'none' : 'default'}
             sortDirection={orderBy === dataKey ? order : false}
             {...headerCellProps}
           >
             {sortable && !editing ? (
-              <TableSortLabel
-                active={orderBy === dataKey}
-                direction={orderBy === dataKey ? order : 'asc'}
-                onClick={createSortHandler(dataKey)}
-              >
+              <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
                 {title}
                 {orderBy === dataKey ? (
-                  <span className={classes.visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
-                  </span>
+                  <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
                 ) : null}
               </TableSortLabel>
             ) : (

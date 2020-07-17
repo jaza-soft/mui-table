@@ -2,19 +2,13 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
-const desserts = [
-  'Frozen yoghurt',
-  'Ice cream sandwich',
-  'Eclair',
-  'Cupcake',
-  'Gingerbread'
-]
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
 const columns = [
   {
     dataKey: 'dessert',
     title: 'Dessert',
-    linkPath: (row, dataKey) => console.log({ row, dataKey }),
+    linkPath: (row, dataKey) => console.log({ row, dataKey })
   },
   {
     dataKey: 'calories',

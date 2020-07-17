@@ -22,8 +22,8 @@
 - [ ] Change Sequence using Drag & Drop
 - [ ] Expandable View/ Modal View/ Sidebar View
 - [ ] Fixed Header
-- [ ] Horizonatl Scroll/ Force Line Wrap on Specified characters
-- [ ] Variant - default, excel
+- [x] Horizonatl Scroll/ Force Line Wrap on Specified characters
+- [x] Variant - default, excel
 - [ ] Elements
   - [x] TextField
   - [x] TextInput
@@ -100,12 +100,13 @@ class App extends Component {
 | columns       | `column[]`  | `[]`          | List of Columns                                                            |
 | rows          | `object[]`  | `[]`          | List of objects                                                            |
 | toolbar       | `bool`      | `false`       | Whether to show toolbar                                                    |
+| toolbarDivider| `bool`      | `true`        | Whether to show Divider between Toolbar and Table Content or not           |
 | title         | `string`    | `Mui Table`   | Toolbar Title                                                              |
 | editable      | `bool`      | `false`       | Table will become editable                                                 |
 | selectable    | `bool \| func`| `false`     | Selectable Rows. `bool \| (row) => bool`                                   |
 | selectAll     | `bool`      | `true`        | Applicable only when selectable is `true`, Select All Support              |
 | pageable      | `bool`      | `false`       | Table will have pagination                                                 |
-| pageSize      | `number`    | `10`          | Number records to show in one page. Values -  `10, 25`                      |
+| pageSize      | `number`    | `10`          | Number records to show in one page. Values -  `10, 25`                     |
 | sortable      | `bool`      | `false`       | Columns will become sortable                                               |
 | comparator    | `function`  | `(a, b) => 0` | Sort Comparator when sortable is `false`                                   |
 | tableProps    | `object`    | `{}`          | MUI Table props to be passed to Table                                      |
@@ -113,6 +114,7 @@ class App extends Component {
 | disabledElement | `string`  | `input`       | Element to use when editable element is disabled. Values - `field, input`  |
 | cellLength    | `number`    | `30`          | Default value of Cell Character Length when cell specific length is not provided |
 | cellOverFlow  | `string`    | `tooltip`     | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap` |
+| variant       | `string`    | `default`     | Select Table Variant. Values - `default, excel`                            |
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
 | selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |

@@ -10,6 +10,7 @@ import SelectableTable from './SelectableTable'
 import SortableTable from './SortableTable'
 import EditableTable from './EditableTable'
 import ScrollableTable from './ScrollableTable'
+import EditableExcelTable from "./EditableExcelTable";
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },
@@ -17,7 +18,8 @@ const tables = {
   selectable: { title: 'Selectable Table', table: <SelectableTable /> },
   sortable: { title: 'Sortable Table', table: <SortableTable /> },
   editable: { title: 'Editable Table', table: <EditableTable /> },
-  scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> }
+  scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> },
+  excelVariant: { title: 'Excel Table - Editable', table: <EditableExcelTable /> }
 }
 
 const useStyles = makeStyles({
