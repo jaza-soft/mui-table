@@ -89,6 +89,7 @@ class App extends Component {
 | disabled      | `function`  |               | Disable Editable cells conditionally. Entire columns can be disabled using `options.disabled`. If both are provided, this func will have high priority.  `(row, dataKey) => bool`|
 | align         | `string`    |               | Same as MUI TableCell Values - `inherit, center, justify, left, right`     |
 | linkPath      | `function`  |               | It will turn field to link. `(row, dataKey) => Path:String`                |
+| length        | `number`    |               | No. of characters to show or force text-wrap depending on value of `cellOverFlow`|
 | headerCellProps | `object`  |       `{}`    | MUI Table Cell Props to be passed to Header Cell                           |
 | rowCellProps  | `object`    |      `{}`     | MUI Table Cell Props to be passed to Row Cell                              |
 
@@ -109,6 +110,9 @@ class App extends Component {
 | comparator    | `function`  | `(a, b) => 0` | Sort Comparator when sortable is `false`                                   |
 | tableProps    | `object`    | `{}`          | MUI Table props to be passed to Table                                      |
 | idKey         | `string`    | `id`          | Identifier Key in Object. Required when table is selectable                |
+| disabledElement | `string`  | `input`       | Element to use when editable element is disabled. Values - `field, input`  |
+| cellLength    | `number`    | `30`          | Default value of Cell Character Length when length specific to cell is not provided |
+| cellOverFlow  | `string`    | `tooltip`     | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap` |
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
 | selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |

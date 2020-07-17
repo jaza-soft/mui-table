@@ -2,10 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 
+// final-form
 import arrayMutators from 'final-form-arrays'
 import { FieldArray } from 'react-final-form-arrays'
 import { Form } from 'react-final-form'
 
+// material-ui
 import { makeStyles } from '@material-ui/core/styles'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
@@ -16,13 +18,36 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 import Checkbox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
+import Tooltip from '@material-ui/core/Tooltip'
 
+// perfect-scroll-bar
+import PerfectScrollbar from 'react-perfect-scrollbar'
+import 'react-perfect-scrollbar/dist/css/styles.css'
+
+// local
 import TableHead from './TableHead'
 import Toolbar from './Toolbar'
 import TextField from './TextField'
 import TextInput from './TextInput'
 import SelectInput from './SelectInput'
 import BooleanInput from './BooleanInput'
+
+const multiLineText = (text, length) => {
+  let result = []
+  if (text) {
+    while (text.length > length) {
+      let idx = text.substring(0, length).lastIndexOf(' ')
+      if (idx === -1) {
+        idx = text.indexOf(' ')
+        if (idx === -1) break
+      }
+      result.push(text.substring(0, idx))
+      text = text.substring(idx + 1)
+    }
+    result.push(text)
+  }
+  return result
+}
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -35,9 +60,7 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy)
+  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy)
 }
 
 function stableSort(array, comparator) {
@@ -52,7 +75,8 @@ function stableSort(array, comparator) {
 
 const useStyles = makeStyles((theme) => ({
   table: {
-    minWidth: 650
+    minWidth: 650,
+    whiteSpace: 'pre'
   },
   footerContainer: {
     display: 'flex',
@@ -88,6 +112,9 @@ const MuiTable = (props) => {
     title,
     tableProps,
     idKey,
+    disabledElement,
+    cellLength,
+    cellOverFlow,
     onSubmit,
     validate,
     onSelectActionClick
@@ -107,8 +134,7 @@ const MuiTable = (props) => {
   const handleSelectActionClick = (event, action) => {
     const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
     const onActionComplete = () => setSelected([])
-    onSelectActionClick &&
-      onSelectActionClick(event, action, selectedRows, onActionComplete)
+    onSelectActionClick && onSelectActionClick(event, action, selectedRows, onActionComplete)
   }
 
   const handleSubmit = (values, form, complete) => {
@@ -148,10 +174,7 @@ const MuiTable = (props) => {
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1))
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      )
+      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
     setSelected(newSelected)
   }
@@ -176,13 +199,9 @@ const MuiTable = (props) => {
     rows: stableSort(rows, comparator).slice(startIdx, endIdx)
   }
 
-  const totalPage =
-    rows.length % pageSize === 0
-      ? rows.length / pageSize
-      : Math.ceil(rows.length / pageSize)
+  const totalPage = rows.length % pageSize === 0 ? rows.length / pageSize : Math.ceil(rows.length / pageSize)
 
-  const selectedCount = rows?.filter((row) => selected?.includes(row[idKey]))
-    .length
+  const selectedCount = rows?.filter((row) => selected?.includes(row[idKey])).length
 
   return (
     <div>
@@ -202,183 +221,143 @@ const MuiTable = (props) => {
             <form onSubmit={handleSubmit}>
               <Paper>
                 {(toolbar || selected.length > 0) && (
-                  <Toolbar
-                    title={title}
-                    selectedCount={selectedCount}
-                    selectActions={selectActions}
-                    onSelectActionClick={handleSelectActionClick}
-                  />
+                  <Toolbar title={title} selectedCount={selectedCount} selectActions={selectActions} onSelectActionClick={handleSelectActionClick} />
                 )}
                 <TableContainer>
-                  <Table className={classes.table} {...tableProps}>
-                    <TableHead
-                      editing={editing}
-                      selectable={selectable}
-                      selectAll={selectAll}
-                      sortable={sortable}
-                      columns={columns}
-                      classes={classes}
-                      selectedCount={selectedCount}
-                      order={order}
-                      orderBy={orderBy}
-                      onSelectAllClick={handleSelectAllClick}
-                      onRequestSort={handleRequestSort}
-                      rowCount={rows.length}
-                    />
+                  <PerfectScrollbar>
+                    <Table className={clsx(classes.table, tableProps?.className)} {...tableProps}>
+                      <TableHead
+                        editing={editing}
+                        selectable={selectable}
+                        selectAll={selectAll}
+                        sortable={sortable}
+                        columns={columns}
+                        classes={classes}
+                        selectedCount={selectedCount}
+                        order={order}
+                        orderBy={orderBy}
+                        onSelectAllClick={handleSelectAllClick}
+                        onRequestSort={handleRequestSort}
+                        rowCount={rows.length}
+                      />
 
-                    <TableBody>
-                      {!editing
-                        ? stableSort(rows, comparator)
-                            .slice(startIdx, endIdx)
-                            .map((row, rowIdx) => {
-                              const isItemSelected = isSelected(row[idKey])
-                              const labelId = `enhanced-table-checkbox-${rowIdx}`
+                      <TableBody>
+                        {!editing
+                          ? stableSort(rows, comparator)
+                              .slice(startIdx, endIdx)
+                              .map((row, rowIdx) => {
+                                const isItemSelected = isSelected(row[idKey])
+                                const labelId = `enhanced-table-checkbox-${rowIdx}`
 
-                              return (
-                                <TableRow
-                                  hover
-                                  role='checkbox'
-                                  aria-checked={isItemSelected}
-                                  tabIndex={-1}
-                                  key={rowIdx}
-                                  selected={isItemSelected}
-                                >
-                                  {!!selectable && (
-                                    <TableCell padding='checkbox'>
-                                      <Checkbox
-                                        checked={isItemSelected}
-                                        inputProps={{
-                                          'aria-labelledby': labelId
-                                        }}
-                                        disabled={
-                                          typeof selectable === 'function' &&
-                                          !selectable(row)
+                                return (
+                                  <TableRow hover role='checkbox' aria-checked={isItemSelected} tabIndex={-1} key={rowIdx} selected={isItemSelected}>
+                                    {!!selectable && (
+                                      <TableCell padding='checkbox'>
+                                        <Checkbox
+                                          checked={isItemSelected}
+                                          inputProps={{
+                                            'aria-labelledby': labelId
+                                          }}
+                                          disabled={typeof selectable === 'function' && !selectable(row)}
+                                          onClick={(event) => handleClick(event, row[idKey])}
+                                        />
+                                      </TableCell>
+                                    )}
+
+                                    {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps }, colIdx) => {
+                                      const finalLength = length || cellLength
+                                      let value = row[dataKey]
+                                      let shortValue = value
+                                      if (typeof value === 'string') {
+                                        const texts = multiLineText(value, finalLength)
+                                        if (cellOverFlow === 'tooltip') {
+                                          shortValue = texts[0]
+                                        } else if (cellOverFlow === 'wrap') {
+                                          shortValue = texts.join('\n')
                                         }
-                                        onClick={(event) =>
-                                          handleClick(event, row[idKey])
-                                        }
-                                      />
-                                    </TableCell>
-                                  )}
-
+                                      }
+                                      const finalValue = typeof render === 'function' ? render(value, shortValue) : shortValue
+                                      return (
+                                        <TableCell
+                                          className={clsx({
+                                            [classes.link]: typeof linkPath === 'function'
+                                          })}
+                                          component={colIdx === 0 ? 'th' : undefined}
+                                          scope={colIdx === 0 ? 'row' : undefined}
+                                          padding={selectable && colIdx === 0 ? 'none' : 'default'}
+                                          key={`${rowIdx}-${colIdx}`}
+                                          align={align}
+                                          onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
+                                          {...rowCellProps}
+                                        >
+                                          {cellOverFlow === 'tooltip' && value !== shortValue && (
+                                            <Tooltip title={value}>
+                                              <span>{finalValue}...</span>
+                                            </Tooltip>
+                                          )}
+                                          {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
+                                        </TableCell>
+                                      )
+                                    })}
+                                  </TableRow>
+                                )
+                              })
+                          : null}
+                        {editable && editing && (
+                          <FieldArray name='rows'>
+                            {({ fields }) =>
+                              fields.map((name, rowIdx) => (
+                                <TableRow key={rowIdx}>
                                   {columns.map(
                                     (
                                       {
                                         dataKey,
+                                        inputType = 'text-field',
                                         render,
+                                        choices,
                                         align,
-                                        linkPath,
-                                        rowCellProps
+                                        rowCellProps,
+                                        options,
+                                        validate,
+                                        disabled: disabledFunc
                                       },
                                       colIdx
-                                    ) => (
-                                      <TableCell
-                                        className={clsx({
-                                          [classes.link]:
-                                            typeof linkPath === 'function'
-                                        })}
-                                        component={
-                                          colIdx === 0 ? 'th' : undefined
-                                        }
-                                        scope={colIdx === 0 ? 'row' : undefined}
-                                        padding={
-                                          selectable && colIdx === 0
-                                            ? 'none'
-                                            : 'default'
-                                        }
-                                        key={`${rowIdx}-${colIdx}`}
-                                        align={align}
-                                        onClick={() =>
-                                          typeof linkPath === 'function'
-                                            ? linkPath(row, dataKey)
-                                            : null
-                                        }
-                                        {...rowCellProps}
-                                      >
-                                        {typeof render === 'function'
-                                          ? render(row[dataKey])
-                                          : row[dataKey]}
-                                      </TableCell>
-                                    )
+                                    ) => {
+                                      const row = fields?.value[rowIdx]
+                                      const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
+
+                                      const element = disabled && disabledElement === 'field' ? 'text-field' : inputType
+
+                                      return (
+                                        <TableCell key={`${rowIdx}-${colIdx}`} align={align} {...rowCellProps}>
+                                          {element === 'text-field' && <TextField name={`${name}.${dataKey}`} render={render} options={options} />}
+                                          {element === 'text-input' && (
+                                            <TextInput name={`${name}.${dataKey}`} validate={validate} disabled={disabled} options={options} />
+                                          )}
+                                          {element === 'select-input' && (
+                                            <SelectInput
+                                              name={`${name}.${dataKey}`}
+                                              choices={choices}
+                                              validate={validate}
+                                              disabled={disabled}
+                                              options={options}
+                                            />
+                                          )}
+                                          {element === 'boolean-input' && (
+                                            <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />
+                                          )}
+                                        </TableCell>
+                                      )
+                                    }
                                   )}
                                 </TableRow>
-                              )
-                            })
-                        : null}
-                      {editable && editing && (
-                        <FieldArray name='rows'>
-                          {({ fields }) =>
-                            fields.map((name, rowIdx) => (
-                              <TableRow key={rowIdx}>
-                                {columns.map(
-                                  (
-                                    {
-                                      dataKey,
-                                      inputType = 'text-field',
-                                      render,
-                                      choices,
-                                      align,
-                                      rowCellProps,
-                                      options,
-                                      validate,
-                                      disabled: disabledFunc
-                                    },
-                                    colIdx
-                                  ) => {
-                                    const row = fields?.value[rowIdx]
-                                    const disabled =
-                                      typeof disabledFunc === 'function'
-                                        ? disabledFunc(row, dataKey)
-                                        : options?.disabled
-
-                                    return (
-                                      <TableCell
-                                        key={`${rowIdx}-${colIdx}`}
-                                        align={align}
-                                        {...rowCellProps}
-                                      >
-                                        {inputType === 'text-field' && (
-                                          <TextField
-                                            name={`${name}.${dataKey}`}
-                                            render={render}
-                                            options={options}
-                                          />
-                                        )}
-                                        {inputType === 'text-input' && (
-                                          <TextInput
-                                            name={`${name}.${dataKey}`}
-                                            validate={validate}
-                                            disabled={disabled}
-                                            options={options}
-                                          />
-                                        )}
-                                        {inputType === 'select-input' && (
-                                          <SelectInput
-                                            name={`${name}.${dataKey}`}
-                                            choices={choices}
-                                            validate={validate}
-                                            disabled={disabled}
-                                            options={options}
-                                          />
-                                        )}
-                                        {inputType === 'boolean-input' && (
-                                          <BooleanInput
-                                            name={`${name}.${dataKey}`}
-                                            disabled={disabled}
-                                            options={options}
-                                          />
-                                        )}
-                                      </TableCell>
-                                    )
-                                  }
-                                )}
-                              </TableRow>
-                            ))
-                          }
-                        </FieldArray>
-                      )}
-                    </TableBody>
-                  </Table>
+                              ))
+                            }
+                          </FieldArray>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </PerfectScrollbar>
                 </TableContainer>
 
                 <div
@@ -390,30 +369,16 @@ const MuiTable = (props) => {
                   {editable && (
                     <div className={classes.footerActions}>
                       {!editing && (
-                        <Button
-                          variant='text'
-                          color='primary'
-                          onClick={() => setEditing(true)}
-                          disabled={selected.length > 0}
-                        >
+                        <Button variant='text' color='primary' onClick={() => setEditing(true)} disabled={selected.length > 0}>
                           Edit
                         </Button>
                       )}
                       {editing && (
                         <React.Fragment>
-                          <Button
-                            variant='text'
-                            color='primary'
-                            type='submit'
-                            disabled={submitting || pristine}
-                          >
+                          <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
                             Save
                           </Button>
-                          <Button
-                            style={{ marginLeft: '1em' }}
-                            variant='text'
-                            onClick={() => setEditing(false)}
-                          >
+                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditing(false)}>
                             Cancel
                           </Button>
                         </React.Fragment>
@@ -460,24 +425,15 @@ MuiTable.propTypes = {
     PropTypes.shape({
       dataKey: PropTypes.string,
       title: PropTypes.string,
-      inputType: PropTypes.oneOf([
-        'text-field',
-        'text-input',
-        'select-input',
-        'boolean-input',
-        'date-input',
-        'auto-complete-input'
-      ]),
+      inputType: PropTypes.oneOf(['text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input']),
       // when inputType is 'select' or 'auto-complete'
-      choices: PropTypes.oneOfType([
-        PropTypes.arrayOf(OptionType),
-        PropTypes.func
-      ]),
-      render: PropTypes.func,
+      choices: PropTypes.oneOfType([PropTypes.arrayOf(OptionType), PropTypes.func]),
+      render: PropTypes.func, // (value, shortValue) => ?any
       disabled: PropTypes.func, // (row, dataKey) => boolean . If any normal cell has to disabled conditionally. It will have higher priority than disabled in options
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
       validate: PropTypes.func, // Validation function for TextInput and SelectInput
       options: PropTypes.object, // options to be passed to underllying editable component - Input, Select, Switch etc
+      length: PropTypes.number, // Cell Length. If not provided then cellLength value of table will be used.
       headerCellProps: PropTypes.object,
       rowCellProps: PropTypes.object
     })
@@ -494,6 +450,9 @@ MuiTable.propTypes = {
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
+  disabledElement: PropTypes.oneOf(['input', 'field']),
+  cellLength: PropTypes.number,
+  cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
@@ -513,6 +472,9 @@ MuiTable.defaultProps = {
   idKey: 'id',
   pageSize: 10,
   selectActions: ['delete'],
+  disabledElement: 'input',
+  cellLength: 30,
+  cellOverFlow: 'tooltip',
   onSubmit: () => {},
   comparator: (a, b) => 0
 }

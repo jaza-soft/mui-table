@@ -4,13 +4,7 @@ import { MuiTable } from '@jazasoft/mui-table'
 
 const required = (value) => (value ? undefined : 'Required')
 
-const desserts = [
-  'Frozen yoghurt',
-  'Ice cream sandwich',
-  'Eclair',
-  'Cupcake',
-  'Gingerbread'
-]
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
 const columns = [
   {
@@ -20,7 +14,7 @@ const columns = [
     choices: desserts.map((e) => ({ id: e, name: e })),
     options: { displayEmpty: true, style: { width: 200 } },
     validate: required,
-    disabled: (row, dataKey) => row?.idx === 3
+    disabled: (row, dataKey) => row?.id === 3
   },
   {
     dataKey: 'calories',
@@ -28,7 +22,7 @@ const columns = [
     align: 'right',
     inputType: 'text-input',
     options: { type: 'number', style: { width: 100 } },
-    disabled: (row, dataKey) => row?.idx === 1
+    disabled: (row, dataKey) => row?.id === 1
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   {
@@ -38,7 +32,7 @@ const columns = [
     inputType: 'boolean-input',
     render: (value) => (!!value ? 'Yes' : 'No'),
     options: { color: 'secondary' },
-    disabled: (row, dataKey) => row?.idx === 4
+    disabled: (row, dataKey) => row?.id === 4
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
@@ -65,15 +59,7 @@ const PageableTable = () => {
     onSubmitComplete()
   }
 
-  return (
-    <MuiTable
-      columns={columns}
-      rows={rows}
-      pageable={true}
-      editable={true}
-      onSubmit={onSubmit}
-    />
-  )
+  return <MuiTable columns={columns} rows={rows} pageable={true} editable={true} onSubmit={onSubmit} />
 }
 
 export default PageableTable
