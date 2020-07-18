@@ -10,16 +10,18 @@ import SelectableTable from './SelectableTable'
 import SortableTable from './SortableTable'
 import EditableTable from './EditableTable'
 import ScrollableTable from './ScrollableTable'
-import EditableExcelTable from "./EditableExcelTable";
+import EditableExcelTable from './EditableExcelTable'
+import FilterSearchTable from './FilterSearchTable'
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },
   pageable: { title: 'Pageable Table', table: <PageableTable /> },
   selectable: { title: 'Selectable Table', table: <SelectableTable /> },
   sortable: { title: 'Sortable Table', table: <SortableTable /> },
-  editable: { title: 'Editable Table', table: <EditableTable /> },
   scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> },
-  excelVariant: { title: 'Excel Table - Editable', table: <EditableExcelTable /> }
+  editable: { title: 'Editable Table', table: <EditableTable /> },
+  excelVariant: { title: 'Editable Table - Excel Variant', table: <EditableExcelTable /> },
+  filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> }
 }
 
 const useStyles = makeStyles({

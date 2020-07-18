@@ -1,10 +1,10 @@
 import MuiTable from './MuiTable'
-import TextInput from './TextInput'
-import SelectInput from './SelectInput'
-import BooleanInput from './BooleanInput'
-import TextField from './TextField'
-import TableHead from './TableHead'
-import Toolbar from './Toolbar'
+import TextInput from './components/TextInput'
+import SelectInput from './components/SelectInput'
+import BooleanInput from './components/BooleanInput'
+import TextField from './components/TextField'
+import TableHead from './components/TableHead'
+import Toolbar from './components/Toolbar'
 
 export {
   MuiTable,

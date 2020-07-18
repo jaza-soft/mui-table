@@ -90,6 +90,7 @@ class App extends Component {
 | align         | `string`    |               | Same as MUI TableCell Values - `inherit, center, justify, left, right`     |
 | linkPath      | `function`  |               | It will turn field to link. `(row, dataKey) => Path:String`                |
 | length        | `number`    |               | No. of characters to show or force text wrap depending on value of `cellOverFlow` prop of table|
+| filterOptions | `object`    |       `{}`    | Filter Options - `{filter: bool, multiSelect: bool, showValueOnly: bool}`  |
 | headerCellProps | `object`  |       `{}`    | MUI Table Cell Props to be passed to Header Cell                           |
 | rowCellProps  | `object`    |      `{}`     | MUI Table Cell Props to be passed to Row Cell                              |
 
@@ -119,6 +120,7 @@ class App extends Component {
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
 | selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |
+| toolbarActions| `string[]`  | `['search']`  | Toolbar Actions. Values - `search, filter, column`                         |
 | onSelectActionClick | `function` |          | Signature - `(event, action, selectedRows, onActionComplete: func) => {}`. call `onActionComplete` to indicate that action is completed|
 
 

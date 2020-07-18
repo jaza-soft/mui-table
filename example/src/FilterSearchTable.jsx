@@ -2,17 +2,8 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
-const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
-
 const columns = [
-  {
-    dataKey: 'dessert',
-    title: 'Dessert',
-    align: 'left',
-    inputType: 'select-input',
-    choices: desserts.map((e) => ({ id: e, name: e }))
-  },
-  { dataKey: 'style', title: 'Style', inputType: 'text-input' },
+  { dataKey: 'style', title: 'Style' },
   {
     dataKey: 'status',
     title: 'Status',
@@ -22,37 +13,27 @@ const columns = [
           padding: '3px 6px',
           borderRadius: 4,
           color: 'white',
-          fontSize: 14,
+          fontSize: 12,
           backgroundColor: value === 'New' ? 'blue' : value === 'Pending' ? 'orange' : 'green'
         }}
       >
         {value}
       </span>
-    )
+    ),
+    filterOptions: { filter: true, multiSelect: true }
   },
-  { dataKey: 'label', title: 'Label' },
-  { dataKey: 'color', title: 'Color', inputType: 'text-input' },
-  { dataKey: 'fit', title: 'Fit/Block', length: 30, inputType: 'text-input', options: { style: { width: 200 } } },
-  { dataKey: 'composition', title: 'Fabric\nComposition', inputType: 'text-input', options: { style: { width: 200 } } },
-  { dataKey: 'placement', title: 'Fabric\nPlacement', inputType: 'text-input', options: { style: { width: 200 } } },
-  //   { dataKey: 'csv', title: 'CSV', inputType: 'boolean-input', options: { color: 'secondary' } },
-  {
-    dataKey: 'csv',
-    title: 'CSV',
-    inputType: 'select-input',
-    align: 'center',
-    choices: [
-      { id: 'Yes', name: 'Yes' },
-      { id: 'No', name: 'No' }
-    ],
-    options: { style: { width: 75 } }
-  },
+  { dataKey: 'label', title: 'Label', filterOptions: { filter: true } },
+  { dataKey: 'color', title: 'Color', filterOptions: { filter: true } },
+  { dataKey: 'fit', title: 'Fit/Block', length: 20 },
+  { dataKey: 'composition', title: 'Fabric\nComposition' },
+  { dataKey: 'placement', title: 'Fabric\nPlacement' },
+  { dataKey: 'csv', title: 'CSV', filterOptions: { filter: true, showValueOnly: false } },
   { dataKey: 'width', title: 'Cuttable\nWidth (CM)' },
   { dataKey: 'shrinkage', title: 'Shrinkage' },
   { dataKey: 'mill', title: 'Mill' }
 ]
 
-const rowList = [
+const rows = [
   {
     style: 'Curabitur sed',
     status: 'New',
@@ -277,17 +258,21 @@ const rowList = [
     shrinkage: 'massa. Quisque',
     mill: 'quis diam'
   }
-].map((e, idx) => ({ ...e, id: idx + 1, dessert: desserts[Math.round(Math.random() * 10) % 5] }))
+]
 
 const SimpleTable = () => {
-  const [rows, setRows] = React.useState(rowList)
-
-  const onSubmit = (values, form, onSubmitComplete) => {
-    setRows(values)
-    onSubmitComplete()
-  }
-
-  return <MuiTable columns={columns} rows={rows} toolbar={true} pageable={true} editable={true} variant='excel' fontSize={14} onSubmit={onSubmit} />
+  return (
+    <MuiTable
+      columns={columns}
+      rows={rows}
+      pageable={true}
+      cellOverFlow='tooltip'
+      cellLength={100}
+      toolbar={true}
+      toolbarDivider={false}
+      toolbarActions={['filter']}
+    />
+  )
 }
 
 export default SimpleTable

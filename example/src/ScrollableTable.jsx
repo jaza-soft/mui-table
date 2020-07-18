@@ -13,7 +13,7 @@ const columns = [
           padding: '3px 6px',
           borderRadius: 4,
           color: 'white',
-          fontSize: 12,
+          fontSize: 16,
           backgroundColor: value === 'New' ? 'blue' : value === 'Pending' ? 'orange' : 'green'
         }}
       >
@@ -260,7 +260,7 @@ const rows = [
 ]
 
 const SimpleTable = () => {
-  return <MuiTable columns={columns} rows={rows} pageable={true} cellOverFlow='tooltip' cellLength={100} />
+  return <MuiTable columns={columns} rows={rows} pageable={true} cellOverFlow='tooltip' cellLength={50} fontSize={16} />
 }
 
 export default SimpleTable

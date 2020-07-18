@@ -19,37 +19,23 @@ import Paper from '@material-ui/core/Paper'
 import Checkbox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
+import Typography from '@material-ui/core/Typography'
 
 // perfect-scroll-bar
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // local
-import Tooltip from './Tooltip'
-import TableHead from './TableHead'
-import Toolbar from './Toolbar'
-import TextField from './TextField'
-import TextInput from './TextInput'
-import SelectInput from './SelectInput'
-import BooleanInput from './BooleanInput'
+import Tooltip from './components/Tooltip'
+import TableHead from './components/TableHead'
+import Toolbar from './components/Toolbar'
+import FilterList from './components/FilterList'
+import TextField from './components/TextField'
+import TextInput from './components/TextInput'
+import SelectInput from './components/SelectInput'
+import BooleanInput from './components/BooleanInput'
 
-const multiLineText = (text, length) => {
-  if (!text) return [text]
-  let result = []
-  if (text) {
-    while (text.length > length) {
-      let idx = text.substring(0, length).lastIndexOf(' ')
-      if (idx === -1) {
-        idx = text.indexOf(' ')
-        if (idx === -1) break
-      }
-      result.push(text.substring(0, idx))
-      text = text.substring(idx + 1)
-    }
-    result.push(text)
-  }
-  return result
-}
+import { multiLineText, getDistinctValues } from './utils/helper'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -75,17 +61,51 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0])
 }
 
+const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
+  const dataKeys = Object.keys(filterValues)
+  let filteredRows = rows.filter((row) => {
+    let result = true
+    for (let i = 0; i < dataKeys.length; i++) {
+      const dataKey = dataKeys[i]
+      const value = filterValues[dataKey]
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          const matchCount = value.filter((v) => v === row[dataKey]).length
+          if (matchCount === 0) {
+            result = false
+            break
+          }
+        }
+      } else {
+        if (value !== row[dataKey]) {
+          result = false
+          break
+        }
+      }
+    }
+    return result
+  })
+
+  if (hasIdKey) {
+    const ids = getDistinctValues(filteredRows.map((row) => row[idKey]))
+    return rows.filter((row) => ids.includes(row[idKey]))
+  }
+
+  return filteredRows
+}
+
 const useStyles = makeStyles((theme) => ({
-  table: (props) => ({
+  table: {
+    minWidth: 650,
+    whiteSpace: 'pre'
+  },
+  excelTable: {
     minWidth: 650,
     whiteSpace: 'pre',
-    '& th, & td':
-      props.variant === 'excel'
-        ? {
-            border: '1px solid rgba(224, 224, 224, 1)'
-          }
-        : {}
-  }),
+    '& th, & td': {
+      border: '1px solid rgba(224, 224, 224, 0.5)'
+    }
+  },
   headerCell: (props) => ({
     padding: '12px 8px',
     fontSize: theme.typography.pxToRem(props.fontSize),
@@ -110,6 +130,9 @@ const useStyles = makeStyles((theme) => ({
   link: {
     color: theme.palette.primary.main,
     cursor: 'pointer'
+  },
+  emptyMessage: {
+    textAlign: 'center'
   }
 }))
 
@@ -121,6 +144,7 @@ const MuiTable = (props) => {
     selectable,
     selectAll,
     selectActions,
+    toolbarActions,
     sortable,
     pageable,
     toolbar,
@@ -132,12 +156,11 @@ const MuiTable = (props) => {
     cellLength,
     cellOverFlow,
     variant,
+    fontSize,
     onSubmit,
     validate,
     onSelectActionClick
   } = props
-
-  const classes = useStyles(props)
 
   const [editing, setEditing] = React.useState(false)
   const [order, setOrder] = React.useState('asc')
@@ -146,6 +169,9 @@ const MuiTable = (props) => {
   const [page, setPage] = React.useState(0)
   const [pageSize, setPageSize] = React.useState(props.pageSize)
   const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
+  const [filterValues, setFilterValues] = React.useState({})
+
+  const classes = useStyles({ variant, pageable, editable, fontSize, editing })
 
   /*External handler functions */
   const handleSelectActionClick = (event, action) => {
@@ -168,6 +194,25 @@ const MuiTable = (props) => {
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
     setKey(key + 1)
+  }
+
+  const updateFilter = (dataKey, value) => {
+    setFilterValues((prevValues) => ({ ...prevValues, [dataKey]: value }))
+  }
+
+  const resetFilter = () => {
+    setFilterValues({})
+  }
+
+  const removeFilter = (dataKey, value) => {
+    const prevValue = filterValues[dataKey]
+    let newFilterValues = { ...filterValues }
+    if (Array.isArray(prevValue)) {
+      newFilterValues[dataKey] = prevValue.filter((e) => e !== value)
+    } else {
+      delete newFilterValues[dataKey]
+    }
+    setFilterValues(newFilterValues)
   }
 
   const handleSelectAllClick = (event) => {
@@ -207,19 +252,56 @@ const MuiTable = (props) => {
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
+  
+  const hasIdKey = rows.filter((row) => row.hasOwnProperty(idKey)).length > 0 // Check Whether idKey exists in rows
+
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
+  // Filter & Sort
+  let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+  rowList = stableSort(rowList, comparator)
+
+  // pagination
+  const totalPage = rowList.length % pageSize === 0 ? rowList.length / pageSize : Math.ceil(rowList.length / pageSize)
   const startIdx = page * pageSize
-  const endIdx = pageable ? page * pageSize + pageSize : rows.length
+  const endIdx = pageable ? page * pageSize + pageSize : rowList.length
+  rowList = rowList.slice(startIdx, endIdx)
 
-  const initialValues = {
-    rows: stableSort(rows, comparator).slice(startIdx, endIdx)
-  }
+  const initialValues = { rows: rowList }
 
-  const totalPage = rows.length % pageSize === 0 ? rows.length / pageSize : Math.ceil(rows.length / pageSize)
-
-  // const selectedCount = rows?.filter((row) => selected?.includes(row[idKey])).length
+  // const selectedCount = rowList?.filter((row) => selected?.includes(row[idKey])).length
   const selectedCount = selected.length
+
+  const filterColumns = columns
+    .filter((c) => c.filterOptions?.filter)
+    .map((c) => ({
+      dataKey: c.dataKey,
+      title: c.title,
+      multiSelect: c.filterOptions?.multiSelect,
+      choices: getDistinctValues(rows.map((row) => row[c.dataKey]).filter((e) => typeof e === 'string' || typeof e === 'number')).map((e) => ({
+        id: e,
+        name: e
+      }))
+    }))
+
+  const filterList = Object.keys(filterValues).flatMap((dataKey) => {
+    let result = []
+    const value = filterValues[dataKey]
+    const column = columns.find((c) => c.dataKey === dataKey) || {}
+    if (Array.isArray(value)) {
+      result = value.map((v) => ({ dataKey, title: column?.title, value: v, showValueOnly: column?.filterOptions?.showValueOnly }))
+    } else {
+      result = [{ dataKey, title: column?.title, value, showValueOnly: column?.filterOptions?.showValueOnly }]
+    }
+    return result
+  })
+
+  const filterProps = {
+    columns: filterColumns,
+    filterValues,
+    updateFilter,
+    resetFilter
+  }
 
   return (
     <div>
@@ -239,12 +321,26 @@ const MuiTable = (props) => {
             <form onSubmit={handleSubmit}>
               <Paper>
                 {(toolbar || selected.length > 0) && (
-                  <Toolbar title={title} selectedCount={selectedCount} selectActions={selectActions} onSelectActionClick={handleSelectActionClick} />
+                  <Toolbar
+                    title={title}
+                    selectedCount={selectedCount}
+                    selectActions={selectActions}
+                    toolbarActions={toolbarActions}
+                    filterProps={filterProps}
+                    onSelectActionClick={handleSelectActionClick}
+                  />
                 )}
-                {toolbarDivider && variant !== 'excel' && <Divider light />}
+
+                <FilterList data={filterList} removeFilter={removeFilter} />
+
+                {toolbarDivider && (variant !== 'excel' || !editing) && <Divider light />}
+
                 <TableContainer>
                   <PerfectScrollbar>
-                    <Table className={clsx(classes.table, tableProps?.className)} {...tableProps}>
+                    <Table
+                      className={clsx({ [classes.table]: true, [classes.excelTable]: variant === 'excel' && editing }, tableProps?.className)}
+                      {...tableProps}
+                    >
                       <TableHead
                         editing={editing}
                         selectable={selectable}
@@ -261,72 +357,78 @@ const MuiTable = (props) => {
                       />
 
                       <TableBody>
-                        {!editing
-                          ? stableSort(rows, comparator)
-                              .slice(startIdx, endIdx)
-                              .map((row, rowIdx) => {
-                                const isItemSelected = isSelected(row[idKey])
-                                const labelId = `enhanced-table-checkbox-${rowIdx}`
-                                const selectDisabled = typeof selectable === 'function' && !selectable(row)
-                                return (
-                                  <TableRow hover role='checkbox' aria-checked={isItemSelected} tabIndex={-1} key={rowIdx} selected={isItemSelected}>
-                                    {!!selectable && (
-                                      <TableCell padding='checkbox'>
-                                        {!selectDisabled && (
-                                          <Checkbox
-                                            checked={isItemSelected}
-                                            inputProps={{
-                                              'aria-labelledby': labelId
-                                            }}
-                                            onClick={(event) => handleClick(event, row[idKey])}
-                                          />
-                                        )}
-                                      </TableCell>
-                                    )}
+                        {!editing ? (
+                          rowList.length > 0 ? (
+                            rowList.map((row, rowIdx) => {
+                              const isItemSelected = isSelected(row[idKey])
+                              const labelId = `enhanced-table-checkbox-${rowIdx}`
+                              const selectDisabled = typeof selectable === 'function' && !selectable(row)
+                              return (
+                                <TableRow hover role='checkbox' aria-checked={isItemSelected} tabIndex={-1} key={rowIdx} selected={isItemSelected}>
+                                  {!!selectable && (
+                                    <TableCell padding='checkbox'>
+                                      {!selectDisabled && (
+                                        <Checkbox
+                                          checked={isItemSelected}
+                                          inputProps={{
+                                            'aria-labelledby': labelId
+                                          }}
+                                          onClick={(event) => handleClick(event, row[idKey])}
+                                        />
+                                      )}
+                                    </TableCell>
+                                  )}
 
-                                    {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
-                                      const finalLength = length || cellLength
-                                      let value = row[dataKey]
-                                      let shortValue = value
-                                      if (typeof value === 'string') {
-                                        const texts = multiLineText(value, finalLength)
-                                        if (cellOverFlow === 'tooltip') {
-                                          shortValue = texts[0]
-                                        } else if (cellOverFlow === 'wrap') {
-                                          shortValue = texts.join('\n')
-                                        }
+                                  {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
+                                    const finalLength = length || cellLength
+                                    let value = row[dataKey]
+                                    let shortValue = value
+                                    if (typeof value === 'string') {
+                                      const texts = multiLineText(value, finalLength)
+                                      if (cellOverFlow === 'tooltip') {
+                                        shortValue = texts[0]
+                                      } else if (cellOverFlow === 'wrap') {
+                                        shortValue = texts.join('\n')
                                       }
-                                      const finalValue = typeof render === 'function' ? render(value, shortValue) : shortValue
-                                      return (
-                                        <TableCell
-                                          className={clsx(
-                                            {
-                                              [classes.link]: typeof linkPath === 'function',
-                                              [classes.rowCell]: true
-                                            },
-                                            options?.className
-                                          )}
-                                          component={colIdx === 0 ? 'th' : undefined}
-                                          scope={colIdx === 0 ? 'row' : undefined}
-                                          padding={selectable && colIdx === 0 ? 'none' : 'default'}
-                                          key={`${rowIdx}-${colIdx}`}
-                                          align={align}
-                                          onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
-                                          {...rowCellProps}
-                                        >
-                                          {cellOverFlow === 'tooltip' && value !== shortValue && (
-                                            <Tooltip title={value}>
-                                              <span>{finalValue}...</span>
-                                            </Tooltip>
-                                          )}
-                                          {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
-                                        </TableCell>
-                                      )
-                                    })}
-                                  </TableRow>
-                                )
-                              })
-                          : null}
+                                    }
+                                    const finalValue = typeof render === 'function' ? render(value, shortValue) : shortValue
+                                    return (
+                                      <TableCell
+                                        className={clsx(
+                                          {
+                                            [classes.link]: typeof linkPath === 'function',
+                                            [classes.rowCell]: true
+                                          },
+                                          options?.className
+                                        )}
+                                        component={colIdx === 0 ? 'th' : undefined}
+                                        scope={colIdx === 0 ? 'row' : undefined}
+                                        padding={selectable && colIdx === 0 ? 'none' : 'default'}
+                                        key={`${rowIdx}-${colIdx}`}
+                                        align={align}
+                                        onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
+                                        {...rowCellProps}
+                                      >
+                                        {cellOverFlow === 'tooltip' && value !== shortValue && (
+                                          <Tooltip title={value}>
+                                            <span>{finalValue}...</span>
+                                          </Tooltip>
+                                        )}
+                                        {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
+                                      </TableCell>
+                                    )
+                                  })}
+                                </TableRow>
+                              )
+                            })
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={columns.length}>
+                                <Typography className={classes.emptyMessage}>No matching records found!</Typography>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        ) : null}
                         {editable && editing && (
                           <FieldArray name='rows'>
                             {({ fields }) =>
@@ -356,7 +458,7 @@ const MuiTable = (props) => {
                                         <TableCell
                                           className={clsx({
                                             [classes.rowCell]: element === 'text-field',
-                                            [classes.inputPadding]: true
+                                            [classes.inputPadding]: element !== 'text-field'
                                           })}
                                           key={`${rowIdx}-${colIdx}`}
                                           align={align}
@@ -369,7 +471,7 @@ const MuiTable = (props) => {
                                               validate={validate}
                                               disabled={disabled}
                                               variant={variant}
-                                              fontSize={props.fontSize}
+                                              fontSize={fontSize}
                                               options={options}
                                             />
                                           )}
@@ -380,7 +482,7 @@ const MuiTable = (props) => {
                                               validate={validate}
                                               disabled={disabled}
                                               variant={variant}
-                                              fontSize={props.fontSize}
+                                              fontSize={fontSize}
                                               options={options}
                                             />
                                           )}
@@ -426,14 +528,14 @@ const MuiTable = (props) => {
                     <TablePagination
                       rowsPerPageOptions={[10, 25]}
                       component='div'
-                      count={rows.length}
+                      count={rowList.length}
                       rowsPerPage={pageSize}
                       page={page}
                       onChangePage={handleChangePage}
                       onChangeRowsPerPage={handleChangePageSize}
                       labelRowsPerPage='Page Size'
                       nextIconButtonProps={{
-                        disabled: editing || page === totalPage - 1
+                        disabled: editing || totalPage === 0 || page === totalPage - 1
                       }}
                       backIconButtonProps={{ disabled: editing || page === 0 }}
                       SelectProps={{
@@ -468,6 +570,11 @@ MuiTable.propTypes = {
       disabled: PropTypes.func, // (row, dataKey) => boolean . If any normal cell has to disabled conditionally. It will have higher priority than disabled in options
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
       validate: PropTypes.func, // Validation function for TextInput and SelectInput
+      filterOptions: PropTypes.shape({
+        filter: PropTypes.bool,
+        multiSelect: PropTypes.bool,
+        showValueOnly: PropTypes.bool
+      }),
       options: PropTypes.object, // options to be passed to underllying editable component - Input, Select, Switch etc
       length: PropTypes.number, // Cell Length. If not provided then cellLength value of table will be used.
       headerCellProps: PropTypes.object,
@@ -487,6 +594,7 @@ MuiTable.propTypes = {
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
+  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['search', 'column', 'filter'])),
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),

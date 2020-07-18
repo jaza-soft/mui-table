@@ -11,6 +11,8 @@ import AddIcon from '@material-ui/icons/Add'
 import FilterListIcon from '@material-ui/icons/FilterList'
 
 import Tooltip from './Tooltip'
+import Popover from './Popover'
+import Filter from './Filter'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,8 +34,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Toolbar = ({ title, selectedCount, selectActions, onSelectActionClick }) => {
+const Toolbar = (props) => {
+  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSelectActionClick } = props
   const classes = useStyles()
+  const [filterActive, setFilterActive] = React.useState(false)
 
   const createActionHandler = (action) => (event) => {
     onSelectActionClick(event, action)
@@ -55,23 +59,34 @@ const Toolbar = ({ title, selectedCount, selectActions, onSelectActionClick }) =
         </Typography>
       )}
 
-      {selectedCount > 0 ? (
-        selectActions.map((action) => (
-          <Tooltip key={action} title={action} arrow>
-            <IconButton aria-label={action} onClick={createActionHandler(action)}>
-              {action === 'add' && <AddIcon />}
-              {action === 'edit' && <EditIcon />}
-              {action === 'delete' && <DeleteIcon />}
-            </IconButton>
-          </Tooltip>
-        ))
-      ) : (
-        <Tooltip title='Filter list' arrow>
-          <IconButton aria-label='filter list'>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+      {selectedCount > 0
+        ? selectActions.map((action) => (
+            <Tooltip key={action} title={action} arrow>
+              <IconButton aria-label={action} onClick={createActionHandler(action)}>
+                {action === 'add' && <AddIcon />}
+                {action === 'edit' && <EditIcon />}
+                {action === 'delete' && <DeleteIcon />}
+              </IconButton>
+            </Tooltip>
+          ))
+        : toolbarActions.map((action) => (
+            <div key={action}>
+              {action === 'filter' && (
+                <Popover
+                  onExited={() => setFilterActive(false)}
+                  hide={!filterActive}
+                  trigger={
+                    <Tooltip title='Filter list' disableFocusListener>
+                      <IconButton aria-label='Filter list' onClick={() => setFilterActive(true)}>
+                        <FilterListIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                  content={<Filter {...filterProps} />}
+                />
+              )}
+            </div>
+          ))}
     </MuiToolbar>
   )
 }
@@ -80,12 +95,15 @@ Toolbar.propTypes = {
   title: PropTypes.string.isRequired,
   selectedCount: PropTypes.number,
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
+  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['search', 'column', 'filter'])),
+  filterProps: PropTypes.object,
   onSelectActionClick: PropTypes.func
 }
 
 Toolbar.defaultProps = {
   selectedCount: 0,
-  selectActions: ['delete']
+  selectActions: ['delete'],
+  toolbarActions: ['search']
 }
 
 export default Toolbar
