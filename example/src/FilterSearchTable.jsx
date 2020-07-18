@@ -261,18 +261,7 @@ const rows = [
 ]
 
 const SimpleTable = () => {
-  return (
-    <MuiTable
-      columns={columns}
-      rows={rows}
-      pageable={true}
-      cellOverFlow='tooltip'
-      cellLength={100}
-      toolbar={true}
-      toolbarDivider={false}
-      toolbarActions={['filter']}
-    />
-  )
+  return <MuiTable columns={columns} rows={rows} pageable={true} toolbarDivider={false} searchable={true} searchKeys={['style', 'label', 'width']} />
 }
 
 export default SimpleTable

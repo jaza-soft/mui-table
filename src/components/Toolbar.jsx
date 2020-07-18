@@ -9,6 +9,10 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import AddIcon from '@material-ui/icons/Add'
 import FilterListIcon from '@material-ui/icons/FilterList'
+import Input from '@material-ui/core/Input'
+import InputAdornment from '@material-ui/core/InputAdornment'
+import ClearIcon from '@material-ui/icons/Clear'
+import SearchIcon from '@material-ui/icons/Search'
 
 import Tooltip from './Tooltip'
 import Popover from './Popover'
@@ -31,13 +35,30 @@ const useStyles = makeStyles((theme) => ({
         },
   title: {
     flex: '1 1 100%'
+  },
+  search: {
+    marginRight: theme.spacing(1),
+    width: 250
   }
 }))
 
 const Toolbar = (props) => {
-  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSelectActionClick } = props
+  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSearch, onSelectActionClick } = props
   const classes = useStyles()
+
   const [filterActive, setFilterActive] = React.useState(false)
+  const [searchText, setSearchText] = React.useState('')
+
+  const handleSearchText = (event) => {
+    const value = event.target.value
+    setSearchText(value)
+    onSearch && onSearch(value)
+  }
+
+  const clearSearchText = () => {
+    setSearchText('')
+    onSearch && onSearch('')
+  }
 
   const createActionHandler = (action) => (event) => {
     onSelectActionClick(event, action)
@@ -85,6 +106,30 @@ const Toolbar = (props) => {
                   content={<Filter {...filterProps} />}
                 />
               )}
+              {action === 'search' && (
+                <Input
+                  className={classes.search}
+                  value={searchText}
+                  onChange={handleSearchText}
+                  placeholder='Search'
+                  startAdornment={
+                    <InputAdornment position='start'>
+                      <IconButton size='small'>
+                        <SearchIcon fontSize='small' />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  endAdornment={
+                    searchText ? (
+                      <InputAdornment position='end'>
+                        <IconButton size='small' onClick={clearSearchText}>
+                          <ClearIcon fontSize='small' />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : null
+                  }
+                />
+              )}
             </div>
           ))}
     </MuiToolbar>
@@ -97,6 +142,7 @@ Toolbar.propTypes = {
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
   toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['search', 'column', 'filter'])),
   filterProps: PropTypes.object,
+  onSearch: PropTypes.func,
   onSelectActionClick: PropTypes.func
 }
 

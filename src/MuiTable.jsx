@@ -94,6 +94,29 @@ const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
   return filteredRows
 }
 
+const applySearch = (rows, searchText, searchKeys, idKey, hasIdKey) => {
+  if (!searchText) return rows
+  let filteredRows = rows.filter((row) => {
+    const match =
+      searchKeys.filter((searchKey) => {
+        let value = row[searchKey]
+        if (value) {
+          value = String(value).toLowerCase()
+          return value.includes(searchText.trim().toLowerCase())
+        }
+        return false
+      }).length > 0
+    return match
+  })
+
+  if (hasIdKey) {
+    const ids = getDistinctValues(filteredRows.map((row) => row[idKey]))
+    return rows.filter((row) => ids.includes(row[idKey]))
+  }
+
+  return filteredRows
+}
+
 const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: 650,
@@ -141,10 +164,11 @@ const MuiTable = (props) => {
     columns,
     rows,
     editable,
+    searchable,
+    searchKeys,
     selectable,
     selectAll,
     selectActions,
-    toolbarActions,
     sortable,
     pageable,
     toolbar,
@@ -170,6 +194,7 @@ const MuiTable = (props) => {
   const [pageSize, setPageSize] = React.useState(props.pageSize)
   const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
   const [filterValues, setFilterValues] = React.useState({})
+  const [searchText, setSearchText] = React.useState('')
 
   const classes = useStyles({ variant, pageable, editable, fontSize, editing })
 
@@ -252,17 +277,18 @@ const MuiTable = (props) => {
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
-  
   const hasIdKey = rows.filter((row) => row.hasOwnProperty(idKey)).length > 0 // Check Whether idKey exists in rows
 
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
   // Filter & Sort
   let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+  rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
   rowList = stableSort(rowList, comparator)
 
   // pagination
   const totalPage = rowList.length % pageSize === 0 ? rowList.length / pageSize : Math.ceil(rowList.length / pageSize)
+  const totalElements = rowList.length
   const startIdx = page * pageSize
   const endIdx = pageable ? page * pageSize + pageSize : rowList.length
   rowList = rowList.slice(startIdx, endIdx)
@@ -303,6 +329,17 @@ const MuiTable = (props) => {
     resetFilter
   }
 
+  let toolbarActions = []
+  if (searchable) {
+    toolbarActions.push('search')
+  }
+  toolbarActions = toolbarActions.concat(props.toolbarActions)
+  if (filterColumns.length > 0) {
+    toolbarActions.push('filter')
+  }
+
+  const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
+
   return (
     <div>
       <Form
@@ -320,20 +357,21 @@ const MuiTable = (props) => {
           return (
             <form onSubmit={handleSubmit}>
               <Paper>
-                {(toolbar || selected.length > 0) && (
+                {showToolbar && (
                   <Toolbar
                     title={title}
                     selectedCount={selectedCount}
                     selectActions={selectActions}
                     toolbarActions={toolbarActions}
                     filterProps={filterProps}
+                    onSearch={setSearchText}
                     onSelectActionClick={handleSelectActionClick}
                   />
                 )}
 
                 <FilterList data={filterList} removeFilter={removeFilter} />
 
-                {toolbarDivider && (variant !== 'excel' || !editing) && <Divider light />}
+                {showToolbar && toolbarDivider && (variant !== 'excel' || !editing) && <Divider light />}
 
                 <TableContainer>
                   <PerfectScrollbar>
@@ -528,7 +566,7 @@ const MuiTable = (props) => {
                     <TablePagination
                       rowsPerPageOptions={[10, 25]}
                       component='div'
-                      count={rowList.length}
+                      count={totalElements}
                       rowsPerPage={pageSize}
                       page={page}
                       onChangePage={handleChangePage}
@@ -586,6 +624,8 @@ MuiTable.propTypes = {
   toolbar: PropTypes.bool,
   toolbarDivider: PropTypes.bool,
   editable: PropTypes.bool,
+  searchable: PropTypes.bool,
+  searchKeys: PropTypes.arrayOf(PropTypes.string),
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
   selectAll: PropTypes.bool,
   sortable: PropTypes.bool,
@@ -594,7 +634,7 @@ MuiTable.propTypes = {
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
   selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
-  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['search', 'column', 'filter'])),
+  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['column'])),
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
@@ -612,6 +652,8 @@ MuiTable.defaultProps = {
   title: 'Mui Table',
   toolbar: false,
   toolbarDivider: true,
+  searchable: false,
+  searchKeys: ['name'],
   editable: false,
   selectable: false,
   selectAll: true,
@@ -620,6 +662,7 @@ MuiTable.defaultProps = {
   idKey: 'id',
   pageSize: 10,
   selectActions: ['delete'],
+  toolbarActions: [],
   disabledElement: 'input',
   cellLength: 30,
   cellOverFlow: 'tooltip',

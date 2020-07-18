@@ -2,31 +2,13 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
-const desserts = [
-  'Frozen yoghurt',
-  'Ice cream sandwich',
-  'Eclair',
-  'Cupcake',
-  'Gingerbread'
-]
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
 const columns = [
-  {
-    dataKey: 'dessert',
-    title: 'Dessert'
-  },
-  {
-    dataKey: 'calories',
-    title: 'Calories',
-    align: 'right'
-  },
+  { dataKey: 'dessert', title: 'Dessert' },
+  { dataKey: 'calories', title: 'Calories', align: 'right' },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
-  {
-    dataKey: 'sweet',
-    title: 'Sweet',
-    align: 'right',
-    render: (value) => (!!value ? 'Yes' : 'No')
-  },
+  { dataKey: 'sweet', title: 'Sweet', align: 'right', render: (value) => (!!value ? 'Yes' : 'No') },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
   { dataKey: 'protein', title: 'Protein', align: 'right' }
@@ -48,12 +30,7 @@ const rowList = Array(30)
 const PageableTable = () => {
   const [rows, setRows] = React.useState(rowList)
 
-  const onSelectActionClick = (
-    event,
-    action,
-    selectedRows,
-    onActionComplete
-  ) => {
+  const onSelectActionClick = (event, action, selectedRows, onActionComplete) => {
     if (action === 'delete') {
       const idSet = new Set()
       selectedRows.forEach((e) => idSet.add(e.itemId))
