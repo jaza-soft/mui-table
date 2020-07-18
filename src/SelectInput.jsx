@@ -1,4 +1,5 @@
 import React from 'react'
+import clsx from 'clsx'
 
 import { Field } from 'react-final-form'
 
@@ -9,14 +10,19 @@ import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import Input from '@material-ui/core/Input'
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   formControl: {
     width: '100%'
-  }
-})
+  },
+  select: (props) => ({
+    padding: '0px 8px',
+    fontSize: theme.typography.pxToRem(props.fontSize),
+    backgroundColor: props.variant === 'excel' ? 'rgba(233, 246, 252, 0.5)' : undefined
+  })
+}))
 
-const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, options }) => {
-  const classes = useStyles()
+const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, options }) => {
+  const classes = useStyles({ variant, fontSize })
 
   return (
     <Field name={name} validate={validate}>
@@ -24,17 +30,12 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
         return (
           <FormControl className={classes.formControl} style={{ width: options?.style?.width }} error={meta.touched && !!meta.error}>
             <Select
+              className={clsx(classes.select, options?.className)}
               id={`${name}-select-input`}
               input={<Input disableUnderline={variant === 'excel'} />}
               inputProps={{ ...input }}
               {...options}
               disabled={disabled}
-              style={{
-                fontSize: 12,
-                padding: '0px 8px',
-                backgroundColor: variant === 'excel' ? 'rgba(3, 138, 255, 0.03)' : undefined,
-                ...options?.style
-              }}
             >
               {options?.displayEmpty && (
                 <MenuItem value=''>

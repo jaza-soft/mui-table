@@ -8,45 +8,45 @@ import Input from '@material-ui/core/Input'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 
-const useStyles = makeStyles({
-  defaultFormControl: {
-    minWidth: 120
-  },
-  excelFormControl: {
-    width: '100%'
-  }
-})
+const useStyles = makeStyles((theme) => ({
+  formControl: (props) => ({
+    minWidth: props.variant === 'excel' ? '100%' : 120
+  }),
+  input: (props) => ({
+    fontSize: theme.typography.pxToRem(props.fontSize)
+  }),
+  nativeInput: (props) => ({
+    fontSize: theme.typography.pxToRem(props.fontSize),
+    padding: 8,
+    border: 'none',
+    backgroundColor: 'rgba(233, 246, 252, 0.5)'
+  })
+}))
 
-const TextInput = React.memo(({ name, validate, disabled, variant, options }) => {
-  const classes = useStyles()
+const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, options }) => {
+  const classes = useStyles({ variant, fontSize })
 
   return (
     <Field name={name} validate={validate}>
       {({ input, meta }) => {
         return (
-          <FormControl className={clsx({ [classes[`${variant}FormControl`]]: variant })} error={meta.touched && !!meta.error}>
+          <FormControl className={classes.formControl} error={meta.touched && !!meta.error}>
             {variant !== 'excel' && (
               <Input
+                className={clsx(classes.input, options?.className)}
                 id={`${name}-text-input`}
                 inputProps={{ ...input }}
                 {...options}
-                style={{ fontSize: 12, ...options?.style }}
                 disabled={disabled}
               />
             )}
             {variant === 'excel' && (
               <input
+                className={clsx(classes.nativeInput, options?.className)}
                 id={`${name}-text-input`}
                 {...input}
                 {...options}
                 disabled={disabled}
-                style={{
-                  padding: 8,
-                  border: 'none',
-                  fontSize: 12,
-                  backgroundColor: 'rgba(3, 138, 255, 0.03)',
-                  ...options?.style
-                }}
               />
             )}
 

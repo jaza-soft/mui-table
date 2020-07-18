@@ -14,7 +14,7 @@ const TextInput = React.memo(({ name, validate, disabled, options }) => {
             id={`${name}-switch`}
             {...inputProps}
             checked={!!value}
-            onChange={(event, value) => {
+            onChange={(_, value) => {
               input?.onChange(value)
             }}
             color='primary'

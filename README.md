@@ -115,6 +115,7 @@ class App extends Component {
 | cellLength    | `number`    | `30`          | Default value of Cell Character Length when cell specific length is not provided |
 | cellOverFlow  | `string`    | `tooltip`     | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap` |
 | variant       | `string`    | `default`     | Select Table Variant. Values - `default, excel`                            |
+| fontSize      | `number`    | `12`          | Font Size                                                                  |
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
 | selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |

@@ -18,7 +18,6 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 import Checkbox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
-import Tooltip from '@material-ui/core/Tooltip'
 import Divider from '@material-ui/core/Divider'
 
 // perfect-scroll-bar
@@ -26,6 +25,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // local
+import Tooltip from './Tooltip'
 import TableHead from './TableHead'
 import Toolbar from './Toolbar'
 import TextField from './TextField'
@@ -34,6 +34,7 @@ import SelectInput from './SelectInput'
 import BooleanInput from './BooleanInput'
 
 const multiLineText = (text, length) => {
+  if (!text) return [text]
   let result = []
   if (text) {
     while (text.length > length) {
@@ -75,45 +76,36 @@ function stableSort(array, comparator) {
 }
 
 const useStyles = makeStyles((theme) => ({
-  defaultTable: {
-    minWidth: 650,
-    whiteSpace: 'pre'
-  },
-  excelTable: {
+  table: (props) => ({
     minWidth: 650,
     whiteSpace: 'pre',
-    '& th, & td': {
-      border: '1px solid rgba(224, 224, 224, 1)'
-    }
-  },
-  headerCell: {
+    '& th, & td':
+      props.variant === 'excel'
+        ? {
+            border: '1px solid rgba(224, 224, 224, 1)'
+          }
+        : {}
+  }),
+  headerCell: (props) => ({
     padding: '12px 8px',
-    fontSize: 12,
+    fontSize: theme.typography.pxToRem(props.fontSize),
     color: '#3C4858'
-  },
-  rowCell: {
+  }),
+  rowCell: (props) => ({
     padding: '8px',
-    fontSize: 12
-  },
-  defaultInputPadding: {
-    padding: '0px 8px'
-  },
-  excelInputPadding: {
-    padding: 0
-  },
-  footerContainer: {
+    fontSize: theme.typography.pxToRem(props.fontSize)
+  }),
+  inputPadding: (props) => ({
+    padding: props.variant === 'excel' ? 0 : '0px 8px'
+  }),
+  footerContainer: (props) => ({
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center'
-  },
+    alignItems: 'center',
+    justifyContent: props.pageable && props.editable ? 'space-between' : 'flex-end'
+  }),
   footerActions: {
     padding: '0.5em 1em'
-  },
-  justifyBetween: {
-    justifyContent: 'space-between'
-  },
-  justifyRight: {
-    justifyContent: 'flex-end'
   },
   link: {
     color: theme.palette.primary.main,
@@ -145,7 +137,7 @@ const MuiTable = (props) => {
     onSelectActionClick
   } = props
 
-  const classes = useStyles()
+  const classes = useStyles(props)
 
   const [editing, setEditing] = React.useState(false)
   const [order, setOrder] = React.useState('asc')
@@ -226,7 +218,8 @@ const MuiTable = (props) => {
 
   const totalPage = rows.length % pageSize === 0 ? rows.length / pageSize : Math.ceil(rows.length / pageSize)
 
-  const selectedCount = rows?.filter((row) => selected?.includes(row[idKey])).length
+  // const selectedCount = rows?.filter((row) => selected?.includes(row[idKey])).length
+  const selectedCount = selected.length
 
   return (
     <div>
@@ -251,7 +244,7 @@ const MuiTable = (props) => {
                 {toolbarDivider && variant !== 'excel' && <Divider light />}
                 <TableContainer>
                   <PerfectScrollbar>
-                    <Table className={clsx({ [classes[`${variant}Table`]]: variant }, tableProps?.className)} {...tableProps}>
+                    <Table className={clsx(classes.table, tableProps?.className)} {...tableProps}>
                       <TableHead
                         editing={editing}
                         selectable={selectable}
@@ -274,19 +267,20 @@ const MuiTable = (props) => {
                               .map((row, rowIdx) => {
                                 const isItemSelected = isSelected(row[idKey])
                                 const labelId = `enhanced-table-checkbox-${rowIdx}`
-
+                                const selectDisabled = typeof selectable === 'function' && !selectable(row)
                                 return (
                                   <TableRow hover role='checkbox' aria-checked={isItemSelected} tabIndex={-1} key={rowIdx} selected={isItemSelected}>
                                     {!!selectable && (
                                       <TableCell padding='checkbox'>
-                                        <Checkbox
-                                          checked={isItemSelected}
-                                          inputProps={{
-                                            'aria-labelledby': labelId
-                                          }}
-                                          disabled={typeof selectable === 'function' && !selectable(row)}
-                                          onClick={(event) => handleClick(event, row[idKey])}
-                                        />
+                                        {!selectDisabled && (
+                                          <Checkbox
+                                            checked={isItemSelected}
+                                            inputProps={{
+                                              'aria-labelledby': labelId
+                                            }}
+                                            onClick={(event) => handleClick(event, row[idKey])}
+                                          />
+                                        )}
                                       </TableCell>
                                     )}
 
@@ -362,7 +356,7 @@ const MuiTable = (props) => {
                                         <TableCell
                                           className={clsx({
                                             [classes.rowCell]: element === 'text-field',
-                                            [classes[`${variant}InputPadding`]]: element !== 'text-field'
+                                            [classes.inputPadding]: true
                                           })}
                                           key={`${rowIdx}-${colIdx}`}
                                           align={align}
@@ -375,6 +369,7 @@ const MuiTable = (props) => {
                                               validate={validate}
                                               disabled={disabled}
                                               variant={variant}
+                                              fontSize={props.fontSize}
                                               options={options}
                                             />
                                           )}
@@ -385,6 +380,7 @@ const MuiTable = (props) => {
                                               validate={validate}
                                               disabled={disabled}
                                               variant={variant}
+                                              fontSize={props.fontSize}
                                               options={options}
                                             />
                                           )}
@@ -405,12 +401,7 @@ const MuiTable = (props) => {
                   </PerfectScrollbar>
                 </TableContainer>
 
-                <div
-                  className={clsx(classes.footerContainer, {
-                    [classes.justifyBetween]: pageable && editable,
-                    [classes.justifyRight]: !(pageable && editable)
-                  })}
-                >
+                <div className={clsx(classes.footerContainer)}>
                   {editable && (
                     <div className={classes.footerActions}>
                       {!editing && (
@@ -500,6 +491,7 @@ MuiTable.propTypes = {
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
   variant: PropTypes.oneOf(['default', 'excel']),
+  fontSize: PropTypes.number,
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
@@ -524,6 +516,7 @@ MuiTable.defaultProps = {
   cellLength: 30,
   cellOverFlow: 'tooltip',
   variant: 'default',
+  fontSize: 12,
   onSubmit: () => {},
   comparator: (a, b) => 0
 }

@@ -5,11 +5,12 @@ import { lighten, makeStyles } from '@material-ui/core/styles'
 import MuiToolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
-import Tooltip from '@material-ui/core/Tooltip'
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import AddIcon from '@material-ui/icons/Add'
 import FilterListIcon from '@material-ui/icons/FilterList'
+
+import Tooltip from './Tooltip'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,28 +46,18 @@ const Toolbar = ({ title, selectedCount, selectActions, onSelectActionClick }) =
       })}
     >
       {selectedCount > 0 ? (
-        <Typography
-          className={classes.title}
-          color='inherit'
-          variant='subtitle1'
-          component='div'
-        >
+        <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
           {selectedCount} selected
         </Typography>
       ) : (
-        <Typography
-          className={classes.title}
-          variant='h6'
-          id='tableTitle'
-          component='div'
-        >
+        <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
           {title}
         </Typography>
       )}
 
       {selectedCount > 0 ? (
         selectActions.map((action) => (
-          <Tooltip key={action} title={action}>
+          <Tooltip key={action} title={action} arrow>
             <IconButton aria-label={action} onClick={createActionHandler(action)}>
               {action === 'add' && <AddIcon />}
               {action === 'edit' && <EditIcon />}
@@ -75,7 +66,7 @@ const Toolbar = ({ title, selectedCount, selectActions, onSelectActionClick }) =
           </Tooltip>
         ))
       ) : (
-        <Tooltip title='Filter list'>
+        <Tooltip title='Filter list' arrow>
           <IconButton aria-label='filter list'>
             <FilterListIcon />
           </IconButton>
