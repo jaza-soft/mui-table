@@ -11,9 +11,8 @@
 - [x] Sorting 
 - [x] Selection
 - [x] Pagination
+- [x] Filter & Search
 - [ ] Inline Editing - Edit one row at once
-- [ ] Filter
-- [ ] Search
 - [ ] Spanning - Row Span & Col Span
 - [ ] Fully Customizable
 - [ ] Tree Data
@@ -90,6 +89,7 @@ class App extends Component {
 | align         | `string`    |               | Same as MUI TableCell Values - `inherit, center, justify, left, right`     |
 | linkPath      | `function`  |               | It will turn field to link. `(row, dataKey) => Path:String`                |
 | length        | `number`    |               | No. of characters to show or force text wrap depending on value of `cellOverFlow` prop of table|
+| filterOptions | `object`    |       `{}`    | Filter Options - `{filter: bool, multiSelect: bool, showValueOnly: bool}`  |
 | headerCellProps | `object`  |       `{}`    | MUI Table Cell Props to be passed to Header Cell                           |
 | rowCellProps  | `object`    |      `{}`     | MUI Table Cell Props to be passed to Row Cell                              |
 
@@ -109,6 +109,8 @@ class App extends Component {
 | pageSize      | `number`    | `10`          | Number records to show in one page. Values -  `10, 25`                     |
 | sortable      | `bool`      | `false`       | Columns will become sortable                                               |
 | comparator    | `function`  | `(a, b) => 0` | Sort Comparator when sortable is `false`                                   |
+| searchable    | `bool`      | `false`       | Enable Search in Table                                                     |
+| searchKeys    | `string[]`  | `['name']`    | Keys on which search will apply                                            |
 | tableProps    | `object`    | `{}`          | MUI Table props to be passed to Table                                      |
 | idKey         | `string`    | `id`          | Identifier Key in Object. Required when table is selectable                |
 | disabledElement | `string`  | `input`       | Element to use when editable element is disabled. Values - `field, input`  |
@@ -118,7 +120,8 @@ class App extends Component {
 | fontSize      | `number`    | `12`          | Font Size                                                                  |
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
 | validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
-| selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                               |
+| selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                                |
+| toolbarActions| `string[]`  | `[]`          | Toolbar Actions. Values - `column`. Not Implemented yet                     |
 | onSelectActionClick | `function` |          | Signature - `(event, action, selectedRows, onActionComplete: func) => {}`. call `onActionComplete` to indicate that action is completed|
 
 

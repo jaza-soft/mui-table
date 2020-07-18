@@ -93,7 +93,7 @@ TableHead.propTypes = {
   onSelectAllClick: PropTypes.func.isRequired,
   // Sorting will be applied on only of the fields
   order: PropTypes.oneOf(['asc', 'desc']).isRequired, // sort direction
-  orderBy: PropTypes.string.isRequired, // sort column
+  orderBy: PropTypes.string, // sort column
   onRequestSort: PropTypes.func.isRequired
 }
 
