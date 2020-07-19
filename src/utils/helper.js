@@ -3,7 +3,7 @@ export const getDistinctValues = (values) => {
   if (!Array.isArray(values)) return values
   let set = new Set()
   values.forEach((value) => set.add(value))
-  return [...set]
+  return Array.from(set)
 }
 
 export const multiLineText = (text, length) => {

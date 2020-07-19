@@ -1,17 +1,17 @@
 import React from 'react'
 
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
 
-import SimpleTable from './SimpleTable'
-import PageableTable from './PageableTable'
-import SelectableTable from './SelectableTable'
-import SortableTable from './SortableTable'
-import EditableTable from './EditableTable'
-import ScrollableTable from './ScrollableTable'
-import EditableExcelTable from './EditableExcelTable'
-import FilterSearchTable from './FilterSearchTable'
+import SimpleTable from './samples/SimpleTable'
+import PageableTable from './samples/PageableTable'
+import SelectableTable from './samples/SelectableTable'
+import SortableTable from './samples/SortableTable'
+import EditableTable from './samples/EditableTable'
+import ScrollableTable from './samples/ScrollableTable'
+import EditableExcelTable from './samples/EditableExcelTable'
+import FilterSearchTable from './samples/FilterSearchTable'
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },

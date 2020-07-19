@@ -51,7 +51,7 @@ function getComparator(order, orderBy) {
   return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy)
 }
 
-function stableSort(array, comparator) {
+function applySort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index])
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0])
@@ -196,7 +196,7 @@ const MuiTable = (props) => {
   const [filterValues, setFilterValues] = React.useState({})
   const [searchText, setSearchText] = React.useState('')
 
-  const classes = useStyles({ variant, pageable, editable, fontSize, editing })
+  const classes = useStyles({ variant, pageable, editable, fontSize })
 
   /*External handler functions */
   const handleSelectActionClick = (event, action) => {
@@ -284,7 +284,7 @@ const MuiTable = (props) => {
   // Filter & Sort
   let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
   rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
-  rowList = stableSort(rowList, comparator)
+  rowList = applySort(rowList, comparator)
 
   // pagination
   const totalPage = rowList.length % pageSize === 0 ? rowList.length / pageSize : Math.ceil(rowList.length / pageSize)
@@ -292,7 +292,6 @@ const MuiTable = (props) => {
   const startIdx = page * pageSize
   const endIdx = pageable ? page * pageSize + pageSize : rowList.length
   rowList = rowList.slice(startIdx, endIdx)
-
   const initialValues = { rows: rowList }
 
   // const selectedCount = rowList?.filter((row) => selected?.includes(row[idKey])).length
@@ -646,6 +645,7 @@ MuiTable.propTypes = {
   onSelectActionClick: PropTypes.func, // (event, action, rows) => {}
   comparator: PropTypes.func
 }
+
 MuiTable.defaultProps = {
   columns: [],
   rows: [],

@@ -1,10 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { makeStyles } from '@material-ui/core/styles'
 import Chip from '@material-ui/core/Chip'
 
 import { capitalize } from '../utils/helper'
-import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles({
   root: {

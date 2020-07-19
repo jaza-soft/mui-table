@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
+// import { columns, rows } from '../data'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 

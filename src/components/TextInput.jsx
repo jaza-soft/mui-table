@@ -3,7 +3,7 @@ import clsx from 'clsx'
 
 import { Field } from 'react-final-form'
 
-import { makeStyles } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
 import Input from '@material-ui/core/Input'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
