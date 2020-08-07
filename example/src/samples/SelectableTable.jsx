@@ -1,5 +1,7 @@
 import React from 'react'
 
+import DoneIcon from '@material-ui/icons/Done'
+
 import { MuiTable } from '@jazasoft/mui-table'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
@@ -38,6 +40,7 @@ const PageableTable = () => {
       let newRows = rows.filter((e) => !itemIds.includes(e.itemId))
       setRows(newRows)
     }
+    console.log({ event, action, selectedRows })
     onActionComplete()
   }
 
@@ -48,7 +51,10 @@ const PageableTable = () => {
       pageable={true}
       selectable={(row) => row?.id % 2 === 1}
       selectAll={false}
-      selectActions={['add', 'delete']}
+      selectActions={[
+        { name: 'delete', tooltip: 'Delete Rows' },
+        { name: 'custom', tooltip: 'Custom Action', icon: <DoneIcon /> }
+      ]}
       onSelectActionClick={onSelectActionClick}
       idKey='itemId'
     />

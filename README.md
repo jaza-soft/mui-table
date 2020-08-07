@@ -74,6 +74,14 @@ class App extends Component {
 
 ## Types
 
+**Action**
+
+| Name          | Type        | Default Value | Description                                                                |
+| ------------- | ----------- | ------------- |--------------------------------------------------------------------------- |
+| name          | `string`    |               | Name of action                                                             |
+| tooltip       | `string`    |               | Tooltip for the action                                                     |
+| icon          | `ReactElement`|             | Icon for this action. This is required only for custom actions.            |
+
 **Column**
 
 | Name          | Type        | Default Value | Description                                                                |
@@ -92,6 +100,7 @@ class App extends Component {
 | filterOptions | `object`    |       `{}`    | Filter Options - `{filter: bool, multiSelect: bool, showValueOnly: bool}`  |
 | headerCellProps | `object`  |       `{}`    | MUI Table Cell Props to be passed to Header Cell                           |
 | rowCellProps  | `object`    |      `{}`     | MUI Table Cell Props to be passed to Row Cell                              |
+
 
 ## Props
 
@@ -119,10 +128,11 @@ class App extends Component {
 | variant       | `string`    | `default`     | Select Table Variant. Values - `default, excel`                            |
 | fontSize      | `number`    | `12`          | Font Size                                                                  |
 | onSubmit      | `function`  |               | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete|
-| validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>` |
-| selectActions | `string[]`  | `['delete']`  | Select Actions. Values - `add, edit, delete`                                |
-| toolbarActions| `string[]`  | `[]`          | Toolbar Actions. Values - `column`. Not Implemented yet                     |
-| onSelectActionClick | `function` |          | Signature - `(event, action, selectedRows, onActionComplete: func) => {}`. call `onActionComplete` to indicate that action is completed|
+| validate      | `function`  |               | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`|
+| selectActions | `Action[]`  | `[{name: 'delete'}]` | Select Actions. Standard actions - `add, edit, delete`              |
+| toolbarActions| `Action[]`  | `[]`          | Toolbar Actions. Standard actions - `column`. Not Implemented yet          |
+| onSelectActionClick | `function` |          | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed|
+| onToolbarActionClick | `function` |         | Signature - `(event, action) => void`.                                    |
 
 
 

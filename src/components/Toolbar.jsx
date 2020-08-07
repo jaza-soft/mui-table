@@ -18,6 +18,10 @@ import Tooltip from './Tooltip'
 import Popover from './Popover'
 import Filter from './Filter'
 
+import { capitalize } from '../utils/helper'
+
+const getTooltip = (tooltip, action) => tooltip || capitalize(action)
+
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
@@ -60,8 +64,15 @@ const Toolbar = (props) => {
     onSearch && onSearch('')
   }
 
-  const createActionHandler = (action) => (event) => {
+  const createSelectActionHandler = (action) => (event) => {
     onSelectActionClick(event, action)
+  }
+
+  const createToolbarActionHandler = (action) => (event) => {
+    if (action === 'filter') {
+      setFilterActive(true)
+    }
+    onToolbarActionClick(event, action)
   }
 
   return (
@@ -81,24 +92,25 @@ const Toolbar = (props) => {
       )}
 
       {selectedCount > 0
-        ? selectActions.map((action) => (
-            <Tooltip key={action} title={action} arrow>
-              <IconButton aria-label={action} onClick={createActionHandler(action)}>
-                {action === 'add' && <AddIcon />}
-                {action === 'edit' && <EditIcon />}
-                {action === 'delete' && <DeleteIcon />}
+        ? selectActions.map(({ name, tooltip, icon }, idx) => (
+            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
+              <IconButton aria-label={getTooltip(tooltip, name)} onClick={createSelectActionHandler(name)}>
+                {name === 'add' && <AddIcon />}
+                {name === 'edit' && <EditIcon />}
+                {name === 'delete' && <DeleteIcon />}
+                {!['add', 'edit', 'delete'].includes(name) && icon}
               </IconButton>
             </Tooltip>
           ))
-        : toolbarActions.map((action) => (
-            <div key={action}>
-              {action === 'filter' && (
+        : toolbarActions.map(({ name, tooltip, icon }, idx) => (
+            <div key={idx}>
+              {name === 'filter' && (
                 <Popover
                   onExited={() => setFilterActive(false)}
                   hide={!filterActive}
                   trigger={
-                    <Tooltip title='Filter list' disableFocusListener>
-                      <IconButton aria-label='Filter list' onClick={() => setFilterActive(true)}>
+                    <Tooltip title={getTooltip(tooltip, name)} disableFocusListener>
+                      <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)}>
                         <FilterListIcon />
                       </IconButton>
                     </Tooltip>
@@ -106,7 +118,7 @@ const Toolbar = (props) => {
                   content={<Filter {...filterProps} />}
                 />
               )}
-              {action === 'search' && (
+              {name === 'search' && (
                 <Input
                   className={classes.search}
                   value={searchText}
@@ -130,26 +142,40 @@ const Toolbar = (props) => {
                   }
                 />
               )}
+              {!['search', 'filter', 'column'].includes(name) && icon && (
+                <Tooltip title={getTooltip(tooltip, name)} disableFocusListener>
+                  <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)}>
+                    {icon}
+                  </IconButton>
+                </Tooltip>
+              )}
             </div>
           ))}
     </MuiToolbar>
   )
 }
 
+const ActionType = PropTypes.shape({
+  name: PropTypes.string,
+  tooltip: PropTypes.string,
+  icon: PropTypes.any
+})
+
 Toolbar.propTypes = {
   title: PropTypes.string.isRequired,
   selectedCount: PropTypes.number,
-  selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
-  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['search', 'column', 'filter'])),
+  selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
+  toolbarActions: PropTypes.arrayOf(ActionType), // standard actions -  search, filter, column
   filterProps: PropTypes.object,
   onSearch: PropTypes.func,
-  onSelectActionClick: PropTypes.func
+  onSelectActionClick: PropTypes.func,
+  onToolbarActionClick: PropTypes.func
 }
 
 Toolbar.defaultProps = {
   selectedCount: 0,
-  selectActions: ['delete'],
-  toolbarActions: ['search']
+  selectActions: [{ name: 'delete' }],
+  toolbarActions: [{ name: 'search' }]
 }
 
 export default Toolbar

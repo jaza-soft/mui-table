@@ -183,7 +183,8 @@ const MuiTable = (props) => {
     fontSize,
     onSubmit,
     validate,
-    onSelectActionClick
+    onSelectActionClick,
+    onToolbarActionClick
   } = props
 
   const [editing, setEditing] = React.useState(false)
@@ -330,11 +331,11 @@ const MuiTable = (props) => {
 
   let toolbarActions = []
   if (searchable) {
-    toolbarActions.push('search')
+    toolbarActions.push({ name: 'search' })
   }
   toolbarActions = toolbarActions.concat(props.toolbarActions)
   if (filterColumns.length > 0) {
-    toolbarActions.push('filter')
+    toolbarActions.push({ name: 'filter' })
   }
 
   const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
@@ -365,6 +366,7 @@ const MuiTable = (props) => {
                     filterProps={filterProps}
                     onSearch={setSearchText}
                     onSelectActionClick={handleSelectActionClick}
+                    onToolbarActionClick={onToolbarActionClick}
                   />
                 )}
 
@@ -595,6 +597,12 @@ const OptionType = PropTypes.shape({
   name: PropTypes.string.isRequired
 })
 
+const ActionType = PropTypes.shape({
+  name: PropTypes.string,
+  tooltip: PropTypes.string,
+  icon: PropTypes.any
+})
+
 MuiTable.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
@@ -632,8 +640,9 @@ MuiTable.propTypes = {
   tableProps: PropTypes.object,
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
-  selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
-  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['column'])),
+  selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
+  toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
+  inlineAction: PropTypes.arrayOf(ActionType),
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
@@ -642,7 +651,8 @@ MuiTable.propTypes = {
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
-  onSelectActionClick: PropTypes.func, // (event, action, rows) => {}
+  onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
+  onToolbarActionClick: PropTypes.func, // (event, action) => void
   comparator: PropTypes.func
 }
 
