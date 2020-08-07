@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import clsx from 'clsx'
 
 import { makeStyles } from '@material-ui/core/styles'
 import TableCell from '@material-ui/core/TableCell'
@@ -7,7 +8,6 @@ import MuiTableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import TableSortLabel from '@material-ui/core/TableSortLabel'
 import Checkbox from '@material-ui/core/Checkbox'
-import clsx from 'clsx'
 
 const useStyles = makeStyles({
   visuallyHidden: {
@@ -25,7 +25,21 @@ const useStyles = makeStyles({
 
 const TableHead = (props) => {
   const classes = useStyles()
-  const { editing, selectable, selectAll, sortable, columns, onSelectAllClick, order, orderBy, selectedCount, rowCount, onRequestSort } = props
+  const {
+    editing,
+    selectable,
+    selectAll,
+    sortable,
+    columns,
+    onSelectAllClick,
+    order,
+    orderBy,
+    selectedCount,
+    rowCount,
+    inlineActions,
+    actionPlacement,
+    onRequestSort
+  } = props
 
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property)
@@ -46,6 +60,8 @@ const TableHead = (props) => {
             )}
           </TableCell>
         )}
+
+        {inlineActions.length > 0 && actionPlacement === 'left' && <TableCell align='left'>Actions</TableCell>}
 
         {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
           <TableCell
@@ -68,10 +84,18 @@ const TableHead = (props) => {
             )}
           </TableCell>
         ))}
+
+        {inlineActions.length > 0 && actionPlacement === 'right' && <TableCell align='right'>Actions</TableCell>}
       </TableRow>
     </MuiTableHead>
   )
 }
+
+const ActionType = PropTypes.shape({
+  name: PropTypes.string,
+  tooltip: PropTypes.string,
+  icon: PropTypes.any
+})
 
 TableHead.propTypes = {
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
@@ -91,6 +115,9 @@ TableHead.propTypes = {
   selectedCount: PropTypes.number.isRequired, // No of Rows Selected
   rowCount: PropTypes.number.isRequired, // Total Number of Rows in Table
   onSelectAllClick: PropTypes.func.isRequired,
+  // Inline Action
+  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add
+  actionPlacement: PropTypes.oneOf(['left', 'right']),
   // Sorting will be applied on only of the fields
   order: PropTypes.oneOf(['asc', 'desc']).isRequired, // sort direction
   orderBy: PropTypes.string, // sort column
@@ -102,7 +129,9 @@ TableHead.defaultProps = {
   selectable: false,
   selectAll: true,
   sortable: false,
-  columns: []
+  columns: [],
+  inlineActions: [],
+  actionPlacement: 'right'
 }
 
 export default TableHead

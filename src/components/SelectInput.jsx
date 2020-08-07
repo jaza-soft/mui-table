@@ -10,19 +10,16 @@ import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import Input from '@material-ui/core/Input'
 
-const useStyles = makeStyles((theme) => {
-  console.log({theme});
-  return {
-    formControl: {
-      width: '100%'
-    },
-    select: (props) => ({
-      padding: '0px 8px',
-      // fontSize: theme.typography.pxToRem(props.fontSize),
-      backgroundColor: props.variant === 'excel' ? 'rgba(233, 246, 252, 0.5)' : undefined
-    })
-  }
-})
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    width: '100%'
+  },
+  select: (props) => ({
+    padding: '0px 8px',
+    fontSize: theme.typography.pxToRem(props.fontSize),
+    backgroundColor: props.variant === 'excel' ? 'rgba(233, 246, 252, 0.5)' : undefined
+  })
+}))
 
 const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, options }) => {
   const classes = useStyles({ variant, fontSize })

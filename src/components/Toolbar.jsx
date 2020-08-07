@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Toolbar = (props) => {
-  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSearch, onSelectActionClick } = props
+  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSearch, onSelectActionClick, onToolbarActionClick } = props
   const classes = useStyles()
 
   const [filterActive, setFilterActive] = React.useState(false)
@@ -65,14 +65,14 @@ const Toolbar = (props) => {
   }
 
   const createSelectActionHandler = (action) => (event) => {
-    onSelectActionClick(event, action)
+    onSelectActionClick && onSelectActionClick(event, action)
   }
 
   const createToolbarActionHandler = (action) => (event) => {
     if (action === 'filter') {
       setFilterActive(true)
     }
-    onToolbarActionClick(event, action)
+    onToolbarActionClick && onToolbarActionClick(event, action)
   }
 
   return (
