@@ -16,19 +16,20 @@ const columns = [
   {
     dataKey: 'status',
     title: 'Status',
-    render: (value, shortValue) => (
-      <span
-        style={{
-          padding: '3px 6px',
-          borderRadius: 4,
-          color: 'white',
-          fontSize: 14,
-          backgroundColor: value === 'New' ? 'blue' : value === 'Pending' ? 'orange' : 'green'
-        }}
-      >
-        {value}
-      </span>
-    )
+    render: (value, shortValue) =>
+      value ? (
+        <span
+          style={{
+            padding: '3px 6px',
+            borderRadius: 4,
+            color: 'white',
+            fontSize: 14,
+            backgroundColor: value === 'New' ? 'blue' : value === 'Pending' ? 'orange' : 'green'
+          }}
+        >
+          {value}
+        </span>
+      ) : null
   },
   { dataKey: 'label', title: 'Label' },
   { dataKey: 'color', title: 'Color', inputType: 'text-input' },

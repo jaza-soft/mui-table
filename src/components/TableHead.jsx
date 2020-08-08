@@ -36,7 +36,7 @@ const TableHead = (props) => {
     orderBy,
     selectedCount,
     rowCount,
-    inlineActions,
+    showActions,
     actionPlacement,
     onRequestSort
   } = props
@@ -61,7 +61,7 @@ const TableHead = (props) => {
           </TableCell>
         )}
 
-        {inlineActions.length > 0 && actionPlacement === 'left' && <TableCell align='left'>Actions</TableCell>}
+        {showActions && actionPlacement === 'left' && <TableCell align='left'>Actions</TableCell>}
 
         {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
           <TableCell
@@ -85,17 +85,11 @@ const TableHead = (props) => {
           </TableCell>
         ))}
 
-        {inlineActions.length > 0 && actionPlacement === 'right' && <TableCell align='right'>Actions</TableCell>}
+        {showActions && actionPlacement === 'right' && <TableCell align='right'>Actions</TableCell>}
       </TableRow>
     </MuiTableHead>
   )
 }
-
-const ActionType = PropTypes.shape({
-  name: PropTypes.string,
-  tooltip: PropTypes.string,
-  icon: PropTypes.any
-})
 
 TableHead.propTypes = {
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
@@ -116,7 +110,7 @@ TableHead.propTypes = {
   rowCount: PropTypes.number.isRequired, // Total Number of Rows in Table
   onSelectAllClick: PropTypes.func.isRequired,
   // Inline Action
-  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add
+  showActions: PropTypes.bool,
   actionPlacement: PropTypes.oneOf(['left', 'right']),
   // Sorting will be applied on only of the fields
   order: PropTypes.oneOf(['asc', 'desc']).isRequired, // sort direction
@@ -130,7 +124,7 @@ TableHead.defaultProps = {
   selectAll: true,
   sortable: false,
   columns: [],
-  inlineActions: [],
+  showActions: false,
   actionPlacement: 'right'
 }
 
