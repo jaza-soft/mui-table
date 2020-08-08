@@ -260,8 +260,8 @@ const rows = [
   }
 ]
 
-const SimpleTable = () => {
+const FilterSearchTable = () => {
   return <MuiTable columns={columns} rows={rows} pageable={true} toolbarDivider={false} searchable={true} searchKeys={['style', 'label', 'width']} />
 }
 
-export default SimpleTable
+export default FilterSearchTable

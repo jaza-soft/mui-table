@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { MuiTable } from '@jazasoft/mui-table'
+import HistoryIcon from '@material-ui/icons/History'
 
-const required = (value) => (value ? undefined : 'Required')
+import { MuiTable } from '@jazasoft/mui-table'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
@@ -13,16 +13,14 @@ const columns = [
     inputType: 'select-input',
     choices: desserts.map((e) => ({ id: e, name: e })),
     options: { displayEmpty: true },
-    validate: required,
-    disabled: (row, dataKey) => row?.id === 3
+    filterOptions: { filter: true, multiSelect: true }
   },
   {
     dataKey: 'calories',
     title: 'Calories',
     align: 'right',
     inputType: 'text-input',
-    options: { type: 'number' },
-    disabled: (row, dataKey) => row?.id === 1
+    options: { type: 'number' }
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   {
@@ -31,8 +29,7 @@ const columns = [
     align: 'right',
     inputType: 'boolean-input',
     render: (value) => (!!value ? 'Yes' : 'No'),
-    options: { color: 'secondary' },
-    disabled: (row, dataKey) => row?.id === 4
+    options: { color: 'secondary' }
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
@@ -51,12 +48,34 @@ const rows = Array(30)
     protein: (Math.random() * 10).toFixed(1)
   }))
 
-const EditableTable = () => {
-  const onSubmit = (values, form, onSubmitComplete) => {
-    onSubmitComplete(values)
+const InlineEditableTable = () => {
+  const onInlineActionClick = (event, action, row, onActionComplete) => {
+    if (action === 'edit') {
+      onActionComplete(row)
+    } else if (action === 'add') {
+      onActionComplete(row)
+    } else if (action === 'history') {
+      console.log({ action, row })
+    }
   }
-
-  return <MuiTable columns={columns} rows={rows} pageable={true} editable={true} onSubmit={onSubmit} />
+  return (
+    <MuiTable
+      columns={columns}
+      rows={rows}
+      pageable={true}
+      searchable={true}
+      searchKeys={['dessert']}
+      inlineActions={[
+        { name: 'add', tooltip: 'Add Row' },
+        { name: 'edit', tooltip: 'Edit Row' },
+        { name: 'history', tooltip: 'Row History', icon: <HistoryIcon /> }
+      ]}
+      actionPlacement='right'
+      rowInsert='below'
+      comparator={(a, b) => a.id - b.id}
+      onInlineActionClick={onInlineActionClick}
+    />
+  )
 }
 
-export default EditableTable
+export default InlineEditableTable

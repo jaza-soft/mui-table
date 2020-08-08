@@ -2,13 +2,7 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
-const desserts = [
-  'Frozen yoghurt',
-  'Ice cream sandwich',
-  'Eclair',
-  'Cupcake',
-  'Gingerbread'
-]
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
 const columns = [
   {
@@ -44,10 +38,8 @@ const rows = Array(30)
     protein: (Math.random() * 10).toFixed(1)
   }))
 
-const PageableTable = () => {
-  return (
-    <MuiTable columns={columns} rows={rows} pageable={true} sortable={true} />
-  )
+const SortableTable = () => {
+  return <MuiTable columns={columns} rows={rows} pageable={true} sortable={true} />
 }
 
-export default PageableTable
+export default SortableTable

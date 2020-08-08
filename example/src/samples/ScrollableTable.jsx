@@ -259,8 +259,8 @@ const rows = [
   }
 ]
 
-const SimpleTable = () => {
+const ScrollableTable = () => {
   return <MuiTable columns={columns} rows={rows} pageable={true} cellOverFlow='tooltip' cellLength={50} fontSize={16} />
 }
 
-export default SimpleTable
+export default ScrollableTable

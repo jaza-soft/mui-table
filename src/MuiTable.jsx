@@ -20,6 +20,15 @@ import Checkbox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
 import Typography from '@material-ui/core/Typography'
+import IconButton from '@material-ui/core/IconButton'
+
+// material-ui/icons
+import DeleteIcon from '@material-ui/icons/Delete'
+import EditIcon from '@material-ui/icons/Edit'
+import AddIcon from '@material-ui/icons/Add'
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd'
+import DoneIcon from '@material-ui/icons/Done'
+import CancelIcon from '@material-ui/icons/Clear'
 
 // perfect-scroll-bar
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -35,86 +44,42 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues } from './utils/helper'
+import { multiLineText, getDistinctValues, capitalize } from './utils/helper'
+import useMuiTable from './hooks/useMuiTable'
 
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1
-  }
-  return 0
-}
+const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
-function getComparator(order, orderBy) {
-  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy)
-}
-
-function applySort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index])
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0])
-    if (order !== 0) return order
-    return a[1] - b[1]
-  })
-  return stabilizedThis.map((el) => el[0])
-}
-
-const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
-  const dataKeys = Object.keys(filterValues)
-  let filteredRows = rows.filter((row) => {
-    let result = true
-    for (let i = 0; i < dataKeys.length; i++) {
-      const dataKey = dataKeys[i]
-      const value = filterValues[dataKey]
-      if (Array.isArray(value)) {
-        if (value.length > 0) {
-          const matchCount = value.filter((v) => v === row[dataKey]).length
-          if (matchCount === 0) {
-            result = false
-            break
-          }
-        }
-      } else {
-        if (value !== row[dataKey]) {
-          result = false
-          break
-        }
-      }
-    }
-    return result
-  })
-
-  if (hasIdKey) {
-    const ids = getDistinctValues(filteredRows.map((row) => row[idKey]))
-    return rows.filter((row) => ids.includes(row[idKey]))
-  }
-
-  return filteredRows
-}
-
-const applySearch = (rows, searchText, searchKeys, idKey, hasIdKey) => {
-  if (!searchText) return rows
-  let filteredRows = rows.filter((row) => {
-    const match =
-      searchKeys.filter((searchKey) => {
-        let value = row[searchKey]
-        if (value) {
-          value = String(value).toLowerCase()
-          return value.includes(searchText.trim().toLowerCase())
-        }
-        return false
-      }).length > 0
-    return match
-  })
-
-  if (hasIdKey) {
-    const ids = getDistinctValues(filteredRows.map((row) => row[idKey]))
-    return rows.filter((row) => ids.includes(row[idKey]))
-  }
-
-  return filteredRows
+const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], actionPlacement, handleInlineActionClick }) => {
+  const editing = !(eRowIdx === undefined || eRowIdx === null)
+  const activeRow = eRowIdx === rowIdx
+  const activeActions =
+    actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
+  return (
+    <TableCell align={actionPlacement} padding='none'>
+      {editing && activeRow
+        ? activeActions.map(({ name, tooltip }, idx) => (
+            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
+              <IconButton aria-label={getTooltip(tooltip, name)} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}>
+                {name === 'done' && <DoneIcon fontSize='small' />}
+                {name === 'cancel' && <CancelIcon fontSize='small' />}
+              </IconButton>
+            </Tooltip>
+          ))
+        : inlineActions.map(({ name, tooltip, icon }, idx) => (
+            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
+              <span>
+                <IconButton aria-label={getTooltip(tooltip, name)} disabled={editing} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}>
+                  {name === 'add' && <AddIcon fontSize='small' />}
+                  {name === 'duplicate' && <LibraryAddIcon fontSize='small' />}
+                  {name === 'edit' && <EditIcon fontSize='small' />}
+                  {name === 'delete' && <DeleteIcon fontSize='small' />}
+                  {!['add', 'duplicate', 'edit', 'delete'].includes(name) && icon}
+                </IconButton>
+              </span>
+            </Tooltip>
+          ))}
+    </TableCell>
+  )
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -138,6 +103,10 @@ const useStyles = makeStyles((theme) => ({
     padding: '8px',
     fontSize: theme.typography.pxToRem(props.fontSize)
   }),
+  disabledRow: {
+    opacity: 0.2,
+    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+  },
   inputPadding: (props) => ({
     padding: props.variant === 'excel' ? 0 : '0px 8px'
   }),
@@ -165,10 +134,11 @@ const MuiTable = (props) => {
     rows,
     editable,
     searchable,
-    searchKeys,
     selectable,
     selectAll,
     selectActions,
+    inlineActions,
+    actionPlacement,
     sortable,
     pageable,
     toolbar,
@@ -181,120 +151,45 @@ const MuiTable = (props) => {
     cellOverFlow,
     variant,
     fontSize,
-    onSubmit,
+    emptyMessage,
     validate,
-    onSelectActionClick
+    onToolbarActionClick
   } = props
 
-  const [editing, setEditing] = React.useState(false)
-  const [order, setOrder] = React.useState('asc')
-  const [orderBy, setOrderBy] = React.useState(columns[0]?.dataKey)
-  const [selected, setSelected] = React.useState([])
-  const [page, setPage] = React.useState(0)
-  const [pageSize, setPageSize] = React.useState(props.pageSize)
-  const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
-  const [filterValues, setFilterValues] = React.useState({})
-  const [searchText, setSearchText] = React.useState('')
+  const {
+    rowList,
+    key,
+    editableInline,
+    editableState,
+    page,
+    pageSize,
+    totalPage,
+    totalElements,
+    selected,
+    order,
+    orderBy,
+    filterValues,
+    setSearchText,
+    setEditableState,
+    handleSelectActionClick,
+    handleSubmit,
+    handleInlineActionClick,
+    handleRequestSort,
+    updateFilter,
+    resetFilter,
+    removeFilter,
+    handleSelectAllClick,
+    handleClick,
+    handleChangePage,
+    handleChangePageSize
+  } = useMuiTable(props)
 
   const classes = useStyles({ variant, pageable, editable, fontSize })
 
-  /*External handler functions */
-  const handleSelectActionClick = (event, action) => {
-    const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
-    const onActionComplete = () => setSelected([])
-    onSelectActionClick && onSelectActionClick(event, action, selectedRows, onActionComplete)
-  }
-
-  const handleSubmit = (values, form, complete) => {
-    const onSubmitComplete = () => {
-      setEditing(false)
-      complete()
-    }
-    onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
-  }
-
-  /*Internal Handler functions */
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc'
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(property)
-    setKey(key + 1)
-  }
-
-  const updateFilter = (dataKey, value) => {
-    setFilterValues((prevValues) => ({ ...prevValues, [dataKey]: value }))
-  }
-
-  const resetFilter = () => {
-    setFilterValues({})
-  }
-
-  const removeFilter = (dataKey, value) => {
-    const prevValue = filterValues[dataKey]
-    let newFilterValues = { ...filterValues }
-    if (Array.isArray(prevValue)) {
-      newFilterValues[dataKey] = prevValue.filter((e) => e !== value)
-    } else {
-      delete newFilterValues[dataKey]
-    }
-    setFilterValues(newFilterValues)
-  }
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n[idKey])
-      setSelected(newSelecteds)
-      return
-    }
-    setSelected([])
-  }
-
-  const handleClick = (event, id) => {
-    if (!selectable) return
-    const selectedIndex = selected.indexOf(id)
-    let newSelected = []
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id)
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1))
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1))
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
-    }
-    setSelected(newSelected)
-  }
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage)
-  }
-
-  const handleChangePageSize = (event) => {
-    setPageSize(parseInt(event.target.value, 10))
-    setPage(0)
-  }
-
   const isSelected = (id) => selected.indexOf(id) !== -1
 
-  const hasIdKey = rows.filter((row) => row.hasOwnProperty(idKey)).length > 0 // Check Whether idKey exists in rows
-
-  const comparator = sortable ? getComparator(order, orderBy) : props.comparator
-
-  // Filter & Sort
-  let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
-  rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
-  rowList = applySort(rowList, comparator)
-
-  // pagination
-  const totalPage = rowList.length % pageSize === 0 ? rowList.length / pageSize : Math.ceil(rowList.length / pageSize)
-  const totalElements = rowList.length
-  const startIdx = page * pageSize
-  const endIdx = pageable ? page * pageSize + pageSize : rowList.length
-  rowList = rowList.slice(startIdx, endIdx)
   const initialValues = { rows: rowList }
 
-  // const selectedCount = rowList?.filter((row) => selected?.includes(row[idKey])).length
   const selectedCount = selected.length
 
   const filterColumns = columns
@@ -330,11 +225,11 @@ const MuiTable = (props) => {
 
   let toolbarActions = []
   if (searchable) {
-    toolbarActions.push('search')
+    toolbarActions.push({ name: 'search' })
   }
   toolbarActions = toolbarActions.concat(props.toolbarActions)
   if (filterColumns.length > 0) {
-    toolbarActions.push('filter')
+    toolbarActions.push({ name: 'filter' })
   }
 
   const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
@@ -365,21 +260,25 @@ const MuiTable = (props) => {
                     filterProps={filterProps}
                     onSearch={setSearchText}
                     onSelectActionClick={handleSelectActionClick}
+                    onToolbarActionClick={onToolbarActionClick}
                   />
                 )}
 
                 <FilterList data={filterList} removeFilter={removeFilter} />
 
-                {showToolbar && toolbarDivider && (variant !== 'excel' || !editing) && <Divider light />}
+                {showToolbar && toolbarDivider && (variant !== 'excel' || !editableState.editing) && <Divider light />}
 
                 <TableContainer>
                   <PerfectScrollbar>
                     <Table
-                      className={clsx({ [classes.table]: true, [classes.excelTable]: variant === 'excel' && editing }, tableProps?.className)}
+                      className={clsx(
+                        { [classes.table]: true, [classes.excelTable]: variant === 'excel' && editableState.editing },
+                        tableProps?.className
+                      )}
                       {...tableProps}
                     >
                       <TableHead
-                        editing={editing}
+                        editing={editableState.editing}
                         selectable={selectable}
                         selectAll={selectAll}
                         sortable={sortable}
@@ -388,13 +287,15 @@ const MuiTable = (props) => {
                         selectedCount={selectedCount}
                         order={order}
                         orderBy={orderBy}
+                        rowCount={rows.length}
+                        inlineActions={inlineActions}
+                        actionPlacement={actionPlacement}
                         onSelectAllClick={handleSelectAllClick}
                         onRequestSort={handleRequestSort}
-                        rowCount={rows.length}
                       />
 
                       <TableBody>
-                        {!editing ? (
+                        {!editableState.editing ? (
                           rowList.length > 0 ? (
                             rowList.map((row, rowIdx) => {
                               const isItemSelected = isSelected(row[idKey])
@@ -415,6 +316,17 @@ const MuiTable = (props) => {
                                       )}
                                     </TableCell>
                                   )}
+
+                                  {inlineActions.length > 0 && actionPlacement === 'left'
+                                    ? renderActions({
+                                        row,
+                                        rowIdx,
+                                        eRowIdx: editableState.rowIdx,
+                                        inlineActions,
+                                        actionPlacement,
+                                        handleInlineActionClick
+                                      })
+                                    : null}
 
                                   {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
                                     const finalLength = length || cellLength
@@ -455,83 +367,137 @@ const MuiTable = (props) => {
                                       </TableCell>
                                     )
                                   })}
+
+                                  {inlineActions.length > 0 && actionPlacement === 'right'
+                                    ? renderActions({
+                                        row,
+                                        rowIdx,
+                                        eRowIdx: editableState.rowIdx,
+                                        inlineActions,
+                                        actionPlacement,
+                                        handleInlineActionClick
+                                      })
+                                    : null}
                                 </TableRow>
                               )
                             })
                           ) : (
                             <TableRow>
                               <TableCell colSpan={columns.length}>
-                                <Typography className={classes.emptyMessage}>No matching records found!</Typography>
+                                <Typography className={classes.emptyMessage}>
+                                  {rows?.length === 0 ? emptyMessage : 'No matching records found!'}{' '}
+                                </Typography>
                               </TableCell>
                             </TableRow>
                           )
                         ) : null}
-                        {editable && editing && (
+
+                        {(editable || editableInline) && editableState.editing && (
                           <FieldArray name='rows'>
                             {({ fields }) =>
-                              fields.map((name, rowIdx) => (
-                                <TableRow key={rowIdx}>
-                                  {columns.map(
-                                    (
-                                      {
-                                        dataKey,
-                                        inputType = 'text-field',
-                                        render,
-                                        choices,
-                                        align,
-                                        rowCellProps,
-                                        options,
-                                        validate,
-                                        disabled: disabledFunc
-                                      },
-                                      colIdx
-                                    ) => {
-                                      const row = fields?.value[rowIdx]
-                                      const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
+                              fields.map((name, rowIdx) => {
+                                const row = fields?.value[rowIdx]
+                                return (
+                                  <TableRow
+                                    key={rowIdx}
+                                    className={clsx({
+                                      [classes.disabledRow]:
+                                        editableState.rowIdx !== undefined && (editableState.rowIdx !== null) & (rowIdx !== editableState.rowIdx)
+                                    })}
+                                  >
+                                    {inlineActions.length > 0 && actionPlacement === 'left'
+                                      ? renderActions({
+                                          row,
+                                          rowIdx,
+                                          eRowIdx: editableState.rowIdx,
+                                          inlineActions,
+                                          actionPlacement,
+                                          handleInlineActionClick
+                                        })
+                                      : null}
+                                    {columns.map(
+                                      (
+                                        {
+                                          dataKey,
+                                          inputType = 'text-field',
+                                          render,
+                                          choices,
+                                          align,
+                                          rowCellProps,
+                                          options,
+                                          validate,
+                                          length,
+                                          disabled: disabledFunc
+                                        },
+                                        colIdx
+                                      ) => {
+                                        const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
 
-                                      const element = disabled && disabledElement === 'field' ? 'text-field' : inputType
-
-                                      return (
-                                        <TableCell
-                                          className={clsx({
-                                            [classes.rowCell]: element === 'text-field',
-                                            [classes.inputPadding]: element !== 'text-field'
-                                          })}
-                                          key={`${rowIdx}-${colIdx}`}
-                                          align={align}
-                                          {...rowCellProps}
-                                        >
-                                          {element === 'text-field' && <TextField name={`${name}.${dataKey}`} render={render} options={options} />}
-                                          {element === 'text-input' && (
-                                            <TextInput
-                                              name={`${name}.${dataKey}`}
-                                              validate={validate}
-                                              disabled={disabled}
-                                              variant={variant}
-                                              fontSize={fontSize}
-                                              options={options}
-                                            />
-                                          )}
-                                          {element === 'select-input' && (
-                                            <SelectInput
-                                              name={`${name}.${dataKey}`}
-                                              choices={choices}
-                                              validate={validate}
-                                              disabled={disabled}
-                                              variant={variant}
-                                              fontSize={fontSize}
-                                              options={options}
-                                            />
-                                          )}
-                                          {element === 'boolean-input' && (
-                                            <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />
-                                          )}
-                                        </TableCell>
-                                      )
-                                    }
-                                  )}
-                                </TableRow>
-                              ))
+                                        let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
+                                        if (editableState.rowIdx !== undefined && editableState.rowIdx !== rowIdx) {
+                                          element = 'text-field'
+                                        }
+                                        return (
+                                          <TableCell
+                                            className={clsx({
+                                              [classes.rowCell]: element === 'text-field',
+                                              [classes.inputPadding]: element !== 'text-field'
+                                            })}
+                                            key={`${rowIdx}-${colIdx}`}
+                                            align={align}
+                                            {...rowCellProps}
+                                          >
+                                            {element === 'text-field' && (
+                                              <TextField
+                                                name={`${name}.${dataKey}`}
+                                                render={render}
+                                                cellOverFlow={cellOverFlow}
+                                                cellLength={cellLength}
+                                                length={length}
+                                                options={options}
+                                              />
+                                            )}
+                                            {element === 'text-input' && (
+                                              <TextInput
+                                                name={`${name}.${dataKey}`}
+                                                validate={validate}
+                                                disabled={disabled}
+                                                variant={variant}
+                                                fontSize={fontSize}
+                                                options={options}
+                                              />
+                                            )}
+                                            {element === 'select-input' && (
+                                              <SelectInput
+                                                name={`${name}.${dataKey}`}
+                                                choices={choices}
+                                                validate={validate}
+                                                disabled={disabled}
+                                                variant={variant}
+                                                fontSize={fontSize}
+                                                options={options}
+                                              />
+                                            )}
+                                            {element === 'boolean-input' && (
+                                              <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />
+                                            )}
+                                          </TableCell>
+                                        )
+                                      }
+                                    )}
+                                    {inlineActions.length > 0 && actionPlacement === 'right'
+                                      ? renderActions({
+                                          row,
+                                          rowIdx,
+                                          eRowIdx: editableState.rowIdx,
+                                          inlineActions,
+                                          actionPlacement,
+                                          handleInlineActionClick
+                                        })
+                                      : null}
+                                  </TableRow>
+                                )
+                              })
                             }
                           </FieldArray>
                         )}
@@ -543,20 +509,19 @@ const MuiTable = (props) => {
                 <div className={clsx(classes.footerContainer)}>
                   {editable && (
                     <div className={classes.footerActions}>
-                      {!editing && (
-                        <Button variant='text' color='primary' onClick={() => setEditing(true)} disabled={selected.length > 0}>
-                          Edit
-                        </Button>
-                      )}
-                      {editing && (
+                      {editableState.editing ? (
                         <React.Fragment>
                           <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
                             Save
                           </Button>
-                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditing(false)}>
+                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditableState({ editing: false })}>
                             Cancel
                           </Button>
                         </React.Fragment>
+                      ) : (
+                        <Button variant='text' color='primary' onClick={() => setEditableState({ editing: true })} disabled={selected.length > 0}>
+                          Edit
+                        </Button>
                       )}
                     </div>
                   )}
@@ -572,11 +537,11 @@ const MuiTable = (props) => {
                       onChangeRowsPerPage={handleChangePageSize}
                       labelRowsPerPage='Page Size'
                       nextIconButtonProps={{
-                        disabled: editing || totalPage === 0 || page === totalPage - 1
+                        disabled: editableState.editing || totalPage === 0 || page === totalPage - 1
                       }}
-                      backIconButtonProps={{ disabled: editing || page === 0 }}
+                      backIconButtonProps={{ disabled: editableState.editing || page === 0 }}
                       SelectProps={{
-                        disabled: editing
+                        disabled: editableState.editing
                       }}
                     />
                   )}
@@ -593,6 +558,12 @@ const MuiTable = (props) => {
 const OptionType = PropTypes.shape({
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired
+})
+
+const ActionType = PropTypes.shape({
+  name: PropTypes.string,
+  tooltip: PropTypes.string,
+  icon: PropTypes.any
 })
 
 MuiTable.propTypes = {
@@ -632,18 +603,25 @@ MuiTable.propTypes = {
   tableProps: PropTypes.object,
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
-  selectActions: PropTypes.arrayOf(PropTypes.oneOf(['add', 'delete', 'edit'])),
-  toolbarActions: PropTypes.arrayOf(PropTypes.oneOf(['column'])),
+  selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
+  toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
+  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
+  actionPlacement: PropTypes.oneOf(['left', 'right']),
+  rowInsert: PropTypes.oneOf(['above', 'below']), // row should be inserted above or below for inline - add/duplicate actions
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
   variant: PropTypes.oneOf(['default', 'excel']),
   fontSize: PropTypes.number,
+  emptyMessage: PropTypes.string,
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
-  onSelectActionClick: PropTypes.func, // (event, action, rows) => {}
-  comparator: PropTypes.func
+  onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
+  onToolbarActionClick: PropTypes.func, // (event, action) => void
+  onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
+  comparator: PropTypes.func,
+  hasRowsChanged: PropTypes.func // (rows) => Key: String Function to detect whether rows props has changed
 }
 
 MuiTable.defaultProps = {
@@ -661,15 +639,20 @@ MuiTable.defaultProps = {
   pageable: false,
   idKey: 'id',
   pageSize: 10,
-  selectActions: ['delete'],
+  selectActions: [{ name: 'delete' }],
   toolbarActions: [],
+  inlineActions: [],
+  actionPlacement: 'right',
+  rowInsert: 'below',
   disabledElement: 'input',
   cellLength: 30,
   cellOverFlow: 'tooltip',
   variant: 'default',
   fontSize: 12,
+  emptyMessage: 'No records available!',
   onSubmit: () => {},
-  comparator: (a, b) => 0
+  comparator: (a, b) => 0,
+  hasRowsChanged: (rows) => `${rows?.length}`
 }
 
 export default MuiTable

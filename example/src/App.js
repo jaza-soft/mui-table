@@ -12,6 +12,7 @@ import EditableTable from './samples/EditableTable'
 import ScrollableTable from './samples/ScrollableTable'
 import EditableExcelTable from './samples/EditableExcelTable'
 import FilterSearchTable from './samples/FilterSearchTable'
+import InlineActionTable from './samples/InlineActionTable'
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },
@@ -21,7 +22,8 @@ const tables = {
   scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> },
   editable: { title: 'Editable Table', table: <EditableTable /> },
   excelVariant: { title: 'Editable Table - Excel Variant', table: <EditableExcelTable /> },
-  filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> }
+  filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> },
+  InlineAction: { title: 'Inline Actions Table', table: <InlineActionTable /> },
 }
 
 const useStyles = makeStyles({
@@ -44,7 +46,7 @@ const useStyles = makeStyles({
 const App = () => {
   const classes = useStyles()
 
-  const [table, setTable] = React.useState(null)
+  const [table, setTable] = React.useState()
 
   return (
     <div className={classes.root}>
