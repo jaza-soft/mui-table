@@ -77,11 +77,11 @@ class App extends Component {
 
 **Action**
 
-| Name    | Type           | Default Value | Description                                                     |
-| ------- | -------------- | ------------- | --------------------------------------------------------------- |
-| name    | `string`       |               | `Required`. Name of action                                      |
-| tooltip | `string`       |               | `Optional`. Tooltip for the action                              |
-| icon    | `ReactElement` |               | Icon for this action. Required for custom actions.              |
+| Name    | Type           | Default Value | Description                                        |
+| ------- | -------------- | ------------- | -------------------------------------------------- |
+| name    | `string`       |               | `Required`. Name of action                         |
+| tooltip | `string`       |               | `Optional`. Tooltip for the action                 |
+| icon    | `ReactElement` |               | Icon for this action. Required for custom actions. |
 
 **Column**
 
@@ -104,39 +104,39 @@ class App extends Component {
 
 ## Props
 
-| Name                 | Type           | Default Value        | Description                                                                                                                                                |
-| -------------------- | -------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| columns              | `column[]`     | `[]`                 | List of Columns                                                                                                                                            |
-| rows                 | `object[]`     | `[]`                 | List of objects                                                                                                                                            |
-| toolbar              | `bool`         | `false`              | Whether to show toolbar                                                                                                                                    |
-| toolbarDivider       | `bool`         | `true`               | Whether to show Divider between Toolbar and Table Content or not                                                                                           |
-| title                | `string`       | `Mui Table`          | Toolbar Title                                                                                                                                              |
-| editable             | `bool`         | `false`              | Table will become editable                                                                                                                                 |
-| selectable           | `bool \| func` | `false`              | Selectable Rows. `bool \| (row) => bool`                                                                                                                   |
-| selectAll            | `bool`         | `true`               | Applicable only when selectable is `true`, Select All Support                                                                                              |
-| pageable             | `bool`         | `false`              | Table will have pagination                                                                                                                                 |
-| pageSize             | `number`       | `10`                 | Number records to show in one page. Values - `10, 25`                                                                                                      |
-| sortable             | `bool`         | `false`              | Columns will become sortable                                                                                                                               |
-| comparator           | `function`     | `(a, b) => 0`        | Sort Comparator when sortable is `false`                                                                                                                   |
-| searchable           | `bool`         | `false`              | Enable Search in Table                                                                                                                                     |
-| searchKeys           | `string[]`     | `['name']`           | Keys on which search will apply                                                                                                                            |
-| tableProps           | `object`       | `{}`                 | MUI Table props to be passed to Table                                                                                                                      |
-| idKey                | `string`       | `id`                 | Identifier Key in Object. Required when table is selectable                                                                                                |
-| disabledElement      | `string`       | `input`              | Element to use when editable element is disabled. Values - `field, input`                                                                                  |
-| cellLength           | `number`       | `30`                 | Default value of Cell Character Length when cell specific length is not provided                                                                           |
-| cellOverFlow         | `string`       | `tooltip`            | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap`                                                                   |
-| variant              | `string`       | `default`            | Select Table Variant. Values - `default, excel`                                                                                                            |
-| fontSize             | `number`       | `12`                 | Font Size                                                                                                                                                  |
+| Name                 | Type           | Default Value        | Description                                                                                                                                                                  |
+| -------------------- | -------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| columns              | `column[]`     | `[]`                 | List of Columns                                                                                                                                                              |
+| rows                 | `object[]`     | `[]`                 | List of objects                                                                                                                                                              |
+| toolbar              | `bool`         | `false`              | Whether to show toolbar                                                                                                                                                      |
+| toolbarDivider       | `bool`         | `true`               | Whether to show Divider between Toolbar and Table Content or not                                                                                                             |
+| title                | `string`       | `Mui Table`          | Toolbar Title                                                                                                                                                                |
+| editable             | `bool`         | `false`              | Table will become editable                                                                                                                                                   |
+| selectable           | `bool \| func` | `false`              | Selectable Rows. `bool \| (row) => bool`                                                                                                                                     |
+| selectAll            | `bool`         | `true`               | Applicable only when selectable is `true`, Select All Support                                                                                                                |
+| pageable             | `bool`         | `false`              | Table will have pagination                                                                                                                                                   |
+| pageSize             | `number`       | `10`                 | Number records to show in one page. Values - `10, 25`                                                                                                                        |
+| sortable             | `bool`         | `false`              | Columns will become sortable                                                                                                                                                 |
+| comparator           | `function`     | `(a, b) => 0`        | Sort Comparator when sortable is `false`                                                                                                                                     |
+| searchable           | `bool`         | `false`              | Enable Search in Table                                                                                                                                                       |
+| searchKeys           | `string[]`     | `['name']`           | Keys on which search will apply                                                                                                                                              |
+| tableProps           | `object`       | `{}`                 | MUI Table props to be passed to Table                                                                                                                                        |
+| idKey                | `string`       | `id`                 | Identifier Key in Object. Required when table is selectable                                                                                                                  |
+| disabledElement      | `string`       | `input`              | Element to use when editable element is disabled. Values - `field, input`                                                                                                    |
+| cellLength           | `number`       | `30`                 | Default value of Cell Character Length when cell specific length is not provided                                                                                             |
+| cellOverFlow         | `string`       | `tooltip`            | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap`                                                                                     |
+| variant              | `string`       | `default`            | Select Table Variant. Values - `default, excel`                                                                                                                              |
+| fontSize             | `number`       | `12`                 | Font Size                                                                                                                                                                    |
 | onSubmit             | `function`     |                      | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` with updated rows to indicate that submit is complete |
-| validate             | `function`     |                      | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`                                                                                |
-| selectActions        | `Action[]`     | `[{name: 'delete'}]` | Select Actions. Standard actions - `add, edit, delete`                                                                                                     |
-| toolbarActions       | `Action[]`     | `[]`                 | Toolbar Actions. Standard actions - `column`. Not Implemented yet                                                                                          |
-| inlineActions        | `Action[]`     | `[]`                 | Inline Actions. Standard actions - `add, duplicate, edit, delete`.                                                                                         |
-| actionPlacement      | `string`       | `right`              | Placement of action buttons. Values - `left, right`                                                                                                        |
-| rowInsert            | `string`       | `below`              | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                       |
-| onSelectActionClick  | `function`     |                      | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                  |
-| onToolbarActionClick | `function`     |                      | Signature - `(event, action) => void`.                                                                                                                     |
-| onInlineActionClick  | `function`     |                      | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                 |
+| validate             | `function`     |                      | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`                                                                                                  |
+| selectActions        | `Action[]`     | `[{name: 'delete'}]` | Select Actions. Standard actions - `add, edit, delete`                                                                                                                       |
+| toolbarActions       | `Action[]`     | `[]`                 | Toolbar Actions. Standard actions - `column`. Not Implemented yet                                                                                                            |
+| inlineActions        | `Action[]`     | `[]`                 | Inline Actions. Standard actions - `add, duplicate, edit, delete`.                                                                                                           |
+| actionPlacement      | `string`       | `right`              | Placement of action buttons. Values - `left, right`                                                                                                                          |
+| rowInsert            | `string`       | `below`              | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                                         |
+| onSelectActionClick  | `function`     |                      | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                                    |
+| onToolbarActionClick | `function`     |                      | Signature - `(event, action) => void`.                                                                                                                                       |
+| onInlineActionClick  | `function`     |                      | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                  |
 
 ## License
 

@@ -152,7 +152,7 @@ const useMuiTable = (props) => {
       setEditableState({ editing: false })
       complete()
       if (rows) {
-        setRows(rows)
+        updateRows(rows)
       }
     }
     onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
