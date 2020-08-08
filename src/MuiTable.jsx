@@ -5,7 +5,7 @@ import clsx from 'clsx'
 // final-form
 import arrayMutators from 'final-form-arrays'
 import { FieldArray } from 'react-final-form-arrays'
-import { Form } from 'react-final-form'
+import { Form, FormSpy } from 'react-final-form'
 
 // material-ui
 import { makeStyles } from '@material-ui/core/styles'
@@ -152,6 +152,7 @@ const MuiTable = (props) => {
     variant,
     fontSize,
     emptyMessage,
+    rowAddCount,
     validate,
     onToolbarActionClick
   } = props
@@ -181,14 +182,22 @@ const MuiTable = (props) => {
     handleSelectAllClick,
     handleClick,
     handleChangePage,
-    handleChangePageSize
+    handleChangePageSize,
+    handleRowAdd
   } = useMuiTable(props)
 
   const classes = useStyles({ variant, pageable, editable, fontSize })
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
-  const initialValues = { rows: rowList }
+  const initialValues = {
+    rows:
+      rowList.length > 0
+        ? rowList
+        : Array(rowAddCount)
+            .fill('')
+            .map(() => ({}))
+  }
 
   const selectedCount = selected.length
 
@@ -233,6 +242,8 @@ const MuiTable = (props) => {
   }
 
   const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
+  // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
+  const showActions = inlineActions.length > 0 && (!editableState.editing || !(editableState.rowIdx === undefined || editableState.rowIdx == null))
 
   return (
     <div>
@@ -288,7 +299,7 @@ const MuiTable = (props) => {
                         order={order}
                         orderBy={orderBy}
                         rowCount={rows.length}
-                        inlineActions={inlineActions}
+                        showActions={showActions}
                         actionPlacement={actionPlacement}
                         onSelectAllClick={handleSelectAllClick}
                         onRequestSort={handleRequestSort}
@@ -317,7 +328,7 @@ const MuiTable = (props) => {
                                     </TableCell>
                                   )}
 
-                                  {inlineActions.length > 0 && actionPlacement === 'left'
+                                  {showActions && actionPlacement === 'left'
                                     ? renderActions({
                                         row,
                                         rowIdx,
@@ -368,7 +379,7 @@ const MuiTable = (props) => {
                                     )
                                   })}
 
-                                  {inlineActions.length > 0 && actionPlacement === 'right'
+                                  {showActions && actionPlacement === 'right'
                                     ? renderActions({
                                         row,
                                         rowIdx,
@@ -405,7 +416,7 @@ const MuiTable = (props) => {
                                         editableState.rowIdx !== undefined && (editableState.rowIdx !== null) & (rowIdx !== editableState.rowIdx)
                                     })}
                                   >
-                                    {inlineActions.length > 0 && actionPlacement === 'left'
+                                    {showActions && actionPlacement === 'left'
                                       ? renderActions({
                                           row,
                                           rowIdx,
@@ -485,7 +496,7 @@ const MuiTable = (props) => {
                                         )
                                       }
                                     )}
-                                    {inlineActions.length > 0 && actionPlacement === 'right'
+                                    {showActions && actionPlacement === 'right'
                                       ? renderActions({
                                           row,
                                           rowIdx,
@@ -510,14 +521,21 @@ const MuiTable = (props) => {
                   {editable && (
                     <div className={classes.footerActions}>
                       {editableState.editing ? (
-                        <React.Fragment>
-                          <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
-                            Save
-                          </Button>
-                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditableState({ editing: false })}>
-                            Cancel
-                          </Button>
-                        </React.Fragment>
+                        <FormSpy subscription={{ form: true }}>
+                          {({ form }) => (
+                            <React.Fragment>
+                              <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
+                                Save
+                              </Button>
+                              <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => handleRowAdd(form)}>
+                                Add Rows
+                              </Button>
+                              <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditableState({ editing: false })}>
+                                Cancel
+                              </Button>
+                            </React.Fragment>
+                          )}
+                        </FormSpy>
                       ) : (
                         <Button variant='text' color='primary' onClick={() => setEditableState({ editing: true })} disabled={selected.length > 0}>
                           Edit
@@ -614,6 +632,7 @@ MuiTable.propTypes = {
   variant: PropTypes.oneOf(['default', 'excel']),
   fontSize: PropTypes.number,
   emptyMessage: PropTypes.string,
+  rowAddCount: PropTypes.number, // Number of rows to add in editable mode
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
@@ -650,6 +669,7 @@ MuiTable.defaultProps = {
   variant: 'default',
   fontSize: 12,
   emptyMessage: 'No records available!',
+  rowAddCount: 3,
   onSubmit: () => {},
   comparator: (a, b) => 0,
   hasRowsChanged: (rows) => `${rows?.length}`

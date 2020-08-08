@@ -92,6 +92,7 @@ const useMuiTable = (props) => {
     idKey,
     inlineActions,
     rowInsert,
+    rowAddCount,
     onSubmit,
     onSelectActionClick,
     onInlineActionClick,
@@ -148,11 +149,13 @@ const useMuiTable = (props) => {
   }
 
   const handleSubmit = (values, form, complete) => {
-    const onSubmitComplete = (rows) => {
+    const onSubmitComplete = (rowList) => {
       setEditableState({ editing: false })
       complete()
-      if (rows) {
-        updateRows(rows)
+      if (rowList) {
+        let updatedRows = [...rows]
+        updatedRows.splice(page * pageSize, pageSize, ...rowList)
+        updateRows(updatedRows)
       }
     }
     onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
@@ -161,7 +164,6 @@ const useMuiTable = (props) => {
   const handleInlineActionClick = (event, action, row, rowIdx) => {
     const onActionComplete = (rowOrRows) => {
       if (editableState.prevAction === 'edit') {
-        setEditableState({ editing: false })
         if (rowOrRows) {
           setRows((rows) => {
             const idx = rows.findIndex((e) => e.idxx === editableState.prevIdxx)
@@ -171,21 +173,26 @@ const useMuiTable = (props) => {
             return [...rows]
           })
         }
-      } else if (editableState.prevAction === 'add' || editableState.prevAction === 'duplicate') {
         setEditableState({ editing: false })
+      } else if (editableState.prevAction === 'add' || editableState.prevAction === 'duplicate') {
         if (rowOrRows) {
           setRows((rows) => {
             const idx = rows.findIndex((e) => e.idxx === editableState.prevIdxx)
-            if (idx !== 1) {
+            if (idx !== -1) {
               rows.splice(idx, 1, { ...rowOrRows, adding: undefined })
             }
             return rows.map((row, idx) => ({ ...row, idxx: idx * 2 })) // update the idxx field
           })
         }
+        setEditableState({ editing: false })
       } else if (action === 'delete') {
+        let rowList = [...rows]
         if (Array.isArray(rowOrRows)) {
-          updateRows(rowOrRows)
+          rowList = rowOrRows
+        } else {
+          rowList = rowList.filter((e) => e.idxx !== row.idxx)
         }
+        updateRows(rowList)
       }
     }
 
@@ -286,6 +293,13 @@ const useMuiTable = (props) => {
     setPage(0)
   }
 
+  const handleRowAdd = (form) => {
+    if (!form?.mutators) return
+    for (let i = 0; i < rowAddCount; i++) {
+      form.mutators.push('rows', {})
+    }
+  }
+
   // Filter & Sort
   let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
   rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
@@ -323,7 +337,8 @@ const useMuiTable = (props) => {
     handleSelectAllClick,
     handleClick,
     handleChangePage,
-    handleChangePageSize
+    handleChangePageSize,
+    handleRowAdd
   }
 }
 

@@ -52,11 +52,25 @@ const rows = Array(30)
   }))
 
 const EditableTable = () => {
+  const onInlineActionClick = (event, action, row, onActionComplete) => {
+    onActionComplete()
+  }
+
   const onSubmit = (values, form, onSubmitComplete) => {
     onSubmitComplete(values)
   }
 
-  return <MuiTable columns={columns} rows={rows} pageable={true} editable={true} onSubmit={onSubmit} />
+  return (
+    <MuiTable
+      columns={columns}
+      rows={rows}
+      pageable={true}
+      editable={true}
+      onSubmit={onSubmit}
+      inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
+      onInlineActionClick={onInlineActionClick}
+    />
+  )
 }
 
 export default EditableTable
