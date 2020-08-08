@@ -151,6 +151,7 @@ const MuiTable = (props) => {
     cellOverFlow,
     variant,
     fontSize,
+    emptyMessage,
     validate,
     onToolbarActionClick
   } = props
@@ -383,7 +384,9 @@ const MuiTable = (props) => {
                           ) : (
                             <TableRow>
                               <TableCell colSpan={columns.length}>
-                                <Typography className={classes.emptyMessage}>No matching records found!</Typography>
+                                <Typography className={classes.emptyMessage}>
+                                  {rows?.length === 0 ? emptyMessage : 'No matching records found!'}{' '}
+                                </Typography>
                               </TableCell>
                             </TableRow>
                           )
@@ -610,6 +613,7 @@ MuiTable.propTypes = {
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
   variant: PropTypes.oneOf(['default', 'excel']),
   fontSize: PropTypes.number,
+  emptyMessage: PropTypes.string,
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
@@ -645,6 +649,7 @@ MuiTable.defaultProps = {
   cellOverFlow: 'tooltip',
   variant: 'default',
   fontSize: 12,
+  emptyMessage: 'No records available!',
   onSubmit: () => {},
   comparator: (a, b) => 0,
   hasRowsChanged: (rows) => `${rows?.length}`
