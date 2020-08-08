@@ -13,17 +13,17 @@
 - [x] Pagination
 - [x] Filter & Search
 - [x] Inline Editing - Edit one row at once
-- [ ] Spanning - Row Span & Col Span
-- [ ] Fully Customizable
-- [ ] Tree Data
-- [ ] Drag & Drop for Editable Tree Data
 - [x] Add/Remove Row
-- [ ] Change Sequence using Drag & Drop
-- [ ] Expandable View/ Modal View/ Sidebar View
-- [ ] Fixed Header
-- [ ] Column selection
 - [x] Horizonatl Scroll/ Force Line Wrap on Specified characters
 - [x] Variant - default, excel
+- [ ] Column selection
+- [ ] Spanning - Row Span & Col Span
+- [ ] Expandable View/ Modal View/ Sidebar View
+- [ ] Fully Customizable
+- [ ] Fixed Header
+- [ ] Tree Data
+- [ ] Drag & Drop for Editable Tree Data
+- [ ] Change Sequence using Drag & Drop
 - [ ] Elements
   - [x] TextField
   - [x] TextInput
@@ -79,9 +79,9 @@ class App extends Component {
 
 | Name    | Type           | Default Value | Description                                                     |
 | ------- | -------------- | ------------- | --------------------------------------------------------------- |
-| name    | `string`       |               | Name of action                                                  |
-| tooltip | `string`       |               | Tooltip for the action                                          |
-| icon    | `ReactElement` |               | Icon for this action. This is required only for custom actions. |
+| name    | `string`       |               | `Required`. Name of action                                      |
+| tooltip | `string`       |               | `Optional`. Tooltip for the action                              |
+| icon    | `ReactElement` |               | Icon for this action. Required for custom actions.              |
 
 **Column**
 
@@ -127,7 +127,7 @@ class App extends Component {
 | cellOverFlow         | `string`       | `tooltip`            | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap`                                                                   |
 | variant              | `string`       | `default`            | Select Table Variant. Values - `default, excel`                                                                                                            |
 | fontSize             | `number`       | `12`                 | Font Size                                                                                                                                                  |
-| onSubmit             | `function`     |                      | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` to indicate that submit is complete |
+| onSubmit             | `function`     |                      | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` with updated rows to indicate that submit is complete |
 | validate             | `function`     |                      | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`                                                                                |
 | selectActions        | `Action[]`     | `[{name: 'delete'}]` | Select Actions. Standard actions - `add, edit, delete`                                                                                                     |
 | toolbarActions       | `Action[]`     | `[]`                 | Toolbar Actions. Standard actions - `column`. Not Implemented yet                                                                                          |
@@ -136,7 +136,7 @@ class App extends Component {
 | rowInsert            | `string`       | `below`              | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                       |
 | onSelectActionClick  | `function`     |                      | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                  |
 | onToolbarActionClick | `function`     |                      | Signature - `(event, action) => void`.                                                                                                                     |
-| onInlineActionClick  | `function`     |                      | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with update row data after action is completed                 |
+| onInlineActionClick  | `function`     |                      | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                 |
 
 ## License
 
