@@ -33,7 +33,7 @@
   - [ ] AutoCompleteInput
   - [ ] On Demand loading from remote for SelectInput and AutoCompleteInput
 
-[Examples](https://codesandbox.io/embed/affectionate-rubin-eh5jx?fontsize=14&hidenavigation=1&theme=dark)
+[Examples](https://codesandbox.io/s/optimistic-shamir-u78kl)
 
 ## Install
 
