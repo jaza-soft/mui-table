@@ -39,7 +39,7 @@ const columns = [
   { dataKey: 'protein', title: 'Protein', align: 'right' }
 ]
 
-const rowList = Array(30)
+const rows = Array(30)
   .fill('')
   .map((_, idx) => ({
     id: idx + 1,
@@ -51,15 +51,12 @@ const rowList = Array(30)
     protein: (Math.random() * 10).toFixed(1)
   }))
 
-const PageableTable = () => {
-  const [rows, setRows] = React.useState(rowList)
-
+const EditableTable = () => {
   const onSubmit = (values, form, onSubmitComplete) => {
-    setRows(values)
-    onSubmitComplete()
+    onSubmitComplete(values)
   }
 
   return <MuiTable columns={columns} rows={rows} pageable={true} editable={true} onSubmit={onSubmit} />
 }
 
-export default PageableTable
+export default EditableTable

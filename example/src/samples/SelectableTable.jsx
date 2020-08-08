@@ -29,7 +29,7 @@ const rowList = Array(30)
     protein: (Math.random() * 10).toFixed(1)
   }))
 
-const PageableTable = () => {
+const SelectableTable = () => {
   const [rows, setRows] = React.useState(rowList)
 
   const onSelectActionClick = (event, action, selectedRows, onActionComplete) => {
@@ -61,4 +61,4 @@ const PageableTable = () => {
   )
 }
 
-export default PageableTable
+export default SelectableTable

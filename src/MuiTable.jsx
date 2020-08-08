@@ -26,6 +26,7 @@ import IconButton from '@material-ui/core/IconButton'
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import AddIcon from '@material-ui/icons/Add'
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd'
 import DoneIcon from '@material-ui/icons/Done'
 import CancelIcon from '@material-ui/icons/Clear'
 
@@ -48,9 +49,9 @@ import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
-const renderActions = ({ row, rowIdx, editingRowIdx, inlineActions = [], actionPlacement, handleInlineActionClick }) => {
-  const editing = !(editingRowIdx === undefined || editingRowIdx === null)
-  const activeRow = editingRowIdx === rowIdx
+const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], actionPlacement, handleInlineActionClick }) => {
+  const editing = !(eRowIdx === undefined || eRowIdx === null)
+  const activeRow = eRowIdx === rowIdx
   const activeActions =
     actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
   return (
@@ -69,9 +70,10 @@ const renderActions = ({ row, rowIdx, editingRowIdx, inlineActions = [], actionP
               <span>
                 <IconButton aria-label={getTooltip(tooltip, name)} disabled={editing} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}>
                   {name === 'add' && <AddIcon fontSize='small' />}
+                  {name === 'duplicate' && <LibraryAddIcon fontSize='small' />}
                   {name === 'edit' && <EditIcon fontSize='small' />}
                   {name === 'delete' && <DeleteIcon fontSize='small' />}
-                  {!['add', 'edit', 'delete'].includes(name) && icon}
+                  {!['add', 'duplicate', 'edit', 'delete'].includes(name) && icon}
                 </IconButton>
               </span>
             </Tooltip>
@@ -154,10 +156,10 @@ const MuiTable = (props) => {
   } = props
 
   const {
-    key,
     rowList,
-    editing,
-    editingRowIdx,
+    key,
+    editableInline,
+    editableState,
     page,
     pageSize,
     totalPage,
@@ -167,7 +169,7 @@ const MuiTable = (props) => {
     orderBy,
     filterValues,
     setSearchText,
-    setEditing,
+    setEditableState,
     handleSelectActionClick,
     handleSubmit,
     handleInlineActionClick,
@@ -263,16 +265,19 @@ const MuiTable = (props) => {
 
                 <FilterList data={filterList} removeFilter={removeFilter} />
 
-                {showToolbar && toolbarDivider && (variant !== 'excel' || !editing) && <Divider light />}
+                {showToolbar && toolbarDivider && (variant !== 'excel' || !editableState.editing) && <Divider light />}
 
                 <TableContainer>
                   <PerfectScrollbar>
                     <Table
-                      className={clsx({ [classes.table]: true, [classes.excelTable]: variant === 'excel' && editing }, tableProps?.className)}
+                      className={clsx(
+                        { [classes.table]: true, [classes.excelTable]: variant === 'excel' && editableState.editing },
+                        tableProps?.className
+                      )}
                       {...tableProps}
                     >
                       <TableHead
-                        editing={editing}
+                        editing={editableState.editing}
                         selectable={selectable}
                         selectAll={selectAll}
                         sortable={sortable}
@@ -289,7 +294,7 @@ const MuiTable = (props) => {
                       />
 
                       <TableBody>
-                        {!editing ? (
+                        {!editableState.editing ? (
                           rowList.length > 0 ? (
                             rowList.map((row, rowIdx) => {
                               const isItemSelected = isSelected(row[idKey])
@@ -312,7 +317,14 @@ const MuiTable = (props) => {
                                   )}
 
                                   {inlineActions.length > 0 && actionPlacement === 'left'
-                                    ? renderActions({ row, rowIdx, editingRowIdx, inlineActions, actionPlacement, handleInlineActionClick })
+                                    ? renderActions({
+                                        row,
+                                        rowIdx,
+                                        eRowIdx: editableState.rowIdx,
+                                        inlineActions,
+                                        actionPlacement,
+                                        handleInlineActionClick
+                                      })
                                     : null}
 
                                   {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
@@ -356,7 +368,14 @@ const MuiTable = (props) => {
                                   })}
 
                                   {inlineActions.length > 0 && actionPlacement === 'right'
-                                    ? renderActions({ row, rowIdx, editingRowIdx, inlineActions, actionPlacement, handleInlineActionClick })
+                                    ? renderActions({
+                                        row,
+                                        rowIdx,
+                                        eRowIdx: editableState.rowIdx,
+                                        inlineActions,
+                                        actionPlacement,
+                                        handleInlineActionClick
+                                      })
                                     : null}
                                 </TableRow>
                               )
@@ -370,7 +389,7 @@ const MuiTable = (props) => {
                           )
                         ) : null}
 
-                        {editable && editing && (
+                        {(editable || editableInline) && editableState.editing && (
                           <FieldArray name='rows'>
                             {({ fields }) =>
                               fields.map((name, rowIdx) => {
@@ -379,11 +398,19 @@ const MuiTable = (props) => {
                                   <TableRow
                                     key={rowIdx}
                                     className={clsx({
-                                      [classes.disabledRow]: editingRowIdx !== undefined && (editingRowIdx !== null) & (rowIdx !== editingRowIdx)
+                                      [classes.disabledRow]:
+                                        editableState.rowIdx !== undefined && (editableState.rowIdx !== null) & (rowIdx !== editableState.rowIdx)
                                     })}
                                   >
                                     {inlineActions.length > 0 && actionPlacement === 'left'
-                                      ? renderActions({ row, rowIdx, editingRowIdx, inlineActions, actionPlacement, handleInlineActionClick })
+                                      ? renderActions({
+                                          row,
+                                          rowIdx,
+                                          eRowIdx: editableState.rowIdx,
+                                          inlineActions,
+                                          actionPlacement,
+                                          handleInlineActionClick
+                                        })
                                       : null}
                                     {columns.map(
                                       (
@@ -404,7 +431,7 @@ const MuiTable = (props) => {
                                         const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
 
                                         let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
-                                        if (editingRowIdx !== undefined && editingRowIdx !== rowIdx) {
+                                        if (editableState.rowIdx !== undefined && editableState.rowIdx !== rowIdx) {
                                           element = 'text-field'
                                         }
                                         return (
@@ -456,7 +483,14 @@ const MuiTable = (props) => {
                                       }
                                     )}
                                     {inlineActions.length > 0 && actionPlacement === 'right'
-                                      ? renderActions({ row, rowIdx, editingRowIdx, inlineActions, actionPlacement, handleInlineActionClick })
+                                      ? renderActions({
+                                          row,
+                                          rowIdx,
+                                          eRowIdx: editableState.rowIdx,
+                                          inlineActions,
+                                          actionPlacement,
+                                          handleInlineActionClick
+                                        })
                                       : null}
                                   </TableRow>
                                 )
@@ -472,17 +506,17 @@ const MuiTable = (props) => {
                 <div className={clsx(classes.footerContainer)}>
                   {editable && (
                     <div className={classes.footerActions}>
-                      {editing && (editingRowIdx === undefined || editingRowIdx === null) ? (
+                      {editableState.editing ? (
                         <React.Fragment>
                           <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
                             Save
                           </Button>
-                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditing(false)}>
+                          <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditableState({ editing: false })}>
                             Cancel
                           </Button>
                         </React.Fragment>
                       ) : (
-                        <Button variant='text' color='primary' onClick={() => setEditing(true)} disabled={selected.length > 0}>
+                        <Button variant='text' color='primary' onClick={() => setEditableState({ editing: true })} disabled={selected.length > 0}>
                           Edit
                         </Button>
                       )}
@@ -500,11 +534,11 @@ const MuiTable = (props) => {
                       onChangeRowsPerPage={handleChangePageSize}
                       labelRowsPerPage='Page Size'
                       nextIconButtonProps={{
-                        disabled: editing || totalPage === 0 || page === totalPage - 1
+                        disabled: editableState.editing || totalPage === 0 || page === totalPage - 1
                       }}
-                      backIconButtonProps={{ disabled: editing || page === 0 }}
+                      backIconButtonProps={{ disabled: editableState.editing || page === 0 }}
                       SelectProps={{
-                        disabled: editing
+                        disabled: editableState.editing
                       }}
                     />
                   )}
@@ -568,8 +602,9 @@ MuiTable.propTypes = {
   idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
-  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add
+  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
   actionPlacement: PropTypes.oneOf(['left', 'right']),
+  rowInsert: PropTypes.oneOf(['above', 'below']), // row should be inserted above or below for inline - add/duplicate actions
   disabledElement: PropTypes.oneOf(['input', 'field']),
   cellLength: PropTypes.number,
   cellOverFlow: PropTypes.oneOf(['tooltip', 'wrap']),
@@ -581,7 +616,8 @@ MuiTable.propTypes = {
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onToolbarActionClick: PropTypes.func, // (event, action) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
-  comparator: PropTypes.func
+  comparator: PropTypes.func,
+  hasRowsChanged: PropTypes.func // (rows) => Key: String Function to detect whether rows props has changed
 }
 
 MuiTable.defaultProps = {
@@ -603,13 +639,15 @@ MuiTable.defaultProps = {
   toolbarActions: [],
   inlineActions: [],
   actionPlacement: 'right',
+  rowInsert: 'below',
   disabledElement: 'input',
   cellLength: 30,
   cellOverFlow: 'tooltip',
   variant: 'default',
   fontSize: 12,
   onSubmit: () => {},
-  comparator: (a, b) => 0
+  comparator: (a, b) => 0,
+  hasRowsChanged: (rows) => `${rows?.length}`
 }
 
 export default MuiTable

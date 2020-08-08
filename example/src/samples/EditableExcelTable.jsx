@@ -52,7 +52,7 @@ const columns = [
   { dataKey: 'mill', title: 'Mill' }
 ]
 
-const rowList = [
+const rows = [
   {
     style: 'Curabitur sed',
     status: 'New',
@@ -279,15 +279,12 @@ const rowList = [
   }
 ].map((e, idx) => ({ ...e, id: idx + 1, dessert: desserts[Math.round(Math.random() * 10) % 5] }))
 
-const SimpleTable = () => {
-  const [rows, setRows] = React.useState(rowList)
-
+const EditableExcelTable = () => {
   const onSubmit = (values, form, onSubmitComplete) => {
-    setRows(values)
-    onSubmitComplete()
+    onSubmitComplete(values)
   }
 
   return <MuiTable columns={columns} rows={rows} toolbar={true} pageable={true} editable={true} variant='excel' fontSize={14} onSubmit={onSubmit} />
 }
 
-export default SimpleTable
+export default EditableExcelTable

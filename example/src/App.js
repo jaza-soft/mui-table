@@ -13,7 +13,6 @@ import ScrollableTable from './samples/ScrollableTable'
 import EditableExcelTable from './samples/EditableExcelTable'
 import FilterSearchTable from './samples/FilterSearchTable'
 import InlineActionTable from './samples/InlineActionTable'
-import InlineEditableTable from './samples/InlineEditableTable'
 
 const tables = {
   simple: { title: 'Simple Table', table: <SimpleTable /> },
@@ -25,7 +24,6 @@ const tables = {
   excelVariant: { title: 'Editable Table - Excel Variant', table: <EditableExcelTable /> },
   filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> },
   InlineAction: { title: 'Inline Actions Table', table: <InlineActionTable /> },
-  InlineEditable: { title: 'Inline Editable Table', table: <InlineEditableTable /> }
 }
 
 const useStyles = makeStyles({
