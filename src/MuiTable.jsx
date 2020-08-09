@@ -133,6 +133,7 @@ const MuiTable = (props) => {
     columns,
     rows,
     editable,
+    enableRowAddition,
     searchable,
     selectable,
     selectAll,
@@ -244,6 +245,11 @@ const MuiTable = (props) => {
   const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
   const showActions = inlineActions.length > 0 && (!editableState.editing || !(editableState.rowIdx === undefined || editableState.rowIdx == null))
+
+  let footerActions = pageable ? ['save', 'row-add', 'cancel'] : ['cancel', 'row-add', 'save']
+  if (!enableRowAddition) {
+    footerActions = footerActions.filter((e) => e !== 'row-add')
+  }
 
   return (
     <div>
@@ -522,19 +528,28 @@ const MuiTable = (props) => {
                     <div className={classes.footerActions}>
                       {editableState.editing ? (
                         <FormSpy subscription={{ form: true }}>
-                          {({ form }) => (
-                            <React.Fragment>
-                              <Button variant='text' color='primary' type='submit' disabled={submitting || pristine}>
-                                Save
-                              </Button>
-                              <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => handleRowAdd(form)}>
-                                Add Rows
-                              </Button>
-                              <Button style={{ marginLeft: '1em' }} variant='text' onClick={() => setEditableState({ editing: false })}>
-                                Cancel
-                              </Button>
-                            </React.Fragment>
-                          )}
+                          {({ form }) =>
+                            footerActions.map((action) =>
+                              action === 'save' ? (
+                                <Button key={action} variant='text' color='primary' type='submit' disabled={submitting || pristine}>
+                                  Save
+                                </Button>
+                              ) : action === 'row-add' ? (
+                                <Button key={action} style={{ marginLeft: '1em' }} variant='text' onClick={() => handleRowAdd(form)}>
+                                  Add Rows
+                                </Button>
+                              ) : action === 'cancel' ? (
+                                <Button
+                                  key={action}
+                                  style={{ marginLeft: '1em' }}
+                                  variant='text'
+                                  onClick={() => setEditableState({ editing: false })}
+                                >
+                                  Cancel
+                                </Button>
+                              ) : null
+                            )
+                          }
                         </FormSpy>
                       ) : (
                         <Button variant='text' color='primary' onClick={() => setEditableState({ editing: true })} disabled={selected.length > 0}>
@@ -612,6 +627,7 @@ MuiTable.propTypes = {
   toolbar: PropTypes.bool,
   toolbarDivider: PropTypes.bool,
   editable: PropTypes.bool,
+  enableRowAddition: PropTypes.bool, // Whether row addition should be enabled in editable mode.
   searchable: PropTypes.bool,
   searchKeys: PropTypes.arrayOf(PropTypes.string),
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
@@ -652,6 +668,7 @@ MuiTable.defaultProps = {
   searchable: false,
   searchKeys: ['name'],
   editable: false,
+  enableRowAddition: false,
   selectable: false,
   selectAll: true,
   sortable: false,
