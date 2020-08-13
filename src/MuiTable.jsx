@@ -338,7 +338,7 @@ const MuiTable = (props) => {
                                   key={rowIdx}
                                   selected={isItemSelected}
                                   style={{
-                                    backgroundColor: row.children.length > 0 && expanded[row[idKey]] ? expandedColor : undefined
+                                    backgroundColor: isTreeTable && row?.children?.length > 0 && expanded[row[idKey]] ? expandedColor : undefined
                                   }}
                                 >
                                   {!!selectable && (
@@ -356,9 +356,9 @@ const MuiTable = (props) => {
                                   )}
                                   {isTreeTable && (
                                     <TableCell padding='checkbox'>
-                                      {row?.children.length > 0 ? (
+                                      {row?.children?.length > 0 ? (
                                         <div
-                                          style={{ paddingLeft: childIndent * row.level, display: 'flex', alignItems: 'center' }}
+                                          style={{ paddingLeft: 8 * row.level, display: 'flex', alignItems: 'center' }}
                                           onClick={(event) => handleTreeExpand(event, row, expanded[row[idKey]])}
                                         >
                                           {expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}

@@ -137,10 +137,12 @@ const useMuiTable = (props) => {
    */
   React.useEffect(() => {
     updateRows(props.rows)
-    const tree = buildTree(props.rows, idKey, parentIdKey)
-    const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
-    setTree(tree)
-    setExpanded(expanded)
+    if (hasParentIdKey) {
+      const tree = buildTree(props.rows, idKey, parentIdKey)
+      const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
+      setTree(tree)
+      setExpanded(expanded)
+    }
   }, [rowsChanged, setRows])
   React.useEffect(() => {
     updateRows(rows)
