@@ -29,6 +29,8 @@ import AddIcon from '@material-ui/icons/Add'
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd'
 import DoneIcon from '@material-ui/icons/Done'
 import CancelIcon from '@material-ui/icons/Clear'
+import ChevronRight from '@material-ui/icons/KeyboardArrowRight'
+import ChevronDown from '@material-ui/icons/KeyboardArrowDown'
 
 // perfect-scroll-bar
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -129,19 +131,17 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const MuiTable = (props) => {
+  const isTreeTable = props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey)).length > 0 // Check Whether idKey exists in rows
+
   const {
     columns,
     rows,
     editable,
     enableRowAddition,
-    searchable,
-    selectable,
     selectAll,
     selectActions,
     inlineActions,
     actionPlacement,
-    sortable,
-    pageable,
     toolbar,
     toolbarDivider,
     title,
@@ -150,6 +150,8 @@ const MuiTable = (props) => {
     disabledElement,
     cellLength,
     cellOverFlow,
+    expandedColor,
+    childIndent,
     variant,
     fontSize,
     emptyMessage,
@@ -157,6 +159,12 @@ const MuiTable = (props) => {
     validate,
     onToolbarActionClick
   } = props
+
+  // Disable these features in Tree Table
+  const searchable = props.searchable && !isTreeTable
+  const selectable = props.selectable && !isTreeTable
+  const sortable = props.sortable && !isTreeTable
+  const pageable = props.pageable && !isTreeTable
 
   const {
     rowList,
@@ -171,6 +179,7 @@ const MuiTable = (props) => {
     order,
     orderBy,
     filterValues,
+    expanded,
     setSearchText,
     setEditableState,
     handleSelectActionClick,
@@ -184,8 +193,9 @@ const MuiTable = (props) => {
     handleClick,
     handleChangePage,
     handleChangePageSize,
-    handleRowAdd
-  } = useMuiTable(props)
+    handleRowAdd,
+    handleTreeExpand
+  } = useMuiTable({ ...props, searchable, selectable, pageable, sortable })
 
   const classes = useStyles({ variant, pageable, editable, fontSize })
 
@@ -238,7 +248,7 @@ const MuiTable = (props) => {
     toolbarActions.push({ name: 'search' })
   }
   toolbarActions = toolbarActions.concat(props.toolbarActions)
-  if (filterColumns.length > 0) {
+  if (filterColumns.length > 0 && !isTreeTable) {
     toolbarActions.push({ name: 'filter' })
   }
 
@@ -299,6 +309,7 @@ const MuiTable = (props) => {
                         selectable={selectable}
                         selectAll={selectAll}
                         sortable={sortable}
+                        isTreeTable={isTreeTable}
                         columns={columns}
                         classes={classes}
                         selectedCount={selectedCount}
@@ -319,7 +330,17 @@ const MuiTable = (props) => {
                               const labelId = `enhanced-table-checkbox-${rowIdx}`
                               const selectDisabled = typeof selectable === 'function' && !selectable(row)
                               return (
-                                <TableRow hover role='checkbox' aria-checked={isItemSelected} tabIndex={-1} key={rowIdx} selected={isItemSelected}>
+                                <TableRow
+                                  hover
+                                  role='checkbox'
+                                  aria-checked={isItemSelected}
+                                  tabIndex={-1}
+                                  key={rowIdx}
+                                  selected={isItemSelected}
+                                  style={{
+                                    backgroundColor: row.children.length > 0 && expanded[row[idKey]] ? expandedColor : undefined
+                                  }}
+                                >
                                   {!!selectable && (
                                     <TableCell padding='checkbox'>
                                       {!selectDisabled && (
@@ -331,6 +352,19 @@ const MuiTable = (props) => {
                                           onClick={(event) => handleClick(event, row[idKey])}
                                         />
                                       )}
+                                    </TableCell>
+                                  )}
+                                  {isTreeTable && (
+                                    <TableCell padding='checkbox'>
+                                      {row?.children.length > 0 ? (
+                                        <div
+                                          style={{ paddingLeft: childIndent * row.level, display: 'flex', alignItems: 'center' }}
+                                          onClick={(event) => handleTreeExpand(event, row, expanded[row[idKey]])}
+                                        >
+                                          {expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}
+                                          {!expanded[row[idKey]] && <ChevronRight style={{ color: '#65819D' }} />}
+                                        </div>
+                                      ) : null}
                                     </TableCell>
                                   )}
 
@@ -370,6 +404,9 @@ const MuiTable = (props) => {
                                         component={colIdx === 0 ? 'th' : undefined}
                                         scope={colIdx === 0 ? 'row' : undefined}
                                         padding={selectable && colIdx === 0 ? 'none' : 'default'}
+                                        style={{
+                                          paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row.level + 1) : undefined
+                                        }}
                                         key={`${rowIdx}-${colIdx}`}
                                         align={align}
                                         onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
@@ -636,7 +673,8 @@ MuiTable.propTypes = {
   pageable: PropTypes.bool,
   tableProps: PropTypes.object,
   pageSize: PropTypes.oneOf([10, 25]),
-  idKey: PropTypes.string, // Identifier Key in row object. This is used which selection
+  idKey: PropTypes.string, // Identifier Key in row object. This is used for selection and in tree table
+  parentIdKey: PropTypes.string, // Identifier Key of parent in row object. This is used in tree table
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
   inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
@@ -649,12 +687,17 @@ MuiTable.propTypes = {
   fontSize: PropTypes.number,
   emptyMessage: PropTypes.string,
   rowAddCount: PropTypes.number, // Number of rows to add in editable mode
+  expandedColor: PropTypes.string,
+  childIndent: PropTypes.number,
+  initialExpandedState: PropTypes.object, // {[idKey]: bool} - Initial expanded state
 
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onToolbarActionClick: PropTypes.func, // (event, action) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
+  onTreeExapand: PropTypes.func, // (event, row, isExpanded) => any
+  defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
   hasRowsChanged: PropTypes.func // (rows) => Key: String Function to detect whether rows props has changed
 }
@@ -674,6 +717,7 @@ MuiTable.defaultProps = {
   sortable: false,
   pageable: false,
   idKey: 'id',
+  parentIdKey: 'parentId',
   pageSize: 10,
   selectActions: [{ name: 'delete' }],
   toolbarActions: [],
@@ -687,6 +731,10 @@ MuiTable.defaultProps = {
   fontSize: 12,
   emptyMessage: 'No records available!',
   rowAddCount: 3,
+  initialExpandedState: null,
+  defaultExpanded: false,
+  childIndent: 12,
+  expandedColor: 'none',
   onSubmit: () => {},
   comparator: (a, b) => 0,
   hasRowsChanged: (rows) => `${rows?.length}`

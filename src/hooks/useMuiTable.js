@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { getDistinctValues } from '../utils/helper'
+import { getDistinctValues, buildTree, flattenTree, getExpandedState } from '../utils/helper'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -28,7 +28,7 @@ function applySort(array, comparator) {
 
 const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
   const dataKeys = Object.keys(filterValues)
-  let filteredRows = rows.filter((row) => {
+  const filteredRows = rows.filter((row) => {
     let result = true
     for (let i = 0; i < dataKeys.length; i++) {
       const dataKey = dataKeys[i]
@@ -61,7 +61,7 @@ const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
 
 const applySearch = (rows, searchText, searchKeys, idKey, hasIdKey) => {
   if (!searchText) return rows
-  let filteredRows = rows.filter((row) => {
+  const filteredRows = rows.filter((row) => {
     const match =
       searchKeys.filter((searchKey) => {
         let value = row[searchKey]
@@ -90,13 +90,17 @@ const useMuiTable = (props) => {
     sortable,
     pageable,
     idKey,
+    parentIdKey,
+    initialExpandedState,
+    defaultExpanded,
     inlineActions,
     rowInsert,
     rowAddCount,
     onSubmit,
     onSelectActionClick,
     onInlineActionClick,
-    hasRowsChanged
+    hasRowsChanged,
+    onTreeExpand
   } = props
 
   const editableInline = inlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
@@ -108,7 +112,9 @@ const useMuiTable = (props) => {
     prevIdxx: undefined, // inline actions which are two step process, store prev idxx
     adding: false // add/duplicate is in progress
   })
-  const [rows, setRows] = React.useState(props.rows)
+  const [rows, setRows] = React.useState(props.rows) // original rows
+  const [tree, setTree] = React.useState([]) // build tree data
+  const [expanded, setExpanded] = React.useState({}) // state of expanded node
   const [order, setOrder] = React.useState('asc')
   const [orderBy, setOrderBy] = React.useState(columns[0]?.dataKey)
   const [selected, setSelected] = React.useState([])
@@ -118,7 +124,8 @@ const useMuiTable = (props) => {
   const [filterValues, setFilterValues] = React.useState({})
   const [searchText, setSearchText] = React.useState('')
 
-  const hasIdKey = rows.filter((row) => row.hasOwnProperty(idKey)).length > 0 // Check Whether idKey exists in rows
+  const hasIdKey = rows.filter((row) => Object.prototype.hasOwnProperty.call(row, idKey)).length > 0 // Check Whether idKey exists in rows
+  const hasParentIdKey = rows.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const rowsChanged = hasRowsChanged(props.rows)
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
@@ -130,6 +137,10 @@ const useMuiTable = (props) => {
    */
   React.useEffect(() => {
     updateRows(props.rows)
+    const tree = buildTree(props.rows, idKey, parentIdKey)
+    const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
+    setTree(tree)
+    setExpanded(expanded)
   }, [rowsChanged, setRows])
   React.useEffect(() => {
     updateRows(rows)
@@ -141,7 +152,7 @@ const useMuiTable = (props) => {
     setRows(rowList)
   }
 
-  /*External handler functions */
+  // External handler functions
   const handleSelectActionClick = (event, action) => {
     const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
     const onActionComplete = () => setSelected([])
@@ -153,7 +164,7 @@ const useMuiTable = (props) => {
       setEditableState({ editing: false })
       complete()
       if (rowList) {
-        let updatedRows = [...rows]
+        const updatedRows = [...rows]
         updatedRows.splice(page * pageSize, pageSize, ...rowList)
         updateRows(updatedRows)
       }
@@ -199,7 +210,7 @@ const useMuiTable = (props) => {
     if (action === 'edit') {
       setEditableState({ editing: true, rowIdx, prevAction: action, prevIdxx: row.idxx })
     } else if (action === 'add' || action === 'duplicate') {
-      let newRow = action === 'duplicate' ? row : {}
+      const newRow = action === 'duplicate' ? row : {}
       setRows((rows) => {
         const idx = rows.findIndex((e) => e.idxx === row.idxx)
         if (idx !== -1) {
@@ -231,7 +242,7 @@ const useMuiTable = (props) => {
     }
   }
 
-  /*Internal Handler functions */
+  // Internal Handler functions
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
@@ -249,7 +260,7 @@ const useMuiTable = (props) => {
 
   const removeFilter = (dataKey, value) => {
     const prevValue = filterValues[dataKey]
-    let newFilterValues = { ...filterValues }
+    const newFilterValues = { ...filterValues }
     if (Array.isArray(prevValue)) {
       newFilterValues[dataKey] = prevValue.filter((e) => e !== value)
     } else {
@@ -300,17 +311,29 @@ const useMuiTable = (props) => {
     }
   }
 
-  // Filter & Sort
-  let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
-  rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
+  const handleTreeExpand = (event, row, isExpanded) => {
+    setExpanded((expanded) => ({ ...expanded, [row[idKey]]: !isExpanded }))
+    onTreeExpand && onTreeExpand(event, row, isExpanded)
+  }
 
-  // pagination
-  const size = editableState.adding ? pageSize + 1 : pageSize
-  const totalPage = rowList.length % size === 0 ? rowList.length / size : Math.ceil(rowList.length / size)
-  const totalElements = rowList.length
-  const startIdx = page * size
-  const endIdx = pageable ? page * size + size : rowList.length
-  rowList = rowList.slice(startIdx, endIdx)
+  // Filter & Sort
+  let rowList = []
+  let totalPage = 0
+  let totalElements = 0
+  if (!hasParentIdKey) {
+    rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+    rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
+
+    // pagination
+    const size = editableState.adding ? pageSize + 1 : pageSize
+    totalPage = rowList.length % size === 0 ? rowList.length / size : Math.ceil(rowList.length / size)
+    totalElements = rowList.length
+    const startIdx = page * size
+    const endIdx = pageable ? page * size + size : rowList.length
+    rowList = rowList.slice(startIdx, endIdx)
+  } else {
+    rowList = flattenTree(tree, expanded, idKey)
+  }
 
   return {
     rowList,
@@ -325,6 +348,7 @@ const useMuiTable = (props) => {
     order,
     orderBy,
     filterValues,
+    expanded,
     setSearchText,
     setEditableState,
     handleSelectActionClick,
@@ -338,7 +362,8 @@ const useMuiTable = (props) => {
     handleClick,
     handleChangePage,
     handleChangePageSize,
-    handleRowAdd
+    handleRowAdd,
+    handleTreeExpand
   }
 }
 
