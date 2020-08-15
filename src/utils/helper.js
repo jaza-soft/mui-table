@@ -38,7 +38,7 @@ export const buildTree = (rows, idKey = 'id', parentIdKey = 'parentId') => {
   return tree
 }
 
-export const flattenTree = (tree, expanded = {}, idKey = 'id') => {
+export const flattenTree = (tree, expanded = false, idKey = 'id') => {
   return tree.flatMap((row) => flattenChild(row, expanded, idKey))
 }
 
@@ -55,11 +55,12 @@ const expandedChild = (root, expanded, defaultExpanded, idKey) => {
   }
 }
 
-const flattenChild = (root, expanded = {}, idKey) => {
-  if (!root.children || root.children.length === 0 || !expanded[root[idKey]]) {
-    return [root]
+const flattenChild = ({ children, ...root }, expanded = {}, idKey) => {
+  const isExpanded = typeof expanded === 'object' ? expanded[root[idKey]] : expanded
+  if (!children || children.length === 0 || !isExpanded) {
+    return [{ ...root, hasChild: children.length > 0 }]
   } else {
-    return [root, ...root.children.flatMap((child) => flattenChild(child, expanded, idKey))]
+    return [{ ...root, hasChild: true }, ...children.flatMap((child) => flattenChild(child, expanded, idKey))]
   }
 }
 
