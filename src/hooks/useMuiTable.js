@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { getDistinctValues } from '../utils/helper'
+import { getDistinctValues, buildTree, flattenTree, getExpandedState } from '../utils/helper'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -28,7 +28,7 @@ function applySort(array, comparator) {
 
 const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
   const dataKeys = Object.keys(filterValues)
-  let filteredRows = rows.filter((row) => {
+  const filteredRows = rows.filter((row) => {
     let result = true
     for (let i = 0; i < dataKeys.length; i++) {
       const dataKey = dataKeys[i]
@@ -48,7 +48,7 @@ const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
         }
       }
     }
-    return result || row.adding
+    return result || row?.adding
   })
 
   if (hasIdKey) {
@@ -61,7 +61,7 @@ const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
 
 const applySearch = (rows, searchText, searchKeys, idKey, hasIdKey) => {
   if (!searchText) return rows
-  let filteredRows = rows.filter((row) => {
+  const filteredRows = rows.filter((row) => {
     const match =
       searchKeys.filter((searchKey) => {
         let value = row[searchKey]
@@ -71,7 +71,7 @@ const applySearch = (rows, searchText, searchKeys, idKey, hasIdKey) => {
         }
         return false
       }).length > 0
-    return match || row.adding
+    return match || row?.adding
   })
 
   if (hasIdKey) {
@@ -90,25 +90,32 @@ const useMuiTable = (props) => {
     sortable,
     pageable,
     idKey,
+    parentIdKey,
+    initialExpandedState,
+    defaultExpanded,
     inlineActions,
     rowInsert,
     rowAddCount,
     onSubmit,
     onSelectActionClick,
     onInlineActionClick,
-    hasRowsChanged
+    hasRowsChanged,
+    onTreeExpand
   } = props
 
   const editableInline = inlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
 
   const [editableState, setEditableState] = React.useState({
-    editing: false,
+    editing: false, // Collective Editing
+    editingInline: false, // Inline Editing
     rowIdx: undefined, // Row being edited in case of inline editing or inline add/duplicate
     prevAction: undefined, // inline actions which are two step process, store prev action
     prevIdxx: undefined, // inline actions which are two step process, store prev idxx
-    adding: false // add/duplicate is in progress
+    newRowCount: 0 // number of new rows added
   })
-  const [rows, setRows] = React.useState(props.rows)
+  const [rows, setRows] = React.useState(props.rows || []) // original rows
+  const [tree, setTree] = React.useState([]) // build tree data
+  const [expanded, setExpanded] = React.useState({}) // state of expanded node
   const [order, setOrder] = React.useState('asc')
   const [orderBy, setOrderBy] = React.useState(columns[0]?.dataKey)
   const [selected, setSelected] = React.useState([])
@@ -118,7 +125,8 @@ const useMuiTable = (props) => {
   const [filterValues, setFilterValues] = React.useState({})
   const [searchText, setSearchText] = React.useState('')
 
-  const hasIdKey = rows.filter((row) => row.hasOwnProperty(idKey)).length > 0 // Check Whether idKey exists in rows
+  const hasIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, idKey)).length > 0 // Check Whether idKey exists in rows
+  const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const rowsChanged = hasRowsChanged(props.rows)
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
@@ -130,6 +138,12 @@ const useMuiTable = (props) => {
    */
   React.useEffect(() => {
     updateRows(props.rows)
+    if (hasParentIdKey) {
+      const tree = buildTree(props.rows, idKey, parentIdKey)
+      const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
+      setTree(tree)
+      setExpanded(expanded)
+    }
   }, [rowsChanged, setRows])
   React.useEffect(() => {
     updateRows(rows)
@@ -141,7 +155,7 @@ const useMuiTable = (props) => {
     setRows(rowList)
   }
 
-  /*External handler functions */
+  // External handler functions
   const handleSelectActionClick = (event, action) => {
     const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
     const onActionComplete = () => setSelected([])
@@ -153,9 +167,17 @@ const useMuiTable = (props) => {
       setEditableState({ editing: false })
       complete()
       if (rowList) {
-        let updatedRows = [...rows]
-        updatedRows.splice(page * pageSize, pageSize, ...rowList)
-        updateRows(updatedRows)
+        if (hasParentIdKey) {
+          const tree = buildTree(rowList, idKey, parentIdKey)
+          const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
+          updateRows(rowList)
+          setTree(tree)
+          setExpanded(expanded)
+        } else {
+          const updatedRows = [...rows]
+          updatedRows.splice(page * pageSize, pageSize, ...rowList)
+          updateRows(updatedRows)
+        }
       }
     }
     onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
@@ -168,38 +190,38 @@ const useMuiTable = (props) => {
           setRows((rows) => {
             const idx = rows.findIndex((e) => e.idxx === editableState.prevIdxx)
             if (idx !== -1) {
-              rows.splice(idx, 1, { ...rowOrRows, idxx: row.idxx })
+              rows.splice(idx, 1, { ...rowOrRows, idxx: row?.idxx })
             }
             return [...rows]
           })
         }
-        setEditableState({ editing: false })
+        setEditableState({ editingInline: false })
       } else if (editableState.prevAction === 'add' || editableState.prevAction === 'duplicate') {
         if (rowOrRows) {
           setRows((rows) => {
             const idx = rows.findIndex((e) => e.idxx === editableState.prevIdxx)
             if (idx !== -1) {
-              rows.splice(idx, 1, { ...rowOrRows, adding: undefined })
+              rows.splice(idx, 1, { ...rowOrRows, adding: undefined, newRowCount: 0 })
             }
             return rows.map((row, idx) => ({ ...row, idxx: idx * 2 })) // update the idxx field
           })
         }
-        setEditableState({ editing: false })
+        setEditableState({ editingInline: false })
       } else if (action === 'delete') {
         let rowList = [...rows]
         if (Array.isArray(rowOrRows)) {
           rowList = rowOrRows
         } else {
-          rowList = rowList.filter((e) => e.idxx !== row.idxx)
+          rowList = rowList.filter((e) => e.idxx !== row?.idxx)
         }
         updateRows(rowList)
       }
     }
 
     if (action === 'edit') {
-      setEditableState({ editing: true, rowIdx, prevAction: action, prevIdxx: row.idxx })
+      setEditableState({ editingInline: true, rowIdx, prevAction: action, prevIdxx: row?.idxx })
     } else if (action === 'add' || action === 'duplicate') {
-      let newRow = action === 'duplicate' ? row : {}
+      const newRow = action === 'duplicate' ? row : {}
       setRows((rows) => {
         const idx = rows.findIndex((e) => e.idxx === row.idxx)
         if (idx !== -1) {
@@ -211,18 +233,18 @@ const useMuiTable = (props) => {
         }
         return [...rows]
       })
-      setEditableState({
-        editing: true,
+      setEditableState((prev) => ({
+        editingInline: true, // editing inline if collective editing was not active
         rowIdx: rowInsert === 'above' ? rowIdx : rowIdx + 1,
         prevAction: action,
         prevIdxx: rowInsert === 'above' ? row.idxx - 1 : row.idxx + 1,
-        adding: true
-      })
+        newRowCount: (prev.newRowCount || 0) + 1
+      }))
     } else if (action === 'cancel') {
       if (editableState.prevAction === 'add' || editableState.prevAction === 'duplicated') {
         setRows((rows) => rows.filter((row) => row.idxx !== editableState.prevIdxx))
       }
-      setEditableState({ editing: false })
+      setEditableState({ editingInline: false })
     } else if (action === 'done') {
       const { idxx, adding, ...finalRow } = row
       onInlineActionClick && onInlineActionClick(event, editableState.prevAction, finalRow, onActionComplete)
@@ -231,7 +253,7 @@ const useMuiTable = (props) => {
     }
   }
 
-  /*Internal Handler functions */
+  // Internal Handler functions
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
@@ -249,7 +271,7 @@ const useMuiTable = (props) => {
 
   const removeFilter = (dataKey, value) => {
     const prevValue = filterValues[dataKey]
-    let newFilterValues = { ...filterValues }
+    const newFilterValues = { ...filterValues }
     if (Array.isArray(prevValue)) {
       newFilterValues[dataKey] = prevValue.filter((e) => e !== value)
     } else {
@@ -293,6 +315,14 @@ const useMuiTable = (props) => {
     setPage(0)
   }
 
+  // collective edit cancel
+  const handleEditCancel = () => {
+    const tree = buildTree(props.rows, idKey, parentIdKey)
+    setEditableState({ editing: false })
+    updateRows(props.rows)
+    setTree(tree)
+  }
+
   const handleRowAdd = (form) => {
     if (!form?.mutators) return
     for (let i = 0; i < rowAddCount; i++) {
@@ -300,17 +330,55 @@ const useMuiTable = (props) => {
     }
   }
 
-  // Filter & Sort
-  let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
-  rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
+  const handleEditableActionClick = (event, name, fields, row, rowIdx) => {
+    const rows = fields?.value
+    if (hasParentIdKey) {
+      if (name === 'add') {
+        rows.splice(rowIdx + 1, 0, { [idKey]: new Date().getTime(), [parentIdKey]: row[parentIdKey] })
+      } else if (name === 'addChild') {
+        rows.splice(rowIdx + 1, 0, { [idKey]: new Date().getTime(), [parentIdKey]: row[idKey] })
+      } else if (name === 'delete') {
+        rows.splice(rowIdx, 1)
+      }
+      const tree = buildTree(rows, idKey, parentIdKey)
+      console.log({ rows, tree })
+      setTree(tree)
+      updateRows(rows)
+    } else {
+      if (name === 'add') {
+        rows.splice(rowIdx + 1, 0, {})
+        setEditableState((prev) => ({ ...prev, newRowCount: prev.newRowCount ? prev.newRowCount + 1 : 1 }))
+      } else if (name === 'delete') {
+        rows.splice(rowIdx, 1)
+        setEditableState((prev) => ({ ...prev, newRowCount: prev.newRowCount ? prev.newRowCount - 1 : -1 }))
+      }
+      updateRows(rows)
+    }
+  }
 
-  // pagination
-  const size = editableState.adding ? pageSize + 1 : pageSize
-  const totalPage = rowList.length % size === 0 ? rowList.length / size : Math.ceil(rowList.length / size)
-  const totalElements = rowList.length
-  const startIdx = page * size
-  const endIdx = pageable ? page * size + size : rowList.length
-  rowList = rowList.slice(startIdx, endIdx)
+  const handleTreeExpand = (event, row, isExpanded) => {
+    setExpanded((expanded) => ({ ...expanded, [row[idKey]]: !isExpanded }))
+    onTreeExpand && onTreeExpand(event, row, isExpanded)
+  }
+
+  // Filter & Sort
+  let rowList = []
+  let totalPage = 0
+  let totalElements = 0
+  if (!hasParentIdKey) {
+    rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+    rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
+
+    // pagination
+    const size = pageSize + (editableState.newRowCount || 0)
+    totalPage = rowList.length % size === 0 ? rowList.length / size : Math.ceil(rowList.length / size)
+    totalElements = rowList.length
+    const startIdx = page * size
+    const endIdx = pageable ? page * size + size : rowList.length
+    rowList = rowList.slice(startIdx, endIdx)
+  } else {
+    rowList = flattenTree(tree, editableState.editing || expanded, idKey)
+  }
 
   return {
     rowList,
@@ -325,6 +393,7 @@ const useMuiTable = (props) => {
     order,
     orderBy,
     filterValues,
+    expanded,
     setSearchText,
     setEditableState,
     handleSelectActionClick,
@@ -338,7 +407,10 @@ const useMuiTable = (props) => {
     handleClick,
     handleChangePage,
     handleChangePageSize,
-    handleRowAdd
+    handleRowAdd,
+    handleTreeExpand,
+    handleEditableActionClick,
+    handleEditCancel
   }
 }
 

@@ -66,6 +66,7 @@ const EditableTable = () => {
       rows={rows}
       pageable={true}
       editable={true}
+      showEditableActions={true}
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
       onInlineActionClick={onInlineActionClick}

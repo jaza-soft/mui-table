@@ -30,6 +30,7 @@ const TableHead = (props) => {
     selectable,
     selectAll,
     sortable,
+    isTreeTable,
     columns,
     onSelectAllClick,
     order,
@@ -60,6 +61,7 @@ const TableHead = (props) => {
             )}
           </TableCell>
         )}
+        {isTreeTable && <TableCell padding='checkbox' />}
 
         {showActions && actionPlacement === 'left' && <TableCell align='left'>Actions</TableCell>}
 
@@ -96,6 +98,7 @@ TableHead.propTypes = {
   selectAll: PropTypes.bool,
   editing: PropTypes.bool, // Remove Selectable Column while editing
   sortable: PropTypes.bool,
+  isTreeTable: PropTypes.bool,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       dataKey: PropTypes.string,
@@ -123,6 +126,7 @@ TableHead.defaultProps = {
   selectable: false,
   selectAll: true,
   sortable: false,
+  isTreeTable: false,
   columns: [],
   showActions: false,
   actionPlacement: 'right'
