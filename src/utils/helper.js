@@ -32,6 +32,15 @@ export const capitalize = (text) => {
   return text
 }
 
+export const hasRowsChanged = (rows) =>
+  `${rows?.length}-${rows
+    ?.filter((e) => e.id)
+    .map((e) => e.id)
+    .join('-')}-${rows
+    ?.filter((e) => e.modifiedAt)
+    .map((e) => e.modifiedAt)
+    .join('-')}`
+
 export const buildTree = (rows, idKey = 'id', parentIdKey = 'parentId') => {
   const rootRows = rows.filter((row) => row[parentIdKey] === null || row[parentIdKey] === undefined)
   const tree = rootRows.map((root) => createChild(root, rows, 0, idKey, parentIdKey))

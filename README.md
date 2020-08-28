@@ -17,6 +17,7 @@
 - [x] Horizonatl Scroll/ Force Line Wrap on Specified characters
 - [x] Variant - default, excel
 - [x] Tree Table
+- [x] Custom Footer Actions
 - [ ] Column selection
 - [ ] Spanning - Row Span & Col Span
 - [ ] Expandable View/ Modal View/ Sidebar View
@@ -77,11 +78,12 @@ class App extends Component {
 
 **Action**
 
-| Name    | Type           | Default Value | Description                                        |
-| ------- | -------------- | ------------- | -------------------------------------------------- |
-| name    | `string`       |               | `Required`. Name of action                         |
-| tooltip | `string`       |               | `Optional`. Tooltip for the action                 |
-| icon    | `ReactElement` |               | Icon for this action. Required for custom actions. |
+| Name    | Type           | Default Value | Description                                                 |
+| ------- | -------------- | ------------- | ----------------------------------------------------------- |
+| name    | `string`       |               | `Required`. Name of action                                  |
+| tooltip | `string`       |               | `Optional`. Tooltip for the action                          |
+| icon    | `ReactElement` |               | Icon for this action. Required for custom actions.          |
+| options | `object`       |               | options will be passed down to Button or IconButton element |
 
 **Column**
 
@@ -104,49 +106,52 @@ class App extends Component {
 
 ## Props
 
-| Name                 | Type               | Default Value           | Description                                                                                                                                                                  |
-| -------------------- | ------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| columns              | `column[]`         | `[]`                    | List of Columns                                                                                                                                                              |
-| rows                 | `object[]`         | `[]`                    | List of objects                                                                                                                                                              |
-| toolbar              | `bool`             | `false`                 | Whether to show toolbar                                                                                                                                                      |
-| toolbarDivider       | `bool`             | `true`                  | Whether to show Divider between Toolbar and Table Content or not                                                                                                             |
-| title                | `string`           | `Mui Table`             | Toolbar Title                                                                                                                                                                |
-| editable             | `bool`             | `false`                 | Table will become editable                                                                                                                                                   |
-| enableRowAddition    | `bool`             | `false`                 | Whether row addition should be enabled in editable mode.                                                                                                                     |
-| selectAll            | `bool`             | `true`                  | Applicable only when selectable is `true`, Select All Support                                                                                                                |
-| pageable             | `bool`             | `false`                 | Table will have pagination                                                                                                                                                   |
-| pageSize             | `number`           | `10`                    | Number records to show in one page. Values - `10, 25`                                                                                                                        |
-| sortable             | `bool`             | `false`                 | Columns will become sortable                                                                                                                                                 |
-| searchable           | `bool`             | `false`                 | Enable Search in Table                                                                                                                                                       |
-| searchKeys           | `string[]`         | `['name']`              | Keys on which search will apply                                                                                                                                              |
-| tableProps           | `object`           | `{}`                    | MUI Table props to be passed to Table                                                                                                                                        |
-| idKey                | `string`           | `id`                    | Identifier Key in row object. This is used for selection and in tree table                                                                                                   |
-| parnetIdKey          | `string`           | `parentId`              | Identifier Key of parent in row object. This is used in tree table                                                                                                           |
-| disabledElement      | `string`           | `input`                 | Element to use when editable element is disabled. Values - `field, input`                                                                                                    |
-| cellLength           | `number`           | `30`                    | Default value of Cell Character Length when cell specific length is not provided                                                                                             |
-| cellOverFlow         | `string`           | `tooltip`               | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap`                                                                                     |
-| variant              | `string`           | `default`               | Select Table Variant. Values - `default, excel`                                                                                                                              |
-| fontSize             | `number`           | `12`                    | Font Size                                                                                                                                                                    |
-| emptyMessage         | `string`           | `No records available!` | Message when rows is empty                                                                                                                                                   |
-| expandedColor        | `string`           | `none`                  | Background Color of Expanded Row                                                                                                                                             |
-| childIndent          | `string`           | `12`                    | Left Indentation of Child in pixel                                                                                                                                           |
-| initialExpandedState | `string`           | `null`                  | Inintial Expanded State. signature - `{[idKey]: true\|false}`                                                                                                                |
-| selectActions        | `Action[]`         | `[{name: 'delete'}]`    | Select Actions. Standard actions - `add, edit, delete`                                                                                                                       |
-| toolbarActions       | `Action[]`         | `[]`                    | Toolbar Actions. Standard actions - `column`. Not Implemented yet                                                                                                            |
-| inlineActions        | `Action[]`         | `[]`                    | Inline Actions. Standard actions - `add, duplicate, edit, delete`.                                                                                                           |
-| actionPlacement      | `string`           | `right`                 | Placement of action buttons. Values - `left, right`                                                                                                                          |
-| rowInsert            | `string`           | `below`                 | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                                         |
-| rowAddCount          | `number`           | `3`                     | Number of rows to add in editable mode                                                                                                                                       |
-| showEditableActions  | `bool`             | `false`                 | Show actions - `add, addChild, delete` in editiable mode                                                                                                                     |
-| defaultExpanded      | `bool \|function`    |                         | default expanded state. Signature - `bool \| (row, level) => bool`.                                                                                                          |
-| selectable           | `bool \| function` | `false`                 | Selectable Rows. `bool \| (row) => bool`                                                                                                                                     |
-| onSubmit             | `function`         |                         | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` with updated rows to indicate that submit is complete |
-| validate             | `function`         |                         | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`                                                                                                  |
-| comparator           | `function`         | `(a, b) => 0`           | Sort Comparator when sortable is `false`                                                                                                                                     |
-| onSelectActionClick  | `function`         |                         | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                                    |
-| onToolbarActionClick | `function`         |                         | Signature - `(event, action) => void`.                                                                                                                                       |
-| onTreeExapand        | `function`         |                         | Function called on expand click. Signature - `(event, row, isExpanded) => void`.                                                                                             |
-| onInlineActionClick  | `function`         |                         | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                  |
+| Name                 | Type               | Default Value           | Description                                                                                                                                                                    |
+| -------------------- | ------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| columns              | `column[]`         | `[]`                    | List of Columns                                                                                                                                                                |
+| rows                 | `object[]`         | `[]`                    | List of objects                                                                                                                                                                |
+| toolbar              | `bool`             | `false`                 | Whether to show toolbar                                                                                                                                                        |
+| toolbarDivider       | `bool`             | `true`                  | Whether to show Divider between Toolbar and Table Content or not                                                                                                               |
+| title                | `string`           | `Mui Table`             | Toolbar Title                                                                                                                                                                  |
+| editable             | `bool`             | `false`                 | Table will become editable                                                                                                                                                     |
+| enableRowAddition    | `bool`             | `false`                 | Whether row addition should be enabled in editable mode.                                                                                                                       |
+| selectAll            | `bool`             | `true`                  | Applicable only when selectable is `true`, Select All Support                                                                                                                  |
+| pageable             | `bool`             | `false`                 | Table will have pagination                                                                                                                                                     |
+| pageSize             | `number`           | `10`                    | Number records to show in one page. Values - `10, 25`                                                                                                                          |
+| sortable             | `bool`             | `false`                 | Columns will become sortable                                                                                                                                                   |
+| searchable           | `bool`             | `false`                 | Enable Search in Table                                                                                                                                                         |
+| searchKeys           | `string[]`         | `['name']`              | Keys on which search will apply                                                                                                                                                |
+| tableProps           | `object`           | `{}`                    | MUI Table props to be passed to Table                                                                                                                                          |
+| idKey                | `string`           | `id`                    | Identifier Key in row object. This is used for selection and in tree table                                                                                                     |
+| parnetIdKey          | `string`           | `parentId`              | Identifier Key of parent in row object. This is used in tree table                                                                                                             |
+| disabledElement      | `string`           | `input`                 | Element to use when editable element is disabled. Values - `field, input`                                                                                                      |
+| cellLength           | `number`           | `30`                    | Default value of Cell Character Length when cell specific length is not provided                                                                                               |
+| cellOverFlow         | `string`           | `tooltip`               | Content behavior when cell content is greater than cell length. Values - `tooltip, wrap`                                                                                       |
+| variant              | `string`           | `default`               | Select Table Variant. Values - `default, excel`                                                                                                                                |
+| fontSize             | `number`           | `12`                    | Font Size                                                                                                                                                                      |
+| emptyMessage         | `string`           | `No records available!` | Message when rows is empty                                                                                                                                                     |
+| expandedColor        | `string`           | `none`                  | Background Color of Expanded Row                                                                                                                                               |
+| childIndent          | `string`           | `12`                    | Left Indentation of Child in pixel                                                                                                                                             |
+| initialExpandedState | `string`           | `null`                  | Inintial Expanded State. signature - `{[idKey]: true\|false}`                                                                                                                  |
+| selectActions        | `Action[]`         | `[{name: 'delete'}]`    | Select Actions. Standard actions - `add, edit, delete`                                                                                                                         |
+| toolbarActions       | `Action[]`         | `[]`                    | Toolbar Actions. Standard actions - `column`. Not Implemented yet                                                                                                              |
+| inlineActions        | `Action[]`         | `[]`                    | Inline Actions. Standard actions - `add, duplicate, edit, delete`.                                                                                                             |
+| footerActions        | `Action[]`         | `[]`                    | Custom Footer Actions. Standard actions - `edit`.                                                                                                                              |
+| actionPlacement      | `string`           | `right`                 | Placement of action buttons. Values - `left, right`                                                                                                                            |
+| rowInsert            | `string`           | `below`                 | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                                           |
+| rowAddCount          | `number`           | `3`                     | Number of rows to add in editable mode                                                                                                                                         |
+| showEditableActions  | `bool`             | `false`                 | Show actions - `add, addChild, delete` in editiable mode                                                                                                                       |
+| defaultExpanded      | `bool \|function`  |                         | default expanded state. Signature - `bool \| (row, level) => bool`.                                                                                                            |
+| selectable           | `bool \| function` | `false`                 | Selectable Rows. `bool \| (row) => bool`                                                                                                                                       |
+| onSubmit             | `function`         |                         | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` with updated rows to indicate that submit is complete   |
+| validate             | `function`         |                         | Called before onSubmit. `(values: FormValues) => Object \| Promise<Object>`                                                                                                    |
+| comparator           | `function`         | `(a, b) => 0`           | Sort Comparator when sortable is `false`                                                                                                                                       |
+| onSelectActionClick  | `function`         |                         | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                                      |
+| onToolbarActionClick | `function`         |                         | Signature - `(event, action) => void`.                                                                                                                                         |
+| onTreeExapand        | `function`         |                         | Function called on expand click. Signature - `(event, row, isExpanded) => void`.                                                                                               |
+| onInlineActionClick  | `function`         |                         | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                    |
+| onFooterActionClick  | `function`         |                         | Signature - `(event, action, rows, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                   |
+| hasRowsChanged       | `function`         | `default function`      | Signature - `(rows) => Key: String`. Function is called to detect whether rows props has changed. Default function detects changes on length of rows and id, modifiedAt fields |
 
 ## License
 

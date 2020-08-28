@@ -92,9 +92,9 @@ const Toolbar = (props) => {
       )}
 
       {selectedCount > 0
-        ? selectActions.map(({ name, tooltip, icon }, idx) => (
+        ? selectActions.map(({ name, tooltip, icon, options }, idx) => (
             <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
-              <IconButton aria-label={getTooltip(tooltip, name)} onClick={createSelectActionHandler(name)}>
+              <IconButton aria-label={getTooltip(tooltip, name)} onClick={createSelectActionHandler(name)} {...options}>
                 {name === 'add' && <AddIcon />}
                 {name === 'edit' && <EditIcon />}
                 {name === 'delete' && <DeleteIcon />}
@@ -102,7 +102,7 @@ const Toolbar = (props) => {
               </IconButton>
             </Tooltip>
           ))
-        : toolbarActions.map(({ name, tooltip, icon }, idx) => (
+        : toolbarActions.map(({ name, tooltip, icon, options }, idx) => (
             <div key={idx}>
               {name === 'filter' && (
                 <Popover
@@ -144,7 +144,7 @@ const Toolbar = (props) => {
               )}
               {!['search', 'filter', 'column'].includes(name) && icon && (
                 <Tooltip title={getTooltip(tooltip, name)} disableFocusListener>
-                  <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)}>
+                  <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)} {...options}>
                     {icon}
                   </IconButton>
                 </Tooltip>
@@ -158,7 +158,8 @@ const Toolbar = (props) => {
 const ActionType = PropTypes.shape({
   name: PropTypes.string,
   tooltip: PropTypes.string,
-  icon: PropTypes.any
+  icon: PropTypes.any,
+  options: PropTypes.object
 })
 
 Toolbar.propTypes = {

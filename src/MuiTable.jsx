@@ -46,7 +46,7 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, capitalize } from './utils/helper'
+import { multiLineText, getDistinctValues, capitalize, hasRowsChanged } from './utils/helper'
 import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
@@ -66,13 +66,14 @@ const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline
               </IconButton>
             </Tooltip>
           ))
-        : inlineActions.map(({ name, tooltip, icon }, idx) => (
+        : inlineActions.map(({ name, tooltip, icon, options }, idx) => (
             <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
               <span>
                 <IconButton
                   aria-label={getTooltip(tooltip, name)}
                   disabled={editingInline}
                   onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}
+                  {...options}
                 >
                   {name === 'add' && <AddIcon fontSize='small' />}
                   {name === 'duplicate' && <LibraryAddIcon fontSize='small' />}
@@ -90,13 +91,14 @@ const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline
 const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacement, handleEditableActionClick }) => {
   return (
     <TableCell align={actionPlacement} padding='none'>
-      {actions.map(({ name, tooltip }, idx) => (
+      {actions.map(({ name, tooltip, options }, idx) => (
         <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
           <span>
             <IconButton
               aria-label={getTooltip(tooltip, name)}
               disabled={row?.hasChild && name === 'delete'}
               onClick={(e) => handleEditableActionClick(e, name, fields, row, rowIdx)}
+              {...options}
             >
               {name === 'add' && <AddIcon fontSize='small' />}
               {name === 'addChild' && <LibraryAddIcon fontSize='small' />}
@@ -141,10 +143,13 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: props.pageable && props.editable ? 'space-between' : 'flex-end'
+    justifyContent: props.pageable ? 'space-between' : 'flex-end'
   }),
   footerActions: {
     padding: '0.5em 1em'
+  },
+  button: {
+    margin: '0 0.5em'
   },
   link: {
     color: theme.palette.primary.main,
@@ -168,6 +173,7 @@ const MuiTable = (props) => {
     selectActions,
     inlineActions,
     actionPlacement,
+    footerActions,
     toolbar,
     toolbarDivider,
     title,
@@ -211,6 +217,7 @@ const MuiTable = (props) => {
     handleSelectActionClick,
     handleSubmit,
     handleInlineActionClick,
+    handleFooterActionClick,
     handleRequestSort,
     updateFilter,
     resetFilter,
@@ -284,11 +291,20 @@ const MuiTable = (props) => {
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
   const showActions = inlineActions.length > 0 && !editableState.editing
 
-  let footerActions = pageable ? ['save', 'row-add', 'cancel'] : ['cancel', 'row-add', 'save']
+  // footer actions in editable mode
+  let editingFooterActions = pageable
+    ? [{ name: 'save' }, { name: 'row-add' }, { name: 'cancel' }]
+    : [{ name: 'cancel' }, { name: 'row-add' }, { name: 'save' }]
   if (!enableRowAddition) {
-    footerActions = footerActions.filter((e) => e !== 'row-add')
+    editingFooterActions = editingFooterActions.filter((e) => e.name !== 'row-add')
+  }
+  // footer actions in view mode
+  let viewFooterActions = pageable ? [{ name: 'edit' }, ...footerActions] : [...footerActions, { name: 'edit' }]
+  if (!editable) {
+    viewFooterActions = viewFooterActions.filter((e) => e.name !== 'edit')
   }
 
+  // Inline Actions in Editable mode
   let editableActions = [
     { name: 'add', tooltip: 'Add Row' },
     { name: 'delete', tooltip: 'Remove Row' }
@@ -296,7 +312,7 @@ const MuiTable = (props) => {
   if (isTreeTable) {
     editableActions.splice(1, 0, { name: 'addChild', tooltip: 'Add Child' })
   }
-
+  
   return (
     <div>
       <Form
@@ -307,10 +323,10 @@ const MuiTable = (props) => {
         mutators={{
           ...arrayMutators
         }}
-        subscription={{ submitting: true, pristine: true }}
+        subscription={{ submitting: true }}
         initialValues={initialValues}
       >
-        {({ handleSubmit, pristine, submitting }) => {
+        {({ handleSubmit, submitting }) => {
           return (
             <form onSubmit={handleSubmit}>
               <Paper>
@@ -634,35 +650,64 @@ const MuiTable = (props) => {
                 </TableContainer>
 
                 <div className={clsx(classes.footerContainer)}>
-                  {editable && (
-                    <div className={classes.footerActions}>
-                      {editableState.editing ? (
-                        <FormSpy subscription={{ form: true }}>
-                          {({ form }) =>
-                            footerActions.map((action) =>
-                              action === 'save' ? (
-                                <Button key={action} variant='text' color='primary' type='submit' disabled={submitting || pristine}>
-                                  Save
-                                </Button>
-                              ) : action === 'row-add' ? (
-                                <Button key={action} style={{ marginLeft: '1em' }} variant='text' onClick={() => handleRowAdd(form)}>
-                                  Add Rows
-                                </Button>
-                              ) : action === 'cancel' ? (
-                                <Button key={action} style={{ marginLeft: '1em' }} variant='text' onClick={handleEditCancel}>
-                                  Cancel
-                                </Button>
-                              ) : null
-                            )
-                          }
-                        </FormSpy>
-                      ) : (
-                        <Button variant='text' color='primary' onClick={() => setEditableState({ editing: true })} disabled={selected.length > 0}>
-                          Edit
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                  <div className={classes.footerActions}>
+                    {editableState.editing ? (
+                      <FormSpy subscription={{ form: true }}>
+                        {({ form }) =>
+                          editingFooterActions.map(({ name }) =>
+                            name === 'save' ? (
+                              <Button
+                                key={name}
+                                className={classes.button}
+                                variant='text'
+                                color='primary'
+                                type='submit'
+                                disabled={submitting || pristine}
+                              >
+                                Save
+                              </Button>
+                            ) : name === 'row-add' ? (
+                              <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
+                                Add Rows
+                              </Button>
+                            ) : name === 'cancel' ? (
+                              <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
+                                Cancel
+                              </Button>
+                            ) : null
+                          )
+                        }
+                      </FormSpy>
+                    ) : (
+                      viewFooterActions.map(({ name, tooltip, icon, options }) =>
+                        name === 'edit' ? (
+                          <Button
+                            key={name}
+                            className={classes.button}
+                            variant='text'
+                            color='primary'
+                            onClick={() => setEditableState({ editing: true })}
+                            disabled={selected.length > 0}
+                          >
+                            Edit
+                          </Button>
+                        ) : (
+                          <Button
+                            key={name}
+                            className={classes.button}
+                            variant='text'
+                            onClick={(event) => handleFooterActionClick(event, name)}
+                            disabled={editableState.busy}
+                            {...options}
+                          >
+                            {icon}
+                            <span style={{ padding: '0.25em' }} />
+                            {tooltip}
+                          </Button>
+                        )
+                      )
+                    )}
+                  </div>
 
                   {pageable && (
                     <TablePagination
@@ -701,7 +746,8 @@ const OptionType = PropTypes.shape({
 const ActionType = PropTypes.shape({
   name: PropTypes.string,
   tooltip: PropTypes.string,
-  icon: PropTypes.any
+  icon: PropTypes.any,
+  options: PropTypes.object
 })
 
 MuiTable.propTypes = {
@@ -746,6 +792,7 @@ MuiTable.propTypes = {
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
   inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
+  footerActions: PropTypes.arrayOf(ActionType), // standard actions - edit, save, row-add, cancel
   actionPlacement: PropTypes.oneOf(['left', 'right']),
   rowInsert: PropTypes.oneOf(['above', 'below']), // row should be inserted above or below for inline - add/duplicate actions
   disabledElement: PropTypes.oneOf(['input', 'field']),
@@ -765,6 +812,7 @@ MuiTable.propTypes = {
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onToolbarActionClick: PropTypes.func, // (event, action) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
+  onFooterActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onTreeExapand: PropTypes.func, // (event, row, isExpanded) => any
   defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
@@ -807,7 +855,7 @@ MuiTable.defaultProps = {
   showEditableActions: false,
   onSubmit: () => {},
   comparator: (a, b) => 0,
-  hasRowsChanged: (rows) => `${rows?.length}`
+  hasRowsChanged
 }
 
 export default MuiTable

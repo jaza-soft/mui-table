@@ -99,6 +99,7 @@ const useMuiTable = (props) => {
     onSubmit,
     onSelectActionClick,
     onInlineActionClick,
+    onFooterActionClick,
     hasRowsChanged,
     onTreeExpand
   } = props
@@ -108,6 +109,7 @@ const useMuiTable = (props) => {
   const [editableState, setEditableState] = React.useState({
     editing: false, // Collective Editing
     editingInline: false, // Inline Editing
+    busy: false, // Busy on clicking user provided footer actions 
     rowIdx: undefined, // Row being edited in case of inline editing or inline add/duplicate
     prevAction: undefined, // inline actions which are two step process, store prev action
     prevIdxx: undefined, // inline actions which are two step process, store prev idxx
@@ -251,6 +253,15 @@ const useMuiTable = (props) => {
     } else {
       onInlineActionClick && onInlineActionClick(event, action, row, onActionComplete)
     }
+  }
+
+  const handleFooterActionClick = (event, action) => {
+    const onActionComplete = (rows) => {
+      setEditableState({busy: false})
+      updateRows(rows)
+    }
+    setEditableState({busy: true})
+    onFooterActionClick && onFooterActionClick(event, action, rows, onActionComplete)
   }
 
   // Internal Handler functions
@@ -401,6 +412,7 @@ const useMuiTable = (props) => {
     handleSelectActionClick,
     handleSubmit,
     handleInlineActionClick,
+    handleFooterActionClick,
     handleRequestSort,
     updateFilter,
     resetFilter,

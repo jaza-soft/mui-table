@@ -13,6 +13,7 @@ import ScrollableTable from './samples/ScrollableTable'
 import EditableExcelTable from './samples/EditableExcelTable'
 import FilterSearchTable from './samples/FilterSearchTable'
 import InlineActionTable from './samples/InlineActionTable'
+import FooterActionTable from './samples/FooterActionTable'
 import TreeTable from './samples/TreeTable'
 
 const tables = {
@@ -25,6 +26,7 @@ const tables = {
   excelVariant: { title: 'Editable Table - Excel Variant', table: <EditableExcelTable /> },
   filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> },
   InlineAction: { title: 'Inline Actions Table', table: <InlineActionTable /> },
+  FooterAction: { title: 'Footer Actions Table', table: <FooterActionTable /> },
   Tree: { title: 'Tree Table', table: <TreeTable /> }
 }
 
