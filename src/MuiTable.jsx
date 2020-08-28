@@ -145,9 +145,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: props.pageable ? 'space-between' : 'flex-end'
   }),
-  footerActions: {
-    padding: '0.5em 1em'
-  },
+  footerActions: (props) => ({
+    padding: props.editable || props.footerActions?.length > 0 ? '0.5em 1em' : undefined
+  }),
   button: {
     margin: '0 0.5em'
   },
@@ -172,6 +172,7 @@ const MuiTable = (props) => {
     selectAll,
     selectActions,
     inlineActions,
+    chipOptions,
     actionPlacement,
     footerActions,
     toolbar,
@@ -232,7 +233,7 @@ const MuiTable = (props) => {
     handleEditCancel
   } = useMuiTable({ ...props, searchable, selectable, pageable, sortable })
 
-  const classes = useStyles({ variant, pageable, editable, fontSize })
+  const classes = useStyles({ variant, pageable, editable, fontSize, footerActions })
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
@@ -296,12 +297,12 @@ const MuiTable = (props) => {
     ? [{ name: 'save' }, { name: 'row-add' }, { name: 'cancel' }]
     : [{ name: 'cancel' }, { name: 'row-add' }, { name: 'save' }]
   if (!enableRowAddition) {
-    editingFooterActions = editingFooterActions.filter((e) => e.name !== 'row-add')
+    editingFooterActions = editingFooterActions.filter((e) => e?.name !== 'row-add')
   }
   // footer actions in view mode
   let viewFooterActions = pageable ? [{ name: 'edit' }, ...footerActions] : [...footerActions, { name: 'edit' }]
   if (!editable) {
-    viewFooterActions = viewFooterActions.filter((e) => e.name !== 'edit')
+    viewFooterActions = viewFooterActions.filter((e) => e?.name !== 'edit')
   }
 
   // Inline Actions in Editable mode
@@ -312,7 +313,7 @@ const MuiTable = (props) => {
   if (isTreeTable) {
     editableActions.splice(1, 0, { name: 'addChild', tooltip: 'Add Child' })
   }
-  
+
   return (
     <div>
       <Form
@@ -343,7 +344,7 @@ const MuiTable = (props) => {
                   />
                 )}
 
-                <FilterList data={filterList} removeFilter={removeFilter} />
+                <FilterList data={filterList} removeFilter={removeFilter} chipOptions={chipOptions} />
 
                 {showToolbar && toolbarDivider && (variant !== 'excel' || !editableState.editing) && <Divider light />}
 
@@ -656,14 +657,7 @@ const MuiTable = (props) => {
                         {({ form }) =>
                           editingFooterActions.map(({ name }) =>
                             name === 'save' ? (
-                              <Button
-                                key={name}
-                                className={classes.button}
-                                variant='text'
-                                color='primary'
-                                type='submit'
-                                disabled={submitting || pristine}
-                              >
+                              <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
                                 Save
                               </Button>
                             ) : name === 'row-add' ? (
@@ -793,6 +787,7 @@ MuiTable.propTypes = {
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
   inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
   footerActions: PropTypes.arrayOf(ActionType), // standard actions - edit, save, row-add, cancel
+  chipOptions: PropTypes.object,
   actionPlacement: PropTypes.oneOf(['left', 'right']),
   rowInsert: PropTypes.oneOf(['above', 'below']), // row should be inserted above or below for inline - add/duplicate actions
   disabledElement: PropTypes.oneOf(['input', 'field']),
@@ -839,6 +834,8 @@ MuiTable.defaultProps = {
   selectActions: [{ name: 'delete' }],
   toolbarActions: [],
   inlineActions: [],
+  footerActions: [],
+  chipOptions: {},
   actionPlacement: 'right',
   rowInsert: 'below',
   disabledElement: 'input',

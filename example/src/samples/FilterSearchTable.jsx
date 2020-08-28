@@ -261,7 +261,7 @@ const rows = [
 ]
 
 const FilterSearchTable = () => {
-  return <MuiTable columns={columns} rows={rows} pageable={true} toolbarDivider={false} searchable={true} searchKeys={['style', 'label', 'width']} />
+  return <MuiTable columns={columns} rows={rows} pageable={true} toolbarDivider={false} searchable={true} searchKeys={['style', 'label', 'width']} chipOptions={{color: 'secondary'}} />
 }
 
 export default FilterSearchTable
