@@ -194,10 +194,10 @@ const MuiTable = (props) => {
   } = props
 
   // Disable these features in Tree Table
-  const searchable = props.searchable && !isTreeTable
-  const selectable = props.selectable && !isTreeTable
-  const sortable = props.sortable && !isTreeTable
-  const pageable = props.pageable && !isTreeTable
+  const searchable = isTreeTable ? false : props.searchable
+  const selectable = isTreeTable ? false : props.selectable
+  const sortable = isTreeTable ? false : props.sortable
+  const pageable = isTreeTable ? false : props.pageable
 
   const {
     rowList,
@@ -445,7 +445,7 @@ const MuiTable = (props) => {
                                         shortValue = texts.join('\n')
                                       }
                                     }
-                                    const finalValue = typeof render === 'function' ? render(value, shortValue) : shortValue
+                                    const finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
                                     return (
                                       <TableCell
                                         className={clsx(
@@ -583,6 +583,7 @@ const MuiTable = (props) => {
                                             {element === 'text-field' && (
                                               <TextField
                                                 name={`${name}.${dataKey}`}
+                                                row={row}
                                                 render={render}
                                                 cellOverFlow={cellOverFlow}
                                                 cellLength={cellLength}
