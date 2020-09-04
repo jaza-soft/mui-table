@@ -74,7 +74,7 @@ const flattenChild = ({ children, ...root }, expanded = {}, idKey) => {
 }
 
 const createChild = (root, rows, level, idKey, parentIdKey) => {
-  const children = rows.filter((row) => row[parentIdKey] === root[idKey])
+  const children = rows.filter((row) => row[parentIdKey] && row[idKey] && row[parentIdKey] === root[idKey])
   return {
     ...root,
     level,

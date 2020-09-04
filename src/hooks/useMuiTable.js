@@ -109,7 +109,7 @@ const useMuiTable = (props) => {
   const [editableState, setEditableState] = React.useState({
     editing: false, // Collective Editing
     editingInline: false, // Inline Editing
-    busy: false, // Busy on clicking user provided footer actions 
+    busy: false, // Busy on clicking user provided footer actions
     rowIdx: undefined, // Row being edited in case of inline editing or inline add/duplicate
     prevAction: undefined, // inline actions which are two step process, store prev action
     prevIdxx: undefined, // inline actions which are two step process, store prev idxx
@@ -131,7 +131,7 @@ const useMuiTable = (props) => {
   const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const rowsChanged = hasRowsChanged(props.rows)
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
-
+  
   /**
    * Store sorted rows data.
    * rows state will change on
@@ -257,10 +257,10 @@ const useMuiTable = (props) => {
 
   const handleFooterActionClick = (event, action) => {
     const onActionComplete = (rows) => {
-      setEditableState({busy: false})
+      setEditableState({ busy: false })
       updateRows(rows)
     }
-    setEditableState({busy: true})
+    setEditableState({ busy: true })
     onFooterActionClick && onFooterActionClick(event, action, rows, onActionComplete)
   }
 
@@ -328,10 +328,12 @@ const useMuiTable = (props) => {
 
   // collective edit cancel
   const handleEditCancel = () => {
-    const tree = buildTree(props.rows, idKey, parentIdKey)
     setEditableState({ editing: false })
     updateRows(props.rows)
-    setTree(tree)
+    if (hasParentIdKey) {
+      const tree = buildTree(props.rows, idKey, parentIdKey)
+      setTree(tree)
+    }
   }
 
   const handleRowAdd = (form) => {
@@ -392,7 +394,7 @@ const useMuiTable = (props) => {
   } else {
     rowList = flattenTree(tree, editableState.editing || expanded, idKey)
   }
-  
+
   return {
     rowList,
     key,
