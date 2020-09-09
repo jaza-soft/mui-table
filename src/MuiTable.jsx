@@ -673,7 +673,7 @@ const MuiTable = (props) => {
                           )
                         }
                       </FormSpy>
-                    ) : (
+                    ) : !editableState.editingInline ? (
                       viewFooterActions.map(({ name, tooltip, icon, options }) =>
                         name === 'edit' ? (
                           <Button
@@ -701,7 +701,7 @@ const MuiTable = (props) => {
                           </Button>
                         )
                       )
-                    )}
+                    ) : null}
                   </div>
 
                   {pageable && (
@@ -734,7 +734,7 @@ const MuiTable = (props) => {
 }
 
 const OptionType = PropTypes.shape({
-  id: PropTypes.string.isRequired,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   name: PropTypes.string.isRequired
 })
 
