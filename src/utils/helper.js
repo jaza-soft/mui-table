@@ -41,6 +41,16 @@ export const hasRowsChanged = (rows) =>
     .map((e) => e.modifiedAt)
     .join('-')}`
 
+export const nameFromId = (column, rows, value) => {
+  let name = value
+  if (typeof column.render === 'function') {
+    const row = rows.find((row) => row[column.dataKey] === value)
+    const rValue = column.render(value, value, row)
+    name = typeof rValue === 'string' ? rValue : value
+  }
+  return name
+}
+
 export const buildTree = (rows, idKey = 'id', parentIdKey = 'parentId') => {
   const rootRows = rows.filter((row) => row[parentIdKey] === null || row[parentIdKey] === undefined)
   const tree = rootRows.map((root) => createChild(root, rows, 0, idKey, parentIdKey))

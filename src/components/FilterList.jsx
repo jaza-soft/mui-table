@@ -24,11 +24,11 @@ const FilterList = ({ data, removeFilter, chipOptions }) => {
 
   return (
     <div className={classes.root}>
-      {data.map(({ dataKey, title, value, showValueOnly = true }, idx) => {
-        let label = `${value}`
+      {data.map(({ dataKey, title, value, name, showValueOnly = true }, idx) => {
+        let label = `${name}`
         if (!showValueOnly) {
           const key = title || capitalize(dataKey)
-          label = key ? `${key}: ${value}` : label
+          label = key ? `${key}: ${name}` : label
         }
         return (
           <Chip

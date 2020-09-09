@@ -46,7 +46,7 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, capitalize, hasRowsChanged } from './utils/helper'
+import { multiLineText, getDistinctValues, capitalize, hasRowsChanged, nameFromId } from './utils/helper'
 import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
@@ -250,24 +250,34 @@ const MuiTable = (props) => {
 
   const filterColumns = columns
     .filter((c) => c.filterOptions?.filter)
-    .map((c) => ({
-      dataKey: c.dataKey,
-      title: c.title,
-      multiSelect: c.filterOptions?.multiSelect,
-      choices: getDistinctValues(rows.map((row) => row[c.dataKey]).filter((e) => typeof e === 'string' || typeof e === 'number')).map((e) => ({
-        id: e,
-        name: e
+    .map((c) => {
+      const distinctValues = getDistinctValues(rows.map((row) => row[c.dataKey]).filter((e) => typeof e === 'string' || typeof e === 'number'))
+      const choices = distinctValues.map((value) => ({
+        id: value,
+        name: nameFromId(c, rows, value)
       }))
-    }))
+      return {
+        dataKey: c.dataKey,
+        title: c.title,
+        multiSelect: c.filterOptions?.multiSelect,
+        choices
+      }
+    })
 
   const filterList = Object.keys(filterValues).flatMap((dataKey) => {
     let result = []
     const value = filterValues[dataKey]
     const column = columns.find((c) => c.dataKey === dataKey) || {}
     if (Array.isArray(value)) {
-      result = value.map((v) => ({ dataKey, title: column?.title, value: v, showValueOnly: column?.filterOptions?.showValueOnly }))
+      result = value.map((v) => ({
+        dataKey,
+        title: column?.title,
+        value: v,
+        name: nameFromId(column, rows, v),
+        showValueOnly: column?.filterOptions?.showValueOnly
+      }))
     } else {
-      result = [{ dataKey, title: column?.title, value, showValueOnly: column?.filterOptions?.showValueOnly }]
+      result = [{ dataKey, title: column?.title, value, name: nameFromId(column, rows, value), showValueOnly: column?.filterOptions?.showValueOnly }]
     }
     return result
   })

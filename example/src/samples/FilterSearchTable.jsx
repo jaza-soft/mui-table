@@ -2,7 +2,15 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
+const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
+
 const columns = [
+  {
+    dataKey: 'dessertId',
+    title: 'Dessert',
+    render: (value, shortValue, row) => row.dessert?.name,
+    filterOptions: { filter: true, multiSelect: false }
+  },
   { dataKey: 'style', title: 'Style' },
   {
     dataKey: 'status',
@@ -33,7 +41,7 @@ const columns = [
   { dataKey: 'mill', title: 'Mill' }
 ]
 
-const rows = [
+let rows = [
   {
     style: 'Curabitur sed',
     status: 'New',
@@ -260,8 +268,23 @@ const rows = [
   }
 ]
 
+rows = rows.map((row) => {
+  const idx = Math.round(Math.random() * 10) % 5
+  return { ...row, dessertId: idx + 1, dessert: { id: idx + 1, name: desserts[idx] } }
+})
+
 const FilterSearchTable = () => {
-  return <MuiTable columns={columns} rows={rows} pageable={true} toolbarDivider={false} searchable={true} searchKeys={['style', 'label', 'width']} chipOptions={{color: 'secondary'}} />
+  return (
+    <MuiTable
+      columns={columns}
+      rows={rows}
+      pageable={true}
+      toolbarDivider={false}
+      searchable={true}
+      searchKeys={['style', 'label', 'width']}
+      chipOptions={{ color: 'secondary' }}
+    />
+  )
 }
 
 export default FilterSearchTable
