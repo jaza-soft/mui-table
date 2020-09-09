@@ -358,7 +358,7 @@ const MuiTable = (props) => {
                       {...tableProps}
                     >
                       <TableHead
-                        editing={editableState.editing}
+                        editing={editableState.editing || editableState.editingInline}
                         selectable={selectable}
                         selectAll={selectAll}
                         sortable={sortable}
