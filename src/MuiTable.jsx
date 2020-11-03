@@ -51,7 +51,7 @@ import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
-const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline, actionPlacement, handleInlineActionClick }) => {
+const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline, actionPlacement, hasValidationErrors, handleInlineActionClick }) => {
   const activeRow = eRowIdx === rowIdx
   const activeActions =
     actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
@@ -60,7 +60,7 @@ const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline
       {editingInline && activeRow
         ? activeActions.map(({ name, tooltip }, idx) => (
             <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
-              <IconButton aria-label={getTooltip(tooltip, name)} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}>
+              <IconButton aria-label={getTooltip(tooltip, name)} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx, hasValidationErrors)}>
                 {name === 'done' && <DoneIcon fontSize='small' />}
                 {name === 'cancel' && <CancelIcon fontSize='small' />}
               </IconButton>
@@ -334,10 +334,10 @@ const MuiTable = (props) => {
         mutators={{
           ...arrayMutators
         }}
-        subscription={{ submitting: true }}
+        subscription={{ submitting: true, hasValidationErrors: true }}
         initialValues={initialValues}
       >
-        {({ handleSubmit, submitting }) => {
+        {({ handleSubmit, submitting,  hasValidationErrors }) => {
           return (
             <form onSubmit={handleSubmit}>
               <Paper>
@@ -531,6 +531,7 @@ const MuiTable = (props) => {
                                           inlineActions,
                                           editingInline: editableState.editingInline,
                                           actionPlacement,
+                                          hasValidationErrors,
                                           handleInlineActionClick
                                         })
                                       : null}
@@ -637,6 +638,7 @@ const MuiTable = (props) => {
                                           inlineActions,
                                           editingInline: editableState.editingInline,
                                           actionPlacement,
+                                          hasValidationErrors,
                                           handleInlineActionClick
                                         })
                                       : null}

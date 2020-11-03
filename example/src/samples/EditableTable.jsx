@@ -1,8 +1,6 @@
 import React from 'react'
 
-import { MuiTable } from '@jazasoft/mui-table'
-
-const required = (value) => (value ? undefined : 'Required')
+import { MuiTable, required, minValue } from '@jazasoft/mui-table'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
@@ -13,7 +11,7 @@ const columns = [
     inputType: 'select-input',
     choices: desserts.map((e) => ({ id: e, name: e })),
     options: { displayEmpty: true },
-    validate: required,
+    validate: required(),
     disabled: (row, dataKey) => row?.id === 3
   },
   {
@@ -22,7 +20,8 @@ const columns = [
     align: 'right',
     inputType: 'text-input',
     options: { type: 'number' },
-    disabled: (row, dataKey) => row?.id === 1
+    disabled: (row, dataKey) => row?.id === 1,
+    validate: minValue(0)
   },
   { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   {

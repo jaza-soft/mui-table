@@ -185,7 +185,7 @@ const useMuiTable = (props) => {
     onSubmit && onSubmit(values?.rows, form, onSubmitComplete)
   }
 
-  const handleInlineActionClick = (event, action, row, rowIdx) => {
+  const handleInlineActionClick = (event, action, row, rowIdx, hasValidationErrors) => {
     const onActionComplete = (rowOrRows) => {
       if (editableState.prevAction === 'edit') {
         if (rowOrRows) {
@@ -249,7 +249,7 @@ const useMuiTable = (props) => {
       setEditableState({ editingInline: false })
     } else if (action === 'done') {
       const { idxx, adding, ...finalRow } = row
-      onInlineActionClick && onInlineActionClick(event, editableState.prevAction, finalRow, onActionComplete)
+      !hasValidationErrors && onInlineActionClick && onInlineActionClick(event, editableState.prevAction, finalRow, onActionComplete)
     } else {
       onInlineActionClick && onInlineActionClick(event, action, row, onActionComplete)
     }

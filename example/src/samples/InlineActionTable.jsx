@@ -2,7 +2,7 @@ import React from 'react'
 
 import HistoryIcon from '@material-ui/icons/History'
 
-import { MuiTable } from '@jazasoft/mui-table'
+import { MuiTable, required } from '@jazasoft/mui-table'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
@@ -13,7 +13,8 @@ const columns = [
     inputType: 'select-input',
     choices: desserts.map((e) => ({ id: e, name: e })),
     options: { displayEmpty: true },
-    filterOptions: { filter: true, multiSelect: true }
+    filterOptions: { filter: true, multiSelect: true },
+    validate: required()
   },
   {
     dataKey: 'calories',
