@@ -39,7 +39,7 @@ const rows = desserts.map((dessert, idx) => ({
 }))
 
 const SimpleTable = () => {
-  return <MuiTable columns={columns} rows={rows} />
+  return <MuiTable columns={columns} rows={rows} rowStyle={({ rowIdx }) => ({ backgroundColor: rowIdx % 2 === 0 ? '#f0f0f0' : 'none' })} />
 }
 
 export default SimpleTable

@@ -51,7 +51,16 @@ import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
-const renderActions = ({ row, rowIdx, eRowIdx, inlineActions = [], editingInline, actionPlacement, hasValidationErrors, handleInlineActionClick }) => {
+const renderActions = ({
+  row,
+  rowIdx,
+  eRowIdx,
+  inlineActions = [],
+  editingInline,
+  actionPlacement,
+  hasValidationErrors,
+  handleInlineActionClick
+}) => {
   const activeRow = eRowIdx === rowIdx
   const activeActions =
     actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
@@ -190,7 +199,9 @@ const MuiTable = (props) => {
     emptyMessage,
     rowAddCount,
     validate,
-    onToolbarActionClick
+    onToolbarActionClick,
+    rowStyle,
+    cellStyle
   } = props
 
   // Disable these features in Tree Table
@@ -337,7 +348,7 @@ const MuiTable = (props) => {
         subscription={{ submitting: true, hasValidationErrors: true }}
         initialValues={initialValues}
       >
-        {({ handleSubmit, submitting,  hasValidationErrors }) => {
+        {({ handleSubmit, submitting, hasValidationErrors }) => {
           return (
             <form onSubmit={handleSubmit}>
               <Paper>
@@ -392,6 +403,7 @@ const MuiTable = (props) => {
                               const isItemSelected = isSelected(row[idKey])
                               const labelId = `enhanced-table-checkbox-${rowIdx}`
                               const selectDisabled = typeof selectable === 'function' && !selectable(row)
+                              const style = typeof rowStyle === 'function' ? rowStyle({ row, rowIdx }) : rowStyle
                               return (
                                 <TableRow
                                   hover
@@ -401,7 +413,8 @@ const MuiTable = (props) => {
                                   key={rowIdx}
                                   selected={isItemSelected}
                                   style={{
-                                    backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? expandedColor : undefined
+                                    backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? expandedColor : undefined,
+                                    ...style
                                   }}
                                 >
                                   {!!selectable && (
@@ -443,7 +456,8 @@ const MuiTable = (props) => {
                                       })
                                     : null}
 
-                                  {columns.map(({ dataKey, render, align, linkPath, length, rowCellProps, options }, colIdx) => {
+                                  {columns.map((column, colIdx) => {
+                                    const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
                                     const finalLength = length || cellLength
                                     let value = row[dataKey]
                                     let shortValue = value
@@ -456,6 +470,7 @@ const MuiTable = (props) => {
                                       }
                                     }
                                     const finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
+                                    const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
                                     return (
                                       <TableCell
                                         className={clsx(
@@ -468,13 +483,15 @@ const MuiTable = (props) => {
                                         component={colIdx === 0 ? 'th' : undefined}
                                         scope={colIdx === 0 ? 'row' : undefined}
                                         padding={selectable && colIdx === 0 ? 'none' : 'default'}
-                                        style={{
-                                          paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined
-                                        }}
                                         key={`${rowIdx}-${colIdx}`}
                                         align={align}
                                         onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
                                         {...rowCellProps}
+                                        style={{
+                                          paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
+                                          ...style,
+                                          ...rowCellProps?.style
+                                        }}
                                       >
                                         {cellOverFlow === 'tooltip' && value !== shortValue && (
                                           <Tooltip title={value}>
@@ -815,6 +832,8 @@ MuiTable.propTypes = {
   initialExpandedState: PropTypes.object, // {[idKey]: bool} - Initial expanded state
   showEditableActions: PropTypes.bool, // Show actions - (add, delete) in editable mode
 
+  rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
+  cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
@@ -863,6 +882,8 @@ MuiTable.defaultProps = {
   childIndent: 12,
   expandedColor: 'none',
   showEditableActions: false,
+  rowStyle: {},
+  cellStyle: {},
   onSubmit: () => {},
   comparator: (a, b) => 0,
   hasRowsChanged

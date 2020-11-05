@@ -152,6 +152,8 @@ class App extends Component {
 | onTreeExapand        | `function`         |                         | Function called on expand click. Signature - `(event, row, isExpanded) => void`.                                                                                               |
 | onInlineActionClick  | `function`         |                         | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                    |
 | onFooterActionClick  | `function`         |                         | Signature - `(event, action, rows, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                   |
+| rowStyle             | `object\|function` | `{}`                    | Signature - `({row, rowIdx}) => object`. function should return style object                                                                                                   |
+| cellStyle            | `object\|function` | `{}`                    | Signature - `({row, column, rowIdx, colIdx}) => object`. function should return style object                                                                                   |
 | hasRowsChanged       | `function`         | `default function`      | Signature - `(rows) => Key: String`. Function is called to detect whether rows props has changed. Default function detects changes on length of rows and id, modifiedAt fields |
 
 ## License
