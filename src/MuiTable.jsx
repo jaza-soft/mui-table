@@ -52,6 +52,8 @@ import useMuiTable from './hooks/useMuiTable'
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
 const renderActions = ({
+  showActions,
+  totalRowKey,
   row,
   rowIdx,
   eRowIdx,
@@ -61,6 +63,10 @@ const renderActions = ({
   hasValidationErrors,
   handleInlineActionClick
 }) => {
+  const showEmpty = !showActions || row[totalRowKey]
+  if (showEmpty) {
+    return <TableCell align={actionPlacement} padding='none' />
+  }
   const activeRow = eRowIdx === rowIdx
   const activeActions =
     actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
@@ -189,6 +195,7 @@ const MuiTable = (props) => {
     title,
     tableProps,
     idKey,
+    totalRowKey,
     disabledElement,
     cellLength,
     cellOverFlow,
@@ -251,7 +258,7 @@ const MuiTable = (props) => {
   const initialValues = {
     rows:
       rowList.length > 0
-        ? rowList
+        ? rowList.filter((row) => !row[totalRowKey])
         : Array(rowAddCount)
             .fill('')
             .map(() => ({}))
@@ -404,6 +411,11 @@ const MuiTable = (props) => {
                               const labelId = `enhanced-table-checkbox-${rowIdx}`
                               const selectDisabled = typeof selectable === 'function' && !selectable(row)
                               const style = typeof rowStyle === 'function' ? rowStyle({ row, rowIdx }) : rowStyle
+                              const bgColor = Array.isArray(expandedColor) ? expandedColor[row?.level] : expandedColor
+                              let fontWeight = 'normal'
+                              if (!!row[totalRowKey]) {
+                                fontWeight = 'bold'
+                              }
                               return (
                                 <TableRow
                                   hover
@@ -413,13 +425,13 @@ const MuiTable = (props) => {
                                   key={rowIdx}
                                   selected={isItemSelected}
                                   style={{
-                                    backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? expandedColor : undefined,
+                                    backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? bgColor : undefined,
                                     ...style
                                   }}
                                 >
                                   {!!selectable && (
                                     <TableCell padding='checkbox'>
-                                      {!selectDisabled && (
+                                      {!selectDisabled && !row[totalRowKey] && (
                                         <Checkbox
                                           checked={isItemSelected}
                                           inputProps={{
@@ -444,8 +456,10 @@ const MuiTable = (props) => {
                                     </TableCell>
                                   )}
 
-                                  {showActions && actionPlacement === 'left'
+                                  {actionPlacement === 'left'
                                     ? renderActions({
+                                        showActions,
+                                        totalRowKey,
                                         row,
                                         rowIdx,
                                         eRowIdx: editableState.rowIdx,
@@ -488,6 +502,7 @@ const MuiTable = (props) => {
                                         onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
                                         {...rowCellProps}
                                         style={{
+                                          fontWeight,
                                           paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
                                           ...style,
                                           ...rowCellProps?.style
@@ -503,8 +518,10 @@ const MuiTable = (props) => {
                                     )
                                   })}
 
-                                  {showActions && actionPlacement === 'right'
+                                  {actionPlacement === 'right'
                                     ? renderActions({
+                                        showActions,
+                                        totalRowKey,
                                         row,
                                         rowIdx,
                                         eRowIdx: editableState.rowIdx,
@@ -540,8 +557,10 @@ const MuiTable = (props) => {
                                       [classes.disabledRow]: editableState.editableInline && rowIdx !== editableState.rowIdx
                                     })}
                                   >
-                                    {showActions && actionPlacement === 'left'
+                                    {actionPlacement === 'left'
                                       ? renderActions({
+                                          showActions,
+                                          totalRowKey,
                                           row,
                                           rowIdx,
                                           eRowIdx: editableState.rowIdx,
@@ -647,8 +666,10 @@ const MuiTable = (props) => {
                                         )
                                       }
                                     )}
-                                    {showActions && actionPlacement === 'right'
+                                    {actionPlacement === 'right'
                                       ? renderActions({
+                                          showActions,
+                                          totalRowKey,
                                           row,
                                           rowIdx,
                                           eRowIdx: editableState.rowIdx,
@@ -812,6 +833,7 @@ MuiTable.propTypes = {
   tableProps: PropTypes.object,
   pageSize: PropTypes.oneOf([10, 25]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used for selection and in tree table
+  totalRowKey: PropTypes.string, // For flaging a row as total row, set true value in totalRowKey
   parentIdKey: PropTypes.string, // Identifier Key of parent in row object. This is used in tree table
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
@@ -827,7 +849,7 @@ MuiTable.propTypes = {
   fontSize: PropTypes.number,
   emptyMessage: PropTypes.string,
   rowAddCount: PropTypes.number, // Number of rows to add in editable mode
-  expandedColor: PropTypes.string,
+  expandedColor: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   childIndent: PropTypes.number,
   initialExpandedState: PropTypes.object, // {[idKey]: bool} - Initial expanded state
   showEditableActions: PropTypes.bool, // Show actions - (add, delete) in editable mode
@@ -861,6 +883,7 @@ MuiTable.defaultProps = {
   sortable: false,
   pageable: false,
   idKey: 'id',
+  totalRowKey: 'totalRow',
   parentIdKey: 'parentId',
   pageSize: 10,
   selectActions: [{ name: 'delete' }],

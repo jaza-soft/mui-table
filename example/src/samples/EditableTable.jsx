@@ -33,12 +33,11 @@ const columns = [
     options: { color: 'secondary' },
     disabled: (row, dataKey) => row?.id === 4
   },
-  { dataKey: 'fat', title: 'Fat (g)', align: 'right' },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
   { dataKey: 'protein', title: 'Protein', align: 'right' }
 ]
 
-const rows = Array(30)
+const rows = Array(5)
   .fill('')
   .map((_, idx) => ({
     id: idx + 1,
@@ -50,19 +49,33 @@ const rows = Array(30)
     protein: (Math.random() * 10).toFixed(1)
   }))
 
+const addTotalRow = (rows) => {
+  let finalRows = [...rows]
+  let totalRow = ['calories', 'fat', 'carbs', 'protein'].reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: rows.reduce((acc, row) => acc + parseFloat(row[key]), 0)
+    }),
+    {}
+  )
+  finalRows.push({ ...totalRow, dessert: 'Total', id: rows.length + 1, totalRow: true })
+  return finalRows
+}
+
 const EditableTable = () => {
   const onInlineActionClick = (event, action, row, onActionComplete) => {
     onActionComplete()
   }
 
   const onSubmit = (values, form, onSubmitComplete) => {
-    onSubmitComplete(values)
+    const rows = addTotalRow(values)
+    onSubmitComplete(rows)
   }
 
   return (
     <MuiTable
       columns={columns}
-      rows={rows}
+      rows={addTotalRow(rows)}
       pageable={true}
       editable={true}
       showEditableActions={true}

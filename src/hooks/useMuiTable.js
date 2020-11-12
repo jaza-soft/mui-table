@@ -131,7 +131,7 @@ const useMuiTable = (props) => {
   const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const rowsChanged = hasRowsChanged(props.rows)
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
-  
+
   /**
    * Store sorted rows data.
    * rows state will change on
