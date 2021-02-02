@@ -127,6 +127,7 @@ const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacem
 }
 
 const useStyles = makeStyles((theme) => ({
+  root: {},
   table: {
     minWidth: 650,
     whiteSpace: 'pre'
@@ -334,7 +335,7 @@ const MuiTable = (props) => {
   }
 
   // Inline Actions in Editable mode
-  let editableActions = [
+  const editableActions = [
     { name: 'add', tooltip: 'Add Row' },
     { name: 'delete', tooltip: 'Remove Row' }
   ]
@@ -345,10 +346,13 @@ const MuiTable = (props) => {
   return (
     <div>
       <Form
+        classes={classes.root}
+        className={props.className}
+        style={props.style}
         key={key}
         onSubmit={handleSubmit}
         validate={validate}
-        validateOnBlur={true}
+        validateOnBlur
         mutators={{
           ...arrayMutators
         }}
@@ -413,7 +417,7 @@ const MuiTable = (props) => {
                               const style = typeof rowStyle === 'function' ? rowStyle({ row, rowIdx }) : rowStyle
                               const bgColor = Array.isArray(expandedColor) ? expandedColor[row?.level] : expandedColor
                               let fontWeight = 'normal'
-                              if (!!row[totalRowKey]) {
+                              if (row[totalRowKey]) {
                                 fontWeight = 'bold'
                               }
                               return (
@@ -557,7 +561,7 @@ const MuiTable = (props) => {
                                       [classes.disabledRow]: editableState.editableInline && rowIdx !== editableState.rowIdx
                                     })}
                                   >
-                                    {actionPlacement === 'left'
+                                    {actionPlacement === 'left' && editableState.editingInline
                                       ? renderActions({
                                           showActions,
                                           totalRowKey,
@@ -666,7 +670,7 @@ const MuiTable = (props) => {
                                         )
                                       }
                                     )}
-                                    {actionPlacement === 'right'
+                                    {actionPlacement === 'right' && editableState.editingInline
                                       ? renderActions({
                                           showActions,
                                           totalRowKey,
