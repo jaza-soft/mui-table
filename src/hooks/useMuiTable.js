@@ -107,7 +107,7 @@ const useMuiTable = (props) => {
   const editableInline = inlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
 
   const [editableState, setEditableState] = React.useState({
-    editing: false, // Collective Editing
+    editing: props.editing || false, // Collective Editing
     editingInline: false, // Inline Editing
     busy: false, // Busy on clicking user provided footer actions
     rowIdx: undefined, // Row being edited in case of inline editing or inline add/duplicate
@@ -166,7 +166,9 @@ const useMuiTable = (props) => {
 
   const handleSubmit = (values, form, complete) => {
     const onSubmitComplete = (rowList) => {
-      setEditableState({ editing: false })
+      if (!(props.editing && props.handleSubmitRef)) {
+        setEditableState({ editing: false })
+      }
       complete()
       if (rowList) {
         if (hasParentIdKey) {

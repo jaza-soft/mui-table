@@ -9,6 +9,7 @@ import PageableTable from './samples/PageableTable'
 import SelectableTable from './samples/SelectableTable'
 import SortableTable from './samples/SortableTable'
 import EditableTable from './samples/EditableTable'
+import EditableTableExternalSubmit from './samples/EditableTableExternalSubmit'
 import ScrollableTable from './samples/ScrollableTable'
 import EditableExcelTable from './samples/EditableExcelTable'
 import FilterSearchTable from './samples/FilterSearchTable'
@@ -23,6 +24,7 @@ const tables = {
   sortable: { title: 'Sortable Table', table: <SortableTable /> },
   scrollable: { title: 'Scrollable Table', table: <ScrollableTable /> },
   editable: { title: 'Editable Table', table: <EditableTable /> },
+  editableExtSubmit: { title: 'Editable Table (External Submit)', table: <EditableTableExternalSubmit /> },
   excelVariant: { title: 'Editable Table - Excel Variant', table: <EditableExcelTable /> },
   filterSearch: { title: 'Filter & Search Table', table: <FilterSearchTable /> },
   InlineAction: { title: 'Inline Actions Table', table: <InlineActionTable /> },
