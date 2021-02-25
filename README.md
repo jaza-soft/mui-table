@@ -131,7 +131,7 @@ class App extends Component {
 | variant              | `string`           | `default`               | Select Table Variant. Values - `default, excel`                                                                                                                                |
 | fontSize             | `number`           | `12`                    | Font Size                                                                                                                                                                      |
 | emptyMessage         | `string`           | `No records available!` | Message when rows is empty                                                                                                                                                     |
-| expandedColor        | `string\|string[]` | `none`                  | Background Color of Expanded Row. provide array of colors if different color is required for different level                                                                  |
+| expandedColor        | `string\|string[]` | `none`                  | Background Color of Expanded Row. provide array of colors if different color is required for different level                                                                   |
 | childIndent          | `string`           | `12`                    | Left Indentation of Child in pixel                                                                                                                                             |
 | initialExpandedState | `string`           | `null`                  | Inintial Expanded State. signature - `{[idKey]: true\|false}`                                                                                                                  |
 | selectActions        | `Action[]`         | `[{name: 'delete'}]`    | Select Actions. Standard actions - `add, edit, delete`                                                                                                                         |
@@ -143,6 +143,8 @@ class App extends Component {
 | rowInsert            | `string`           | `below`                 | Placement row to insert for `add, duplicate` inline actions. Values - `above, below`                                                                                           |
 | rowAddCount          | `number`           | `3`                     | Number of rows to add in editable mode                                                                                                                                         |
 | showEditableActions  | `bool`             | `false`                 | Show actions - `add, addChild, delete` in editiable mode                                                                                                                       |
+| component            | `string`           | `form`                  | HTML element for FormContent                                                                                                                                                   |
+| editing              | `bool`             | `false`                 | To Open Table in Editable mode                                                                                                                                                 |
 | defaultExpanded      | `bool \|function`  |                         | default expanded state. Signature - `bool \| (row, level) => bool`.                                                                                                            |
 | selectable           | `bool \| function` | `false`                 | Selectable Rows. `bool \| (row) => bool`                                                                                                                                       |
 | onSubmit             | `function`         |                         | Submit function to be called when table is editable. `(values, form, onSubmitComplete) => {}`. call `onSubmitComplete` with updated rows to indicate that submit is complete   |
@@ -156,6 +158,7 @@ class App extends Component {
 | rowStyle             | `object\|function` | `{}`                    | Signature - `({row, rowIdx}) => object`. function should return style object                                                                                                   |
 | cellStyle            | `object\|function` | `{}`                    | Signature - `({row, column, rowIdx, colIdx}) => object`. function should return style object                                                                                   |
 | hasRowsChanged       | `function`         | `default function`      | Signature - `(rows) => Key: String`. Function is called to detect whether rows props has changed. Default function detects changes on length of rows and id, modifiedAt fields |
+| handleSubmitRef      | `function`         |                         | Signature - `(handleSubmit) => Void`. When External Form submit is required, We get hold of React Final Form handleSubmit by calling this method.                              |
 
 ## License
 

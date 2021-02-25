@@ -126,6 +126,497 @@ const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacem
   )
 }
 
+const FormContent = (props) => {
+  const {
+    columns,
+    rows,
+    rowList,
+    classes,
+    submitting,
+    hasValidationErrors,
+    showToolbar,
+    title,
+    selectActions,
+    toolbarActions,
+    filterProps,
+    setSearchText,
+    handleSelectActionClick,
+    onToolbarActionClick,
+    filterList,
+    removeFilter,
+    chipOptions,
+    toolbarDivider,
+    variant,
+    editableState,
+    tableProps,
+    selectable,
+    selectAll,
+    sortable,
+    isTreeTable,
+    order,
+    orderBy,
+    showActions,
+    showEditableActions,
+    actionPlacement,
+    handleSelectAllClick,
+    handleRequestSort,
+    isSelected,
+    expandedColor,
+    idKey,
+    rowStyle,
+    totalRowKey,
+    expanded,
+    handleClick,
+    handleTreeExpand,
+    inlineActions,
+    handleInlineActionClick,
+    cellLength,
+    cellOverFlow,
+    cellStyle,
+    childIndent,
+    emptyMessage,
+    editable,
+    editableInline,
+    editableActions,
+    handleEditableActionClick,
+    disabledElement,
+    fontSize,
+    editingFooterActions,
+    viewFooterActions,
+    selected,
+    handleRowAdd,
+    handleEditCancel,
+    setEditableState,
+    pageable,
+    handleFooterActionClick,
+    totalElements,
+    pageSize,
+    page,
+    totalPage,
+    handleChangePage,
+    handleChangePageSize
+  } = props
+
+  const selectedCount = selected.length
+
+  const editFooterActions =
+    props.editing && props.handleSubmitRef ? editingFooterActions.filter((e) => !['save', 'cancel'].includes(e.name)) : editingFooterActions
+
+  let footerElement = (
+    <div className={clsx(classes.footerContainer)}>
+      <div className={classes.footerActions}>
+        {editableState.editing ? (
+          <FormSpy subscription={{ form: true }}>
+            {({ form }) =>
+              editFooterActions
+                .sort((a, b) => a.serialNo - b.serialNo)
+                .map(({ name }) =>
+                  name === 'save' ? (
+                    <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
+                      Save
+                    </Button>
+                  ) : name === 'row-add' ? (
+                    <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
+                      Add Rows
+                    </Button>
+                  ) : name === 'cancel' ? (
+                    <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
+                      Cancel
+                    </Button>
+                  ) : null
+                )
+            }
+          </FormSpy>
+        ) : !editableState.editingInline ? (
+          viewFooterActions
+            .sort((a, b) => a.serialNo - b.serialNo)
+            .map(({ name, tooltip, icon, options }) => {
+              const disabled = name === 'edit' ? selected.length > 0 : editableState.busy
+              return (
+                <Button
+                  key={name}
+                  className={classes.button}
+                  variant='text'
+                  onClick={(event) => (name === 'edit' ? setEditableState({ editing: true }) : handleFooterActionClick(event, name))}
+                  disabled={disabled}
+                  {...options}
+                >
+                  {icon}
+                  {icon && <span style={{ padding: '0.25em' }} />}
+                  {tooltip}
+                </Button>
+              )
+            })
+        ) : null}
+      </div>
+
+      {pageable && (
+        <TablePagination
+          rowsPerPageOptions={[10, 25]}
+          component='div'
+          count={totalElements}
+          rowsPerPage={pageSize}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangePageSize}
+          labelRowsPerPage='Page Size'
+          nextIconButtonProps={{
+            disabled: editableState.editing || totalPage === 0 || page === totalPage - 1
+          }}
+          backIconButtonProps={{ disabled: editableState.editing || page === 0 }}
+          SelectProps={{
+            disabled: editableState.editing
+          }}
+        />
+      )}
+    </div>
+  )
+  if (editableState.editing && editFooterActions?.length === 0) {
+    footerElement = null
+  }
+
+  return (
+    <Paper>
+      {showToolbar && (
+        <Toolbar
+          title={title}
+          selectedCount={selectedCount}
+          selectActions={selectActions}
+          toolbarActions={toolbarActions}
+          filterProps={filterProps}
+          onSearch={setSearchText}
+          onSelectActionClick={handleSelectActionClick}
+          onToolbarActionClick={onToolbarActionClick}
+        />
+      )}
+
+      <FilterList data={filterList} removeFilter={removeFilter} chipOptions={chipOptions} />
+
+      {showToolbar && toolbarDivider && (variant !== 'excel' || !editableState.editing) && <Divider light />}
+
+      <TableContainer>
+        <PerfectScrollbar>
+          <Table
+            className={clsx({ [classes.table]: true, [classes.excelTable]: variant === 'excel' && editableState.editing }, tableProps?.className)}
+            {...tableProps}
+          >
+            <TableHead
+              editing={editableState.editing || editableState.editingInline}
+              selectable={selectable}
+              selectAll={selectAll}
+              sortable={sortable}
+              isTreeTable={isTreeTable}
+              columns={columns}
+              classes={classes}
+              selectedCount={selectedCount}
+              order={order}
+              orderBy={orderBy}
+              rowCount={rows.length}
+              showActions={showActions || (editableState.editing && showEditableActions)}
+              actionPlacement={actionPlacement}
+              onSelectAllClick={handleSelectAllClick}
+              onRequestSort={handleRequestSort}
+            />
+
+            <TableBody>
+              {!(editableState.editing || editableState.editingInline) ? (
+                rowList.length > 0 ? (
+                  rowList.map((row, rowIdx) => {
+                    const isItemSelected = isSelected(row[idKey])
+                    const labelId = `enhanced-table-checkbox-${rowIdx}`
+                    const selectDisabled = typeof selectable === 'function' && !selectable(row)
+                    const style = typeof rowStyle === 'function' ? rowStyle({ row, rowIdx }) : rowStyle
+                    const bgColor = Array.isArray(expandedColor) ? expandedColor[row?.level] : expandedColor
+                    let fontWeight = 'normal'
+                    if (row[totalRowKey]) {
+                      fontWeight = 'bold'
+                    }
+                    return (
+                      <TableRow
+                        hover
+                        role='checkbox'
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={rowIdx}
+                        selected={isItemSelected}
+                        style={{
+                          backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? bgColor : undefined,
+                          ...style
+                        }}
+                      >
+                        {!!selectable && (
+                          <TableCell padding='checkbox'>
+                            {!selectDisabled && !row[totalRowKey] && (
+                              <Checkbox
+                                checked={isItemSelected}
+                                inputProps={{
+                                  'aria-labelledby': labelId
+                                }}
+                                onClick={(event) => handleClick(event, row[idKey])}
+                              />
+                            )}
+                          </TableCell>
+                        )}
+                        {isTreeTable && (
+                          <TableCell padding='checkbox'>
+                            {row?.hasChild ? (
+                              <div
+                                style={{ paddingLeft: 8 * (row?.level || 0), display: 'flex', alignItems: 'center' }}
+                                onClick={(event) => handleTreeExpand(event, row, expanded[row[idKey]])}
+                              >
+                                {expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}
+                                {!expanded[row[idKey]] && <ChevronRight style={{ color: '#65819D' }} />}
+                              </div>
+                            ) : null}
+                          </TableCell>
+                        )}
+
+                        {actionPlacement === 'left'
+                          ? renderActions({
+                              showActions,
+                              totalRowKey,
+                              row,
+                              rowIdx,
+                              eRowIdx: editableState.rowIdx,
+                              inlineActions,
+                              editingInline: editableState.editingInline,
+                              actionPlacement,
+                              handleInlineActionClick
+                            })
+                          : null}
+
+                        {columns.map((column, colIdx) => {
+                          const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
+                          const finalLength = length || cellLength
+                          const value = row[dataKey]
+                          let shortValue = value
+                          if (typeof value === 'string') {
+                            const texts = multiLineText(value, finalLength)
+                            if (cellOverFlow === 'tooltip') {
+                              shortValue = texts[0]
+                            } else if (cellOverFlow === 'wrap') {
+                              shortValue = texts.join('\n')
+                            }
+                          }
+                          const finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
+                          const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
+                          return (
+                            <TableCell
+                              className={clsx(
+                                {
+                                  [classes.link]: typeof linkPath === 'function',
+                                  [classes.rowCell]: true
+                                },
+                                options?.className
+                              )}
+                              component={colIdx === 0 ? 'th' : undefined}
+                              scope={colIdx === 0 ? 'row' : undefined}
+                              padding={selectable && colIdx === 0 ? 'none' : 'default'}
+                              key={`${rowIdx}-${colIdx}`}
+                              align={align}
+                              onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
+                              {...rowCellProps}
+                              style={{
+                                fontWeight,
+                                paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
+                                ...style,
+                                ...rowCellProps?.style
+                              }}
+                            >
+                              {cellOverFlow === 'tooltip' && value !== shortValue && (
+                                <Tooltip title={value}>
+                                  <span>{finalValue}...</span>
+                                </Tooltip>
+                              )}
+                              {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
+                            </TableCell>
+                          )
+                        })}
+
+                        {actionPlacement === 'right'
+                          ? renderActions({
+                              showActions,
+                              totalRowKey,
+                              row,
+                              rowIdx,
+                              eRowIdx: editableState.rowIdx,
+                              inlineActions,
+                              editingInline: editableState.editingInline,
+                              actionPlacement,
+                              handleInlineActionClick
+                            })
+                          : null}
+                      </TableRow>
+                    )
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length + (showActions || (editableState.editing && showEditableActions) ? 1 : 0)}>
+                      <Typography className={classes.emptyMessage}>{rows?.length === 0 ? emptyMessage : 'No matching records found!'} </Typography>
+                    </TableCell>
+                  </TableRow>
+                )
+              ) : null}
+
+              {(editable || editableInline) && (editableState.editing || editableState.editingInline) && (
+                <FieldArray name='rows'>
+                  {({ fields }) =>
+                    fields.map((name, rowIdx) => {
+                      const row = fields?.value[rowIdx]
+                      return (
+                        <TableRow
+                          key={rowIdx}
+                          className={clsx({
+                            [classes.disabledRow]: editableState.editableInline && rowIdx !== editableState.rowIdx
+                          })}
+                        >
+                          {actionPlacement === 'left' && editableState.editingInline
+                            ? renderActions({
+                                showActions,
+                                totalRowKey,
+                                row,
+                                rowIdx,
+                                eRowIdx: editableState.rowIdx,
+                                inlineActions,
+                                editingInline: editableState.editingInline,
+                                actionPlacement,
+                                hasValidationErrors,
+                                handleInlineActionClick
+                              })
+                            : null}
+
+                          {showEditableActions && actionPlacement === 'left'
+                            ? renderEditableActions({
+                                fields,
+                                row,
+                                rowIdx,
+                                actions: editableActions,
+                                actionPlacement,
+                                handleEditableActionClick
+                              })
+                            : null}
+                          {isTreeTable && (
+                            <TableCell padding='checkbox'>
+                              {row?.hasChild ? (
+                                <div style={{ paddingLeft: 8 * (row?.level || 0), display: 'flex', alignItems: 'center' }}>
+                                  <ChevronDown style={{ color: '#65819D' }} />
+                                </div>
+                              ) : null}
+                            </TableCell>
+                          )}
+
+                          {columns.map(
+                            (
+                              {
+                                dataKey,
+                                inputType = 'text-field',
+                                render,
+                                choices,
+                                align,
+                                rowCellProps,
+                                options,
+                                validate,
+                                length,
+                                disabled: disabledFunc
+                              },
+                              colIdx
+                            ) => {
+                              const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
+
+                              let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
+                              if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
+                                element = 'text-field'
+                              }
+                              return (
+                                <TableCell
+                                  className={clsx({
+                                    [classes.rowCell]: element === 'text-field',
+                                    [classes.inputPadding]: element !== 'text-field'
+                                  })}
+                                  key={`${rowIdx}-${colIdx}`}
+                                  align={align}
+                                  style={{
+                                    paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined
+                                  }}
+                                  {...rowCellProps}
+                                >
+                                  {element === 'text-field' && (
+                                    <TextField
+                                      name={`${name}.${dataKey}`}
+                                      row={row}
+                                      render={render}
+                                      cellOverFlow={cellOverFlow}
+                                      cellLength={cellLength}
+                                      length={length}
+                                      options={options}
+                                    />
+                                  )}
+                                  {element === 'text-input' && (
+                                    <TextInput
+                                      name={`${name}.${dataKey}`}
+                                      validate={validate}
+                                      disabled={disabled}
+                                      variant={variant}
+                                      fontSize={fontSize}
+                                      options={options}
+                                    />
+                                  )}
+                                  {element === 'select-input' && (
+                                    <SelectInput
+                                      name={`${name}.${dataKey}`}
+                                      choices={choices}
+                                      validate={validate}
+                                      disabled={disabled}
+                                      variant={variant}
+                                      fontSize={fontSize}
+                                      options={options}
+                                    />
+                                  )}
+                                  {element === 'boolean-input' && <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />}
+                                </TableCell>
+                              )
+                            }
+                          )}
+                          {actionPlacement === 'right' && editableState.editingInline
+                            ? renderActions({
+                                showActions,
+                                totalRowKey,
+                                row,
+                                rowIdx,
+                                eRowIdx: editableState.rowIdx,
+                                inlineActions,
+                                editingInline: editableState.editingInline,
+                                actionPlacement,
+                                hasValidationErrors,
+                                handleInlineActionClick
+                              })
+                            : null}
+                          {showEditableActions && actionPlacement === 'right'
+                            ? renderEditableActions({
+                                fields,
+                                row,
+                                rowIdx,
+                                actions: editableActions,
+                                actionPlacement,
+                                handleEditableActionClick
+                              })
+                            : null}
+                        </TableRow>
+                      )
+                    })
+                  }
+                </FieldArray>
+              )}
+            </TableBody>
+          </Table>
+        </PerfectScrollbar>
+      </TableContainer>
+
+      {footerElement}
+    </Paper>
+  )
+}
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   table: {
@@ -184,32 +675,14 @@ const MuiTable = (props) => {
     rows,
     editable,
     enableRowAddition,
-    showEditableActions,
-    selectAll,
-    selectActions,
     inlineActions,
-    chipOptions,
-    actionPlacement,
     footerActions,
     toolbar,
-    toolbarDivider,
-    title,
-    tableProps,
-    idKey,
     totalRowKey,
-    disabledElement,
-    cellLength,
-    cellOverFlow,
-    expandedColor,
-    childIndent,
     variant,
     fontSize,
-    emptyMessage,
     rowAddCount,
-    validate,
-    onToolbarActionClick,
-    rowStyle,
-    cellStyle
+    validate
   } = props
 
   // Disable these features in Tree Table
@@ -218,39 +691,13 @@ const MuiTable = (props) => {
   const sortable = isTreeTable ? false : props.sortable
   const pageable = isTreeTable ? false : props.pageable
 
-  const {
-    rowList,
-    key,
-    editableInline,
-    editableState,
-    page,
-    pageSize,
-    totalPage,
-    totalElements,
-    selected,
-    order,
-    orderBy,
-    filterValues,
-    expanded,
-    setSearchText,
-    setEditableState,
-    handleSelectActionClick,
-    handleSubmit,
-    handleInlineActionClick,
-    handleFooterActionClick,
-    handleRequestSort,
-    updateFilter,
-    resetFilter,
-    removeFilter,
-    handleSelectAllClick,
-    handleClick,
-    handleChangePage,
-    handleChangePageSize,
-    handleRowAdd,
-    handleTreeExpand,
-    handleEditableActionClick,
-    handleEditCancel
-  } = useMuiTable({ ...props, searchable, selectable, pageable, sortable })
+  const { rowList, key, updateFilter, resetFilter, editableState, selected, filterValues, handleSubmit, ...restProps } = useMuiTable({
+    ...props,
+    searchable,
+    selectable,
+    pageable,
+    sortable
+  })
 
   const classes = useStyles({ variant, pageable, editable, fontSize, footerActions })
 
@@ -264,8 +711,6 @@ const MuiTable = (props) => {
             .fill('')
             .map(() => ({}))
   }
-
-  const selectedCount = selected.length
 
   const filterColumns = columns
     .filter((c) => c.filterOptions?.filter)
@@ -365,420 +810,36 @@ const MuiTable = (props) => {
         initialValues={initialValues}
       >
         {({ handleSubmit, submitting, hasValidationErrors }) => {
-          return (
-            <form onSubmit={handleSubmit}>
-              <Paper>
-                {showToolbar && (
-                  <Toolbar
-                    title={title}
-                    selectedCount={selectedCount}
-                    selectActions={selectActions}
-                    toolbarActions={toolbarActions}
-                    filterProps={filterProps}
-                    onSearch={setSearchText}
-                    onSelectActionClick={handleSelectActionClick}
-                    onToolbarActionClick={onToolbarActionClick}
-                  />
-                )}
-
-                <FilterList data={filterList} removeFilter={removeFilter} chipOptions={chipOptions} />
-
-                {showToolbar && toolbarDivider && (variant !== 'excel' || !editableState.editing) && <Divider light />}
-
-                <TableContainer>
-                  <PerfectScrollbar>
-                    <Table
-                      className={clsx(
-                        { [classes.table]: true, [classes.excelTable]: variant === 'excel' && editableState.editing },
-                        tableProps?.className
-                      )}
-                      {...tableProps}
-                    >
-                      <TableHead
-                        editing={editableState.editing || editableState.editingInline}
-                        selectable={selectable}
-                        selectAll={selectAll}
-                        sortable={sortable}
-                        isTreeTable={isTreeTable}
-                        columns={columns}
-                        classes={classes}
-                        selectedCount={selectedCount}
-                        order={order}
-                        orderBy={orderBy}
-                        rowCount={rows.length}
-                        showActions={showActions || (editableState.editing && showEditableActions)}
-                        actionPlacement={actionPlacement}
-                        onSelectAllClick={handleSelectAllClick}
-                        onRequestSort={handleRequestSort}
-                      />
-
-                      <TableBody>
-                        {!(editableState.editing || editableState.editingInline) ? (
-                          rowList.length > 0 ? (
-                            rowList.map((row, rowIdx) => {
-                              const isItemSelected = isSelected(row[idKey])
-                              const labelId = `enhanced-table-checkbox-${rowIdx}`
-                              const selectDisabled = typeof selectable === 'function' && !selectable(row)
-                              const style = typeof rowStyle === 'function' ? rowStyle({ row, rowIdx }) : rowStyle
-                              const bgColor = Array.isArray(expandedColor) ? expandedColor[row?.level] : expandedColor
-                              let fontWeight = 'normal'
-                              if (row[totalRowKey]) {
-                                fontWeight = 'bold'
-                              }
-                              return (
-                                <TableRow
-                                  hover
-                                  role='checkbox'
-                                  aria-checked={isItemSelected}
-                                  tabIndex={-1}
-                                  key={rowIdx}
-                                  selected={isItemSelected}
-                                  style={{
-                                    backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? bgColor : undefined,
-                                    ...style
-                                  }}
-                                >
-                                  {!!selectable && (
-                                    <TableCell padding='checkbox'>
-                                      {!selectDisabled && !row[totalRowKey] && (
-                                        <Checkbox
-                                          checked={isItemSelected}
-                                          inputProps={{
-                                            'aria-labelledby': labelId
-                                          }}
-                                          onClick={(event) => handleClick(event, row[idKey])}
-                                        />
-                                      )}
-                                    </TableCell>
-                                  )}
-                                  {isTreeTable && (
-                                    <TableCell padding='checkbox'>
-                                      {row?.hasChild ? (
-                                        <div
-                                          style={{ paddingLeft: 8 * (row?.level || 0), display: 'flex', alignItems: 'center' }}
-                                          onClick={(event) => handleTreeExpand(event, row, expanded[row[idKey]])}
-                                        >
-                                          {expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}
-                                          {!expanded[row[idKey]] && <ChevronRight style={{ color: '#65819D' }} />}
-                                        </div>
-                                      ) : null}
-                                    </TableCell>
-                                  )}
-
-                                  {actionPlacement === 'left'
-                                    ? renderActions({
-                                        showActions,
-                                        totalRowKey,
-                                        row,
-                                        rowIdx,
-                                        eRowIdx: editableState.rowIdx,
-                                        inlineActions,
-                                        editingInline: editableState.editingInline,
-                                        actionPlacement,
-                                        handleInlineActionClick
-                                      })
-                                    : null}
-
-                                  {columns.map((column, colIdx) => {
-                                    const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
-                                    const finalLength = length || cellLength
-                                    const value = row[dataKey]
-                                    let shortValue = value
-                                    if (typeof value === 'string') {
-                                      const texts = multiLineText(value, finalLength)
-                                      if (cellOverFlow === 'tooltip') {
-                                        shortValue = texts[0]
-                                      } else if (cellOverFlow === 'wrap') {
-                                        shortValue = texts.join('\n')
-                                      }
-                                    }
-                                    const finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
-                                    const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
-                                    return (
-                                      <TableCell
-                                        className={clsx(
-                                          {
-                                            [classes.link]: typeof linkPath === 'function',
-                                            [classes.rowCell]: true
-                                          },
-                                          options?.className
-                                        )}
-                                        component={colIdx === 0 ? 'th' : undefined}
-                                        scope={colIdx === 0 ? 'row' : undefined}
-                                        padding={selectable && colIdx === 0 ? 'none' : 'default'}
-                                        key={`${rowIdx}-${colIdx}`}
-                                        align={align}
-                                        onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
-                                        {...rowCellProps}
-                                        style={{
-                                          fontWeight,
-                                          paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
-                                          ...style,
-                                          ...rowCellProps?.style
-                                        }}
-                                      >
-                                        {cellOverFlow === 'tooltip' && value !== shortValue && (
-                                          <Tooltip title={value}>
-                                            <span>{finalValue}...</span>
-                                          </Tooltip>
-                                        )}
-                                        {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
-                                      </TableCell>
-                                    )
-                                  })}
-
-                                  {actionPlacement === 'right'
-                                    ? renderActions({
-                                        showActions,
-                                        totalRowKey,
-                                        row,
-                                        rowIdx,
-                                        eRowIdx: editableState.rowIdx,
-                                        inlineActions,
-                                        editingInline: editableState.editingInline,
-                                        actionPlacement,
-                                        handleInlineActionClick
-                                      })
-                                    : null}
-                                </TableRow>
-                              )
-                            })
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={columns.length + (showActions || (editableState.editing && showEditableActions) ? 1 : 0)}>
-                                <Typography className={classes.emptyMessage}>
-                                  {rows?.length === 0 ? emptyMessage : 'No matching records found!'}{' '}
-                                </Typography>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        ) : null}
-
-                        {(editable || editableInline) && (editableState.editing || editableState.editingInline) && (
-                          <FieldArray name='rows'>
-                            {({ fields }) =>
-                              fields.map((name, rowIdx) => {
-                                const row = fields?.value[rowIdx]
-                                return (
-                                  <TableRow
-                                    key={rowIdx}
-                                    className={clsx({
-                                      [classes.disabledRow]: editableState.editableInline && rowIdx !== editableState.rowIdx
-                                    })}
-                                  >
-                                    {actionPlacement === 'left' && editableState.editingInline
-                                      ? renderActions({
-                                          showActions,
-                                          totalRowKey,
-                                          row,
-                                          rowIdx,
-                                          eRowIdx: editableState.rowIdx,
-                                          inlineActions,
-                                          editingInline: editableState.editingInline,
-                                          actionPlacement,
-                                          hasValidationErrors,
-                                          handleInlineActionClick
-                                        })
-                                      : null}
-
-                                    {showEditableActions && actionPlacement === 'left'
-                                      ? renderEditableActions({
-                                          fields,
-                                          row,
-                                          rowIdx,
-                                          actions: editableActions,
-                                          actionPlacement,
-                                          handleEditableActionClick
-                                        })
-                                      : null}
-                                    {isTreeTable && (
-                                      <TableCell padding='checkbox'>
-                                        {row?.hasChild ? (
-                                          <div style={{ paddingLeft: 8 * (row?.level || 0), display: 'flex', alignItems: 'center' }}>
-                                            <ChevronDown style={{ color: '#65819D' }} />
-                                          </div>
-                                        ) : null}
-                                      </TableCell>
-                                    )}
-
-                                    {columns.map(
-                                      (
-                                        {
-                                          dataKey,
-                                          inputType = 'text-field',
-                                          render,
-                                          choices,
-                                          align,
-                                          rowCellProps,
-                                          options,
-                                          validate,
-                                          length,
-                                          disabled: disabledFunc
-                                        },
-                                        colIdx
-                                      ) => {
-                                        const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
-
-                                        let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
-                                        if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
-                                          element = 'text-field'
-                                        }
-                                        return (
-                                          <TableCell
-                                            className={clsx({
-                                              [classes.rowCell]: element === 'text-field',
-                                              [classes.inputPadding]: element !== 'text-field'
-                                            })}
-                                            key={`${rowIdx}-${colIdx}`}
-                                            align={align}
-                                            style={{
-                                              paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined
-                                            }}
-                                            {...rowCellProps}
-                                          >
-                                            {element === 'text-field' && (
-                                              <TextField
-                                                name={`${name}.${dataKey}`}
-                                                row={row}
-                                                render={render}
-                                                cellOverFlow={cellOverFlow}
-                                                cellLength={cellLength}
-                                                length={length}
-                                                options={options}
-                                              />
-                                            )}
-                                            {element === 'text-input' && (
-                                              <TextInput
-                                                name={`${name}.${dataKey}`}
-                                                validate={validate}
-                                                disabled={disabled}
-                                                variant={variant}
-                                                fontSize={fontSize}
-                                                options={options}
-                                              />
-                                            )}
-                                            {element === 'select-input' && (
-                                              <SelectInput
-                                                name={`${name}.${dataKey}`}
-                                                choices={choices}
-                                                validate={validate}
-                                                disabled={disabled}
-                                                variant={variant}
-                                                fontSize={fontSize}
-                                                options={options}
-                                              />
-                                            )}
-                                            {element === 'boolean-input' && (
-                                              <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />
-                                            )}
-                                          </TableCell>
-                                        )
-                                      }
-                                    )}
-                                    {actionPlacement === 'right' && editableState.editingInline
-                                      ? renderActions({
-                                          showActions,
-                                          totalRowKey,
-                                          row,
-                                          rowIdx,
-                                          eRowIdx: editableState.rowIdx,
-                                          inlineActions,
-                                          editingInline: editableState.editingInline,
-                                          actionPlacement,
-                                          hasValidationErrors,
-                                          handleInlineActionClick
-                                        })
-                                      : null}
-                                    {showEditableActions && actionPlacement === 'right'
-                                      ? renderEditableActions({
-                                          fields,
-                                          row,
-                                          rowIdx,
-                                          actions: editableActions,
-                                          actionPlacement,
-                                          handleEditableActionClick
-                                        })
-                                      : null}
-                                  </TableRow>
-                                )
-                              })
-                            }
-                          </FieldArray>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </PerfectScrollbar>
-                </TableContainer>
-
-                <div className={clsx(classes.footerContainer)}>
-                  <div className={classes.footerActions}>
-                    {editableState.editing ? (
-                      <FormSpy subscription={{ form: true }}>
-                        {({ form }) =>
-                          editingFooterActions
-                            .sort((a, b) => a.serialNo - b.serialNo)
-                            .map(({ name }) =>
-                              name === 'save' ? (
-                                <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
-                                  Save
-                                </Button>
-                              ) : name === 'row-add' ? (
-                                <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
-                                  Add Rows
-                                </Button>
-                              ) : name === 'cancel' ? (
-                                <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
-                                  Cancel
-                                </Button>
-                              ) : null
-                            )
-                        }
-                      </FormSpy>
-                    ) : !editableState.editingInline ? (
-                      viewFooterActions
-                        .sort((a, b) => a.serialNo - b.serialNo)
-                        .map(({ name, tooltip, icon, options }) => {
-                          const disabled = name === 'edit' ? selected.length > 0 : editableState.busy
-                          return (
-                            <Button
-                              key={name}
-                              className={classes.button}
-                              variant='text'
-                              onClick={(event) => (name === 'edit' ? setEditableState({ editing: true }) : handleFooterActionClick(event, name))}
-                              disabled={disabled}
-                              {...options}
-                            >
-                              {icon}
-                              {icon && <span style={{ padding: '0.25em' }} />}
-                              {tooltip}
-                            </Button>
-                          )
-                        })
-                    ) : null}
-                  </div>
-
-                  {pageable && (
-                    <TablePagination
-                      rowsPerPageOptions={[10, 25]}
-                      component='div'
-                      count={totalElements}
-                      rowsPerPage={pageSize}
-                      page={page}
-                      onChangePage={handleChangePage}
-                      onChangeRowsPerPage={handleChangePageSize}
-                      labelRowsPerPage='Page Size'
-                      nextIconButtonProps={{
-                        disabled: editableState.editing || totalPage === 0 || page === totalPage - 1
-                      }}
-                      backIconButtonProps={{ disabled: editableState.editing || page === 0 }}
-                      SelectProps={{
-                        disabled: editableState.editing
-                      }}
-                    />
-                  )}
-                </div>
-              </Paper>
-            </form>
+          props.handleSubmitRef && props.handleSubmitRef(handleSubmit)
+          return React.createElement(
+            props.component,
+            { onSubmit: handleSubmit },
+            <FormContent
+              classes={classes}
+              submitting={submitting}
+              hasValidationErrors={hasValidationErrors}
+              isSelected={isSelected}
+              viewFooterActions={viewFooterActions}
+              editingFooterActions={editingFooterActions}
+              showActions={showActions}
+              showToolbar={showToolbar}
+              filterProps={filterProps}
+              filterList={filterList}
+              rowList={rowList}
+              editableState={editableState}
+              selected={selected}
+              isTreeTable={isTreeTable}
+              editable={editable}
+              pageable={pageable}
+              columns={columns}
+              rows={rows}
+              inlineActions={inlineActions}
+              totalRowKey={totalRowKey}
+              variant={variant}
+              fontSize={fontSize}
+              {...props}
+              {...restProps}
+            />
           )
         }}
       </Form>
@@ -857,6 +918,8 @@ MuiTable.propTypes = {
   childIndent: PropTypes.number,
   initialExpandedState: PropTypes.object, // {[idKey]: bool} - Initial expanded state
   showEditableActions: PropTypes.bool, // Show actions - (add, delete) in editable mode
+  component: PropTypes.string, // HTML component to use for FormContent
+  editing: PropTypes.bool, // To Open table in editable mode
 
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
@@ -869,7 +932,8 @@ MuiTable.propTypes = {
   onTreeExapand: PropTypes.func, // (event, row, isExpanded) => any
   defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
-  hasRowsChanged: PropTypes.func // (rows) => Key: String Function to detect whether rows props has changed
+  hasRowsChanged: PropTypes.func, // (rows) => Key: String Function to detect whether rows props has changed
+  handleSubmitRef: PropTypes.func // When Form is submited externally, get hold of ReactFinalForm handleSubmit function by passing this function.
 }
 
 MuiTable.defaultProps = {
@@ -909,6 +973,8 @@ MuiTable.defaultProps = {
   childIndent: 12,
   expandedColor: 'none',
   showEditableActions: false,
+  component: 'form',
+  editing: false,
   rowStyle: {},
   cellStyle: {},
   onSubmit: () => {},
