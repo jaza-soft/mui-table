@@ -78,6 +78,7 @@ const EditableTable = () => {
       rows={addTotalRow(rows)}
       pageable={true}
       editable={true}
+      footerActions={[{ name: 'edit', tooltip: 'Update', options: { variant: 'outlined', color: 'secondary' } }]}
       showEditableActions={true}
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}

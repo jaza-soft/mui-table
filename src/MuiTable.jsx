@@ -46,7 +46,7 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, capitalize, hasRowsChanged, nameFromId } from './utils/helper'
+import { multiLineText, getDistinctValues, capitalize, hasRowsChanged, nameFromId, mergeArray } from './utils/helper'
 import useMuiTable from './hooks/useMuiTable'
 
 const getTooltip = (tooltip, action) => tooltip || capitalize(action)
@@ -322,18 +322,23 @@ const MuiTable = (props) => {
   const showActions = inlineActions.length > 0 && !editableState.editing
 
   // footer actions in editable mode
-  let editingFooterActions = pageable
-    ? [{ name: 'save' }, { name: 'row-add' }, { name: 'cancel' }]
-    : [{ name: 'cancel' }, { name: 'row-add' }, { name: 'save' }]
+  let editingFooterActions = [
+    { name: 'save', serialNo: pageable ? 1 : -1 },
+    { name: 'row-add', serialNo: pageable ? 2 : -2 },
+    { name: 'cancel', serialNo: pageable ? 3 : -3 }
+  ]
   if (!enableRowAddition) {
     editingFooterActions = editingFooterActions.filter((e) => e?.name !== 'row-add')
   }
   // footer actions in view mode
-  let viewFooterActions = pageable ? [{ name: 'edit' }, ...footerActions] : [...footerActions, { name: 'edit' }]
+  let viewFooterActions = mergeArray(
+    [{ name: 'edit', tooltip: 'Edit', options: { color: 'primary' }, serialNo: pageable ? 1 : -1 }],
+    footerActions,
+    'name'
+  )
   if (!editable) {
     viewFooterActions = viewFooterActions.filter((e) => e?.name !== 'edit')
   }
-
   // Inline Actions in Editable mode
   const editableActions = [
     { name: 'add', tooltip: 'Add Row' },
@@ -477,7 +482,7 @@ const MuiTable = (props) => {
                                   {columns.map((column, colIdx) => {
                                     const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
                                     const finalLength = length || cellLength
-                                    let value = row[dataKey]
+                                    const value = row[dataKey]
                                     let shortValue = value
                                     if (typeof value === 'string') {
                                       const texts = multiLineText(value, finalLength)
@@ -710,51 +715,45 @@ const MuiTable = (props) => {
                     {editableState.editing ? (
                       <FormSpy subscription={{ form: true }}>
                         {({ form }) =>
-                          editingFooterActions.map(({ name }) =>
-                            name === 'save' ? (
-                              <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
-                                Save
-                              </Button>
-                            ) : name === 'row-add' ? (
-                              <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
-                                Add Rows
-                              </Button>
-                            ) : name === 'cancel' ? (
-                              <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
-                                Cancel
-                              </Button>
-                            ) : null
-                          )
+                          editingFooterActions
+                            .sort((a, b) => a.serialNo - b.serialNo)
+                            .map(({ name }) =>
+                              name === 'save' ? (
+                                <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
+                                  Save
+                                </Button>
+                              ) : name === 'row-add' ? (
+                                <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
+                                  Add Rows
+                                </Button>
+                              ) : name === 'cancel' ? (
+                                <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
+                                  Cancel
+                                </Button>
+                              ) : null
+                            )
                         }
                       </FormSpy>
                     ) : !editableState.editingInline ? (
-                      viewFooterActions.map(({ name, tooltip, icon, options }) =>
-                        name === 'edit' ? (
-                          <Button
-                            key={name}
-                            className={classes.button}
-                            variant='text'
-                            color='primary'
-                            onClick={() => setEditableState({ editing: true })}
-                            disabled={selected.length > 0}
-                          >
-                            Edit
-                          </Button>
-                        ) : (
-                          <Button
-                            key={name}
-                            className={classes.button}
-                            variant='text'
-                            onClick={(event) => handleFooterActionClick(event, name)}
-                            disabled={editableState.busy}
-                            {...options}
-                          >
-                            {icon}
-                            <span style={{ padding: '0.25em' }} />
-                            {tooltip}
-                          </Button>
-                        )
-                      )
+                      viewFooterActions
+                        .sort((a, b) => a.serialNo - b.serialNo)
+                        .map(({ name, tooltip, icon, options }) => {
+                          const disabled = name === 'edit' ? selected.length > 0 : editableState.busy
+                          return (
+                            <Button
+                              key={name}
+                              className={classes.button}
+                              variant='text'
+                              onClick={(event) => (name === 'edit' ? setEditableState({ editing: true }) : handleFooterActionClick(event, name))}
+                              disabled={disabled}
+                              {...options}
+                            >
+                              {icon}
+                              {icon && <span style={{ padding: '0.25em' }} />}
+                              {tooltip}
+                            </Button>
+                          )
+                        })
                     ) : null}
                   </div>
 
@@ -793,6 +792,7 @@ const OptionType = PropTypes.shape({
 })
 
 const ActionType = PropTypes.shape({
+  serialNo: PropTypes.number,
   name: PropTypes.string,
   tooltip: PropTypes.string,
   icon: PropTypes.any,

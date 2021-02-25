@@ -24,6 +24,25 @@ export const multiLineText = (text, length) => {
   return result
 }
 
+export const mergeArray = (arr1, arr2, idKey) => {
+  const ids1 = arr1.map((e) => (typeof idKey === 'function' ? idKey(e) : e[idKey]))
+  const ids2 = arr2.map((e) => (typeof idKey === 'function' ? idKey(e) : e[idKey]))
+
+  let merged = arr1.filter((e) => (typeof idKey === 'function' ? !ids2.includes(idKey(e)) : !ids2.includes(e[idKey]))) // Elements of first array not present in second array
+  const newElements = arr2.filter((e) => (typeof idKey === 'function' ? !ids1.includes(idKey(e)) : !ids1.includes(e[idKey])))
+  merged = [...merged, ...newElements]
+
+  const existingIds = ids1.filter((id) => ids2.includes(id))
+  const existingElements = []
+  existingIds.forEach((id) => {
+    const element1 = arr1.find((e) => (typeof idKey === 'function' ? idKey(e) === id : e[idKey] === id))
+    const element2 = arr2.find((e) => (typeof idKey === 'function' ? idKey(e) === id : e[idKey] === id))
+    existingElements.push({ ...element1, ...element2 })
+  })
+  merged = [...merged, ...existingElements]
+  return merged
+}
+
 export const capitalize = (text) => {
   if (typeof text === 'string' && text.trim().length > 0) {
     text = text.trim()
@@ -62,7 +81,7 @@ export const flattenTree = (tree, expanded = false, idKey = 'id') => {
 }
 
 export const getExpandedState = (tree, defaultExpanded, idKey = 'id') => {
-  let expanded = {}
+  const expanded = {}
   tree.forEach((root) => expandedChild(root, expanded, defaultExpanded, idKey))
   return expanded
 }
