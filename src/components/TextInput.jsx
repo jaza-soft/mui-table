@@ -8,6 +8,8 @@ import Input from '@material-ui/core/Input'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 
+import ValidationError from './ValidationError'
+
 const useStyles = makeStyles((theme) => ({
   formControl: (props) => ({
     minWidth: props.variant === 'excel' ? '100%' : 120
@@ -23,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   })
 }))
 
-const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, options }) => {
+const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18nMap, options }) => {
   const classes = useStyles({ variant, fontSize })
 
   return (
@@ -50,7 +52,11 @@ const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, opt
               />
             )}
 
-            {meta.touched && meta.error && <FormHelperText id={`${name}-error`}>{meta.error}</FormHelperText>}
+            {meta.touched && meta.error && (
+              <FormHelperText id={`${name}-error`}>
+                <ValidationError error={meta.error} i18nMap={i18nMap} />
+              </FormHelperText>
+            )}
           </FormControl>
         )
       }}

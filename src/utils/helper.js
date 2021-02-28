@@ -1,9 +1,21 @@
+import translate from './translate'
+
+export const isEmpty = (value) => typeof value === 'undefined' || value === null || value === '' || (Array.isArray(value) && value.length === 0)
+
 export const getDistinctValues = (values) => {
   if (!values) return values
   if (!Array.isArray(values)) return values
   const set = new Set()
   values.forEach((value) => set.add(value))
   return Array.from(set)
+}
+
+export const getLabel = (i18nCode, tooltip, i18nMap = {}, args = {}) => {
+  if (!isEmpty(i18nMap)) {
+    return tooltip ? translate(tooltip, i18nMap, { ...args, _: tooltip }) : translate(i18nCode, i18nMap, args)
+  } else {
+    return tooltip || capitalize(i18nCode)
+  }
 }
 
 export const multiLineText = (text, length) => {

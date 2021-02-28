@@ -11,6 +11,8 @@ import FormControl from '@material-ui/core/FormControl'
 import InputLabel from '@material-ui/core/InputLabel'
 import Divider from '@material-ui/core/Divider'
 
+import { getLabel } from '../utils/helper'
+
 const useStyles = makeStyles({
   root: {
     minWidth: 500,
@@ -32,7 +34,7 @@ const useStyles = makeStyles({
 })
 
 const Filter = (props) => {
-  const { columns, filterValues = {}, updateFilter, resetFilter } = props
+  const { columns, filterValues = {}, updateFilter, resetFilter, i18nMap } = props
   const classes = useStyles()
 
   const handleChange = (event, dataKey) => {
@@ -47,8 +49,8 @@ const Filter = (props) => {
   return (
     <div className={classes.root}>
       <div className={classes.header}>
-        <Typography>Filters</Typography>
-        <Button onClick={handleReset}>RESET</Button>
+        <Typography>{getLabel('text.filters', null, i18nMap, { _: 'Filters' })}</Typography>
+        <Button onClick={handleReset}>{getLabel('text.reset', null, i18nMap, { _: 'Reset' })}</Button>
       </div>
       <Divider light variant='fullWidth' />
       <div className={classes.content}>
@@ -58,7 +60,7 @@ const Filter = (props) => {
             return (
               <Grid key={idx} item xs={12} sm={6}>
                 <FormControl className={classes.formControl}>
-                  <InputLabel id='demo-simple-select-label'>{title}</InputLabel>
+                  <InputLabel id='demo-simple-select-label'>{getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}</InputLabel>
                   <Select
                     value={filterValues[dataKey] || defaultValue}
                     multiple={multiSelect}
