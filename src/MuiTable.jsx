@@ -46,10 +46,9 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, capitalize, hasRowsChanged, nameFromId, mergeArray } from './utils/helper'
+import { multiLineText, getDistinctValues, hasRowsChanged, nameFromId, mergeArray, getLabel, capitalize } from './utils/helper'
+import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
-
-const getTooltip = (tooltip, action) => tooltip || capitalize(action)
 
 const renderActions = ({
   showActions,
@@ -61,7 +60,8 @@ const renderActions = ({
   editingInline,
   actionPlacement,
   hasValidationErrors,
-  handleInlineActionClick
+  handleInlineActionClick,
+  i18nMap
 }) => {
   const showEmpty = !showActions || row[totalRowKey]
   if (showEmpty) {
@@ -74,18 +74,21 @@ const renderActions = ({
     <TableCell align={actionPlacement} padding='none'>
       {editingInline && activeRow
         ? activeActions.map(({ name, tooltip }, idx) => (
-            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
-              <IconButton aria-label={getTooltip(tooltip, name)} onClick={(e) => handleInlineActionClick(e, name, row, rowIdx, hasValidationErrors)}>
+            <Tooltip key={idx} title={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
+              <IconButton
+                aria-label={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                onClick={(e) => handleInlineActionClick(e, name, row, rowIdx, hasValidationErrors)}
+              >
                 {name === 'done' && <DoneIcon fontSize='small' />}
                 {name === 'cancel' && <CancelIcon fontSize='small' />}
               </IconButton>
             </Tooltip>
           ))
         : inlineActions.map(({ name, tooltip, icon, options }, idx) => (
-            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
+            <Tooltip key={idx} title={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
               <span>
                 <IconButton
-                  aria-label={getTooltip(tooltip, name)}
+                  aria-label={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
                   disabled={editingInline}
                   onClick={(e) => handleInlineActionClick(e, name, row, rowIdx)}
                   {...options}
@@ -103,14 +106,14 @@ const renderActions = ({
   )
 }
 
-const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacement, handleEditableActionClick }) => {
+const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacement, handleEditableActionClick, i18nMap }) => {
   return (
     <TableCell align={actionPlacement} padding='none'>
       {actions.map(({ name, tooltip, options }, idx) => (
-        <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
+        <Tooltip key={idx} title={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
           <span>
             <IconButton
-              aria-label={getTooltip(tooltip, name)}
+              aria-label={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
               disabled={row?.hasChild && name === 'delete'}
               onClick={(e) => handleEditableActionClick(e, name, fields, row, rowIdx)}
               {...options}
@@ -128,6 +131,7 @@ const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacem
 
 const FormContent = (props) => {
   const {
+    i18nMap,
     columns,
     rows,
     rowList,
@@ -210,18 +214,18 @@ const FormContent = (props) => {
             {({ form }) =>
               editFooterActions
                 .sort((a, b) => a.serialNo - b.serialNo)
-                .map(({ name }) =>
+                .map(({ name, tooltip }) =>
                   name === 'save' ? (
                     <Button key={name} className={classes.button} variant='text' color='primary' type='submit' disabled={submitting}>
-                      Save
+                      {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: 'Save' })}
                     </Button>
-                  ) : name === 'row-add' ? (
+                  ) : name === 'rowAdd' ? (
                     <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
-                      Add Rows
+                      {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: 'Add Rows' })}
                     </Button>
                   ) : name === 'cancel' ? (
                     <Button key={name} className={classes.button} variant='text' onClick={handleEditCancel}>
-                      Cancel
+                      {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: 'Cancel' })}
                     </Button>
                   ) : null
                 )
@@ -243,7 +247,7 @@ const FormContent = (props) => {
                 >
                   {icon}
                   {icon && <span style={{ padding: '0.25em' }} />}
-                  {tooltip}
+                  {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
                 </Button>
               )
             })
@@ -259,7 +263,7 @@ const FormContent = (props) => {
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangePageSize}
-          labelRowsPerPage='Page Size'
+          labelRowsPerPage={translate('text.pageSize', i18nMap, { _: 'Page Size' })}
           nextIconButtonProps={{
             disabled: editableState.editing || totalPage === 0 || page === totalPage - 1
           }}
@@ -287,6 +291,7 @@ const FormContent = (props) => {
           onSearch={setSearchText}
           onSelectActionClick={handleSelectActionClick}
           onToolbarActionClick={onToolbarActionClick}
+          i18nMap={i18nMap}
         />
       )}
 
@@ -316,6 +321,7 @@ const FormContent = (props) => {
               actionPlacement={actionPlacement}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
+              i18nMap={i18nMap}
             />
 
             <TableBody>
@@ -381,7 +387,8 @@ const FormContent = (props) => {
                               inlineActions,
                               editingInline: editableState.editingInline,
                               actionPlacement,
-                              handleInlineActionClick
+                              handleInlineActionClick,
+                              i18nMap
                             })
                           : null}
 
@@ -443,7 +450,8 @@ const FormContent = (props) => {
                               inlineActions,
                               editingInline: editableState.editingInline,
                               actionPlacement,
-                              handleInlineActionClick
+                              handleInlineActionClick,
+                              i18nMap
                             })
                           : null}
                       </TableRow>
@@ -481,7 +489,8 @@ const FormContent = (props) => {
                                 editingInline: editableState.editingInline,
                                 actionPlacement,
                                 hasValidationErrors,
-                                handleInlineActionClick
+                                handleInlineActionClick,
+                                i18nMap
                               })
                             : null}
 
@@ -492,7 +501,8 @@ const FormContent = (props) => {
                                 rowIdx,
                                 actions: editableActions,
                                 actionPlacement,
-                                handleEditableActionClick
+                                handleEditableActionClick,
+                                i18nMap
                               })
                             : null}
                           {isTreeTable && (
@@ -558,6 +568,7 @@ const FormContent = (props) => {
                                       disabled={disabled}
                                       variant={variant}
                                       fontSize={fontSize}
+                                      i18nMap={i18nMap}
                                       options={options}
                                     />
                                   )}
@@ -569,6 +580,7 @@ const FormContent = (props) => {
                                       disabled={disabled}
                                       variant={variant}
                                       fontSize={fontSize}
+                                      i18nMap={i18nMap}
                                       options={options}
                                     />
                                   )}
@@ -588,7 +600,8 @@ const FormContent = (props) => {
                                 editingInline: editableState.editingInline,
                                 actionPlacement,
                                 hasValidationErrors,
-                                handleInlineActionClick
+                                handleInlineActionClick,
+                                i18nMap
                               })
                             : null}
                           {showEditableActions && actionPlacement === 'right'
@@ -598,7 +611,8 @@ const FormContent = (props) => {
                                 rowIdx,
                                 actions: editableActions,
                                 actionPlacement,
-                                handleEditableActionClick
+                                handleEditableActionClick,
+                                i18nMap
                               })
                             : null}
                         </TableRow>
@@ -691,7 +705,7 @@ const MuiTable = (props) => {
   const sortable = isTreeTable ? false : props.sortable
   const pageable = isTreeTable ? false : props.pageable
 
-  const { rowList, key, updateFilter, resetFilter, editableState, selected, filterValues, handleSubmit, ...restProps } = useMuiTable({
+  const { rowList, key, updateFilter, resetFilter, editableState, selected, filterValues, handleSubmit, i18nMap, ...restProps } = useMuiTable({
     ...props,
     searchable,
     selectable,
@@ -750,7 +764,8 @@ const MuiTable = (props) => {
     columns: filterColumns,
     filterValues,
     updateFilter,
-    resetFilter
+    resetFilter,
+    i18nMap
   }
 
   let toolbarActions = []
@@ -769,11 +784,11 @@ const MuiTable = (props) => {
   // footer actions in editable mode
   let editingFooterActions = [
     { name: 'save', serialNo: pageable ? 1 : -1 },
-    { name: 'row-add', serialNo: pageable ? 2 : -2 },
+    { name: 'rowAdd', serialNo: pageable ? 2 : -2 },
     { name: 'cancel', serialNo: pageable ? 3 : -3 }
   ]
   if (!enableRowAddition) {
-    editingFooterActions = editingFooterActions.filter((e) => e?.name !== 'row-add')
+    editingFooterActions = editingFooterActions.filter((e) => e?.name !== 'rowAdd')
   }
   // footer actions in view mode
   let viewFooterActions = mergeArray(
@@ -815,30 +830,33 @@ const MuiTable = (props) => {
             props.component,
             { onSubmit: handleSubmit },
             <FormContent
+              {...props}
+              {...restProps}
               classes={classes}
               submitting={submitting}
               hasValidationErrors={hasValidationErrors}
-              isSelected={isSelected}
+              columns={columns}
+              rows={rows}
+              rowList={rowList}
+              isTreeTable={isTreeTable}
+              editable={editable}
+              pageable={pageable}
+              inlineActions={inlineActions}
+              editableActions={editableActions}
+              toolbarActions={toolbarActions}
               viewFooterActions={viewFooterActions}
               editingFooterActions={editingFooterActions}
               showActions={showActions}
               showToolbar={showToolbar}
               filterProps={filterProps}
               filterList={filterList}
-              rowList={rowList}
               editableState={editableState}
               selected={selected}
-              isTreeTable={isTreeTable}
-              editable={editable}
-              pageable={pageable}
-              columns={columns}
-              rows={rows}
-              inlineActions={inlineActions}
+              isSelected={isSelected}
               totalRowKey={totalRowKey}
               variant={variant}
               fontSize={fontSize}
-              {...props}
-              {...restProps}
+              i18nMap={i18nMap}
             />
           )
         }}
@@ -903,7 +921,7 @@ MuiTable.propTypes = {
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
   inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
-  footerActions: PropTypes.arrayOf(ActionType), // standard actions - edit, save, row-add, cancel
+  footerActions: PropTypes.arrayOf(ActionType), // standard actions - edit, save, rowAdd, cancel
   chipOptions: PropTypes.object,
   actionPlacement: PropTypes.oneOf(['left', 'right']),
   rowInsert: PropTypes.oneOf(['above', 'below']), // row should be inserted above or below for inline - add/duplicate actions
@@ -920,6 +938,7 @@ MuiTable.propTypes = {
   showEditableActions: PropTypes.bool, // Show actions - (add, delete) in editable mode
   component: PropTypes.string, // HTML component to use for FormContent
   editing: PropTypes.bool, // To Open table in editable mode
+  i18nMap: PropTypes.object, // i18n object containing key and values
 
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object

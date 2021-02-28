@@ -10,6 +10,8 @@ import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import Input from '@material-ui/core/Input'
 
+import ValidationError from './ValidationError'
+
 const useStyles = makeStyles((theme) => ({
   formControl: {
     width: '100%'
@@ -21,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   })
 }))
 
-const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, options }) => {
+const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, i18nMap, options }) => {
   const classes = useStyles({ variant, fontSize })
 
   return (
@@ -49,7 +51,11 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
               ))}
             </Select>
 
-            {meta.touched && meta.error && <FormHelperText id={`${name}-error`}>{meta.error}</FormHelperText>}
+            {meta.touched && meta.error && (
+              <FormHelperText id={`${name}-error`}>
+                <ValidationError error={meta.error} i18nMap={i18nMap} />
+              </FormHelperText>
+            )}
           </FormControl>
         )
       }}

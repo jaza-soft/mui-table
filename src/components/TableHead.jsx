@@ -9,6 +9,8 @@ import TableRow from '@material-ui/core/TableRow'
 import TableSortLabel from '@material-ui/core/TableSortLabel'
 import Checkbox from '@material-ui/core/Checkbox'
 
+import { getLabel } from '../utils/helper'
+
 const useStyles = makeStyles({
   visuallyHidden: {
     border: 0,
@@ -39,7 +41,8 @@ const TableHead = (props) => {
     rowCount,
     showActions,
     actionPlacement,
-    onRequestSort
+    onRequestSort,
+    i18nMap
   } = props
 
   const createSortHandler = (property) => (event) => {
@@ -63,7 +66,7 @@ const TableHead = (props) => {
         )}
         {isTreeTable && <TableCell padding='checkbox' />}
 
-        {showActions && actionPlacement === 'left' && <TableCell align='left'>Actions</TableCell>}
+        {showActions && actionPlacement === 'left' && <TableCell align='left'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>}
 
         {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
           <TableCell
@@ -76,18 +79,20 @@ const TableHead = (props) => {
           >
             {sortable && !editing ? (
               <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
-                {title}
+                {getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}
                 {orderBy === dataKey ? (
                   <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
                 ) : null}
               </TableSortLabel>
             ) : (
-              title
+              getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })
             )}
           </TableCell>
         ))}
 
-        {showActions && actionPlacement === 'right' && <TableCell align='right'>Actions</TableCell>}
+        {showActions && actionPlacement === 'right' && (
+          <TableCell align='right'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
+        )}
       </TableRow>
     </MuiTableHead>
   )

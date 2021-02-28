@@ -18,9 +18,8 @@ import Tooltip from './Tooltip'
 import Popover from './Popover'
 import Filter from './Filter'
 
-import { capitalize } from '../utils/helper'
-
-const getTooltip = (tooltip, action) => tooltip || capitalize(action)
+import { capitalize, getLabel } from '../utils/helper'
+import i18nMap from '../utils/i18nMap'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -83,18 +82,22 @@ const Toolbar = (props) => {
     >
       {selectedCount > 0 ? (
         <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
-          {selectedCount} selected
+          {getLabel(`text.selected`, null, i18nMap, { _: `${selectedCount} items Selected`, count: selectedCount })}
         </Typography>
       ) : (
         <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
-          {title}
+          {getLabel(`text.title`, null, i18nMap, { _: title })}
         </Typography>
       )}
 
       {selectedCount > 0
         ? selectActions.map(({ name, tooltip, icon, options }, idx) => (
-            <Tooltip key={idx} title={getTooltip(tooltip, name)} arrow>
-              <IconButton aria-label={getTooltip(tooltip, name)} onClick={createSelectActionHandler(name)} {...options}>
+            <Tooltip key={idx} title={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
+              <IconButton
+                aria-label={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                onClick={createSelectActionHandler(name)}
+                {...options}
+              >
                 {name === 'add' && <AddIcon />}
                 {name === 'edit' && <EditIcon />}
                 {name === 'delete' && <DeleteIcon />}
@@ -109,8 +112,11 @@ const Toolbar = (props) => {
                   onExited={() => setFilterActive(false)}
                   hide={!filterActive}
                   trigger={
-                    <Tooltip title={getTooltip(tooltip, name)} disableFocusListener>
-                      <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)}>
+                    <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
+                      <IconButton
+                        aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                        onClick={createToolbarActionHandler(name)}
+                      >
                         <FilterListIcon />
                       </IconButton>
                     </Tooltip>
@@ -123,7 +129,7 @@ const Toolbar = (props) => {
                   className={classes.search}
                   value={searchText}
                   onChange={handleSearchText}
-                  placeholder='Search'
+                  placeholder={getLabel(`text.search`, null, i18nMap, { _: 'Search' })}
                   startAdornment={
                     <InputAdornment position='start'>
                       <IconButton size='small'>
@@ -143,8 +149,12 @@ const Toolbar = (props) => {
                 />
               )}
               {!['search', 'filter', 'column'].includes(name) && icon && (
-                <Tooltip title={getTooltip(tooltip, name)} disableFocusListener>
-                  <IconButton aria-label={getTooltip(tooltip, name)} onClick={createToolbarActionHandler(name)} {...options}>
+                <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
+                  <IconButton
+                    aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                    onClick={createToolbarActionHandler(name)}
+                    {...options}
+                  >
                     {icon}
                   </IconButton>
                 </Tooltip>

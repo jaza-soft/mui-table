@@ -1,6 +1,8 @@
 import React from 'react'
+import lodashMerge from 'lodash.merge'
 
 import { getDistinctValues, buildTree, flattenTree, getExpandedState } from '../utils/helper'
+import i18nMap from '../utils/i18nMap'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -397,7 +399,10 @@ const useMuiTable = (props) => {
     rowList = flattenTree(tree, editableState.editing || expanded, idKey)
   }
 
+  const mergedI18nMap = lodashMerge(i18nMap, props.i18nMap || {})
+
   return {
+    i18nMap: mergedI18nMap,
     rowList,
     key,
     editableInline,

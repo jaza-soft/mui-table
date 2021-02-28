@@ -1,6 +1,6 @@
 {
   "name": "@jazasoft/mui-table",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "Advanced React Data Table using Material UI",
   "author": "zahidraza",
   "license": "MIT",
@@ -60,7 +60,9 @@
     "clsx": "^1.1.1",
     "final-form": "^4.20.1",
     "final-form-arrays": "^3.0.2",
+    "lodash.get": "^4.4.2",
     "lodash.memoize": "^4.1.2",
+    "lodash.merge": "^4.6.2",
     "react-final-form": "^6.5.0",
     "react-final-form-arrays": "^3.1.1",
     "react-perfect-scrollbar": "^1.5.8"
