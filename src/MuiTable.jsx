@@ -717,15 +717,6 @@ const MuiTable = (props) => {
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
-  const initialValues = {
-    rows:
-      rowList.length > 0
-        ? rowList.filter((row) => !row[totalRowKey])
-        : Array(rowAddCount)
-            .fill('')
-            .map(() => ({}))
-  }
-
   const filterColumns = columns
     .filter((c) => c.filterOptions?.filter)
     .map((c) => {
@@ -808,6 +799,17 @@ const MuiTable = (props) => {
     editableActions.splice(1, 0, { name: 'addChild', tooltip: 'Add Child' })
   }
 
+  const initialValues = React.useMemo(() => {
+    return {
+      rows:
+        rowList.length > 0
+          ? rowList.filter((row) => !row[totalRowKey])
+          : Array(rowAddCount)
+              .fill('')
+              .map(() => ({}))
+    }
+  }, [rowList.length])
+
   return (
     <div>
       <Form
@@ -818,9 +820,7 @@ const MuiTable = (props) => {
         onSubmit={handleSubmit}
         validate={validate}
         validateOnBlur
-        mutators={{
-          ...arrayMutators
-        }}
+        mutators={arrayMutators}
         subscription={{ submitting: true, hasValidationErrors: true }}
         initialValues={initialValues}
       >
@@ -1001,4 +1001,4 @@ MuiTable.defaultProps = {
   hasRowsChanged
 }
 
-export default MuiTable
+export default React.memo(MuiTable)

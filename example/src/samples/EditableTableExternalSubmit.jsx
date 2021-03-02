@@ -57,8 +57,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const EditableTable = () => {
+const EditableTableExtSubmit = () => {
   const classes = useStyles()
+
   const [user, setUser] = React.useState({ addressList: [{ flat: 'Venkatas Grassland Apartment' }] })
 
   const onSubmit = (values, form, onSubmitComplete) => {
@@ -68,13 +69,16 @@ const EditableTable = () => {
   }
 
   const onChange = (event) => {
-    setUser((prev) => ({ ...prev, [event.target.name]: event.target.value }))
+    const name = event?.target?.name
+    const value = event?.target?.value
+    setUser((prev) => ({ ...prev, [name]: value }))
   }
 
   let handleSubmit
   const handleSubmitRef = (submit) => {
     handleSubmit = submit
   }
+
   return (
     <div>
       <form className={classes.root} noValidate autoComplete='off'>
@@ -114,4 +118,4 @@ const EditableTable = () => {
   )
 }
 
-export default EditableTable
+export default EditableTableExtSubmit
