@@ -8,7 +8,7 @@ import CardHeader from '@material-ui/core/CardHeader'
 import Divider from '@material-ui/core/Divider'
 import Button from '@material-ui/core/Button'
 
-import { MuiTable } from '@jazasoft/mui-table'
+import { MuiTable, required, minLength } from '@jazasoft/mui-table'
 
 const options = {
   style: {
@@ -28,12 +28,14 @@ const columns = [
     dataKey: 'street',
     title: 'Street',
     inputType: 'text-input',
+    validate: [required(), minLength(2)],
     options
   },
   {
     dataKey: 'city',
     title: 'City',
     inputType: 'text-input',
+    validate: required(),
     options
   },
   {

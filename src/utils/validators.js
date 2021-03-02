@@ -1,6 +1,6 @@
 import lodashMemoize from 'lodash.memoize'
 
-import { isEmpty } from './helper';
+import { isEmpty } from './helper'
 
 /* eslint-disable no-underscore-dangle */
 /* @link http://stackoverflow.com/questions/46155/validate-email-address-in-javascript */
@@ -24,6 +24,21 @@ const getMessage = (message, messageArgs, value, values) =>
 // result in a new function at every render, and then trigger infinite re-render.
 // Hence, we memoize every built-in validator to prevent a "Maximum call stack" error.
 const memoize = (fn) => lodashMemoize(fn, (...args) => JSON.stringify(args))
+
+const isFunction = (value) => typeof value === 'function'
+
+// Compose multiple validators into a single one for use with final-form
+export const composeValidators = (...validators) => (value, values, meta) => {
+  const allValidators = (Array.isArray(validators[0]) ? validators[0] : validators).filter(isFunction)
+
+  for (const validator of allValidators) {
+    const error = validator(value, values, meta)
+
+    if (error) {
+      return error
+    }
+  }
+}
 
 /**
  * Required validator

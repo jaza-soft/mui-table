@@ -49,6 +49,7 @@ import BooleanInput from './components/BooleanInput'
 import { multiLineText, getDistinctValues, hasRowsChanged, nameFromId, mergeArray, getLabel, capitalize } from './utils/helper'
 import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
+import { composeValidators } from './utils/validators'
 
 const renderActions = ({
   showActions,
@@ -684,20 +685,9 @@ const useStyles = makeStyles((theme) => ({
 const MuiTable = (props) => {
   const isTreeTable = props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey)).length > 0 // Check Whether idKey exists in rows
 
-  const {
-    columns,
-    rows,
-    editable,
-    enableRowAddition,
-    inlineActions,
-    footerActions,
-    toolbar,
-    totalRowKey,
-    variant,
-    fontSize,
-    rowAddCount,
-    validate
-  } = props
+  const { rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
+
+  const columns = props.columns?.map((c) => ({ ...c, validate: Array.isArray(c.validate) ? composeValidators(c.validate) : c.validate }))
 
   // Disable these features in Tree Table
   const searchable = isTreeTable ? false : props.searchable
@@ -889,7 +879,7 @@ MuiTable.propTypes = {
       render: PropTypes.func, // (value, shortValue) => ?any
       disabled: PropTypes.func, // (row, dataKey) => boolean . If any normal cell has to disabled conditionally. It will have higher priority than disabled in options
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
-      validate: PropTypes.func, // Validation function for TextInput and SelectInput
+      validate: PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.func)]), // Validation function for TextInput and SelectInput
       filterOptions: PropTypes.shape({
         filter: PropTypes.bool,
         multiSelect: PropTypes.bool,

@@ -87,22 +87,22 @@ class App extends Component {
 
 **Column**
 
-| Name            | Type       | Default Value  | Description                                                                                                                                                                      |
-| --------------- | ---------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| dataKey         | `string`   |                | Key in Object for this column                                                                                                                                                    |
-| title           | `string`   |                | Label for this column                                                                                                                                                            |
-| inputType       | `string`   | `'text-field'` | Type of Input when table is editable. Values - `'text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input'`                                |
-| choices         | `object[]` | `[]`           | List of Choices when inputType is `'select-input'` or `'auto-complete-input'`. Object Type - `{id: string\|number, name: string}`                                                |
-| render          | `function` |                | render function if custom rendering is required. signature - `(value) => ?any`                                                                                                   |
-| validate        | `function` |                | field validation function. `(value: ?any, allValues: Object, meta: ?FieldState) => ?any`                                                                                         |
-| options         | `object`   | `{}`           | props to be passed to underlying editable component - Input, Select, Switch etc                                                                                                  |
-| disabled        | `function` |                | Disable Editable cells conditionally. Entire columns can be disabled using `options.disabled`. If both are provided, this func will have high priority. `(row, dataKey) => bool` |
-| align           | `string`   |                | Same as MUI TableCell Values - `inherit, center, justify, left, right`                                                                                                           |
-| linkPath        | `function` |                | It will turn field to link. `(row, dataKey) => Path:String`                                                                                                                      |
-| length          | `number`   |                | No. of characters to show or force text wrap depending on value of `cellOverFlow` prop of table                                                                                  |
-| filterOptions   | `object`   | `{}`           | Filter Options - `{filter: bool, multiSelect: bool, showValueOnly: bool}`                                                                                                        |
-| headerCellProps | `object`   | `{}`           | MUI Table Cell Props to be passed to Header Cell                                                                                                                                 |
-| rowCellProps    | `object`   | `{}`           | MUI Table Cell Props to be passed to Row Cell                                                                                                                                    |
+| Name            | Type                   | Default Value  | Description                                                                                                                                                                      |
+| --------------- | ---------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| dataKey         | `string`               |                | Key in Object for this column                                                                                                                                                    |
+| title           | `string`               |                | Label for this column                                                                                                                                                            |
+| inputType       | `string`               | `'text-field'` | Type of Input when table is editable. Values - `'text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input'`                                |
+| choices         | `object[]`             | `[]`           | List of Choices when inputType is `'select-input'` or `'auto-complete-input'`. Object Type - `{id: string\|number, name: string}`                                                |
+| render          | `function`             |                | render function if custom rendering is required. signature - `(value) => ?any`                                                                                                   |
+| validate        | `function\|function[]` |                | field validation function. `(value: ?any, allValues: Object, meta: ?FieldState) => ?any`                                                                                         |
+| options         | `object`               | `{}`           | props to be passed to underlying editable component - Input, Select, Switch etc                                                                                                  |
+| disabled        | `function`             |                | Disable Editable cells conditionally. Entire columns can be disabled using `options.disabled`. If both are provided, this func will have high priority. `(row, dataKey) => bool` |
+| align           | `string`               |                | Same as MUI TableCell Values - `inherit, center, justify, left, right`                                                                                                           |
+| linkPath        | `function`             |                | It will turn field to link. `(row, dataKey) => Path:String`                                                                                                                      |
+| length          | `number`               |                | No. of characters to show or force text wrap depending on value of `cellOverFlow` prop of table                                                                                  |
+| filterOptions   | `object`               | `{}`           | Filter Options - `{filter: bool, multiSelect: bool, showValueOnly: bool}`                                                                                                        |
+| headerCellProps | `object`               | `{}`           | MUI Table Cell Props to be passed to Header Cell                                                                                                                                 |
+| rowCellProps    | `object`               | `{}`           | MUI Table Cell Props to be passed to Row Cell                                                                                                                                    |
 
 ## Props
 
