@@ -106,6 +106,8 @@ const EditableTableExtSubmit = () => {
             editable={true}
             editing={true}
             enableRowAddition={true}
+            rowAddCount={1}
+            onRowAdd={(rows) => rows[rows?.length - 1]}
             onSubmit={onSubmit}
           />
         </Card>

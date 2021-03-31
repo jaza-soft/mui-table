@@ -211,8 +211,8 @@ const FormContent = (props) => {
     <div className={clsx(classes.footerContainer)}>
       <div className={classes.footerActions}>
         {editableState.editing ? (
-          <FormSpy subscription={{ form: true }}>
-            {({ form }) =>
+          <FormSpy subscription={{ form: true, values: true }}>
+            {({ form, values }) =>
               editFooterActions
                 .sort((a, b) => a.serialNo - b.serialNo)
                 .map(({ name, tooltip }) =>
@@ -221,7 +221,7 @@ const FormContent = (props) => {
                       {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: 'Save' })}
                     </Button>
                   ) : name === 'rowAdd' ? (
-                    <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form)}>
+                    <Button key={name} className={classes.button} variant='text' onClick={() => handleRowAdd(form, values)}>
                       {getLabel(`footerAction.${name}`, tooltip, i18nMap, { _: 'Add Rows' })}
                     </Button>
                   ) : name === 'cancel' ? (
@@ -538,6 +538,7 @@ const FormContent = (props) => {
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
+                              const finalChoices = typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey }) : choices
                               return (
                                 <TableCell
                                   className={clsx({
@@ -576,7 +577,7 @@ const FormContent = (props) => {
                                   {element === 'select-input' && (
                                     <SelectInput
                                       name={`${name}.${dataKey}`}
-                                      choices={choices}
+                                      choices={finalChoices}
                                       validate={validate}
                                       disabled={disabled}
                                       variant={variant}
@@ -806,7 +807,7 @@ const MuiTable = (props) => {
         classes={classes.root}
         className={props.className}
         style={props.style}
-        key={key}
+        key={`${key}-${JSON.stringify(initialValues)}`}
         onSubmit={handleSubmit}
         validate={validate}
         validateOnBlur
@@ -922,6 +923,7 @@ MuiTable.propTypes = {
   fontSize: PropTypes.number,
   emptyMessage: PropTypes.string,
   rowAddCount: PropTypes.number, // Number of rows to add in editable mode
+  onRowAdd: PropTypes.func, // (rows) => row object
   expandedColor: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   childIndent: PropTypes.number,
   initialExpandedState: PropTypes.object, // {[idKey]: bool} - Initial expanded state

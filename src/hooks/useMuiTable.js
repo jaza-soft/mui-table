@@ -103,7 +103,8 @@ const useMuiTable = (props) => {
     onInlineActionClick,
     onFooterActionClick,
     hasRowsChanged,
-    onTreeExpand
+    onTreeExpand,
+    onRowAdd
   } = props
 
   const editableInline = inlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
@@ -340,10 +341,14 @@ const useMuiTable = (props) => {
     }
   }
 
-  const handleRowAdd = (form) => {
+  const handleRowAdd = (form, values) => {
     if (!form?.mutators) return
     for (let i = 0; i < rowAddCount; i++) {
-      form.mutators.push('rows', {})
+      let newRow = {}
+      if (typeof onRowAdd === 'function') {
+        newRow = onRowAdd(values?.rows) || {}
+      }
+      form.mutators.push('rows', newRow)
     }
   }
 
@@ -351,7 +356,12 @@ const useMuiTable = (props) => {
     const rowList = fields?.value
     if (hasParentIdKey) {
       if (name === 'add') {
-        rowList.splice(rowIdx + 1, 0, { [idKey]: new Date().getTime(), [parentIdKey]: row[parentIdKey] })
+        let newRow = { [idKey]: new Date().getTime(), [parentIdKey]: row[parentIdKey] }
+        if (typeof onRowAdd === 'function') {
+          const nRow = onRowAdd(rowList) || {}
+          newRow = { ...nRow, ...newRow }
+        }
+        rowList.splice(rowIdx + 1, 0, newRow)
       } else if (name === 'addChild') {
         rowList.splice(rowIdx + 1, 0, { [idKey]: new Date().getTime(), [parentIdKey]: row[idKey] })
       } else if (name === 'delete') {
@@ -363,7 +373,11 @@ const useMuiTable = (props) => {
     } else {
       const size = pageSize + (editableState.newRowCount || 0)
       if (name === 'add') {
-        rowList.splice(rowIdx + 1, 0, {})
+        let newRow = {}
+        if (typeof onRowAdd === 'function') {
+          newRow = onRowAdd(rowList, rowIdx) || {}
+        }
+        rowList.splice(rowIdx + 1, 0, newRow)
         setEditableState((prev) => ({ ...prev, newRowCount: prev.newRowCount ? prev.newRowCount + 1 : 1 }))
       } else if (name === 'delete') {
         rowList.splice(rowIdx, 1)

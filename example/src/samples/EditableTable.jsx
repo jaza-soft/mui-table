@@ -9,7 +9,7 @@ const columns = [
     dataKey: 'dessert',
     title: 'Dessert',
     inputType: 'select-input',
-    choices: desserts.map((e) => ({ id: e, name: e })),
+    choices: ({ row, rowIdx }) => (rowIdx === 0 ? desserts.slice(0, 2).map((e) => ({ id: e, name: e })) : desserts.map((e) => ({ id: e, name: e }))),
     options: { displayEmpty: true },
     validate: required(),
     disabled: (row, dataKey) => row?.id === 3
@@ -37,7 +37,7 @@ const columns = [
   { dataKey: 'protein', title: 'Protein', align: 'right' }
 ]
 
-const rows = Array(5)
+const rows = Array(15)
   .fill('')
   .map((_, idx) => ({
     id: idx + 1,
@@ -80,6 +80,7 @@ const EditableTable = () => {
       editable={true}
       footerActions={[{ name: 'edit', tooltip: 'Update', options: { variant: 'outlined', color: 'secondary' } }]}
       showEditableActions={true}
+      onRowAdd={(rows) => ({ sweet: true })}
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
       onInlineActionClick={onInlineActionClick}
