@@ -799,7 +799,7 @@ const MuiTable = (props) => {
               .fill('')
               .map(() => ({}))
     }
-  }, [rowList.length])
+  }, [JSON.stringify(rowList)])
 
   return (
     <div>
