@@ -46,7 +46,7 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, hasRowsChanged, nameFromId, mergeArray, getLabel, capitalize } from './utils/helper'
+import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize } from './utils/helper'
 import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
 import { composeValidators } from './utils/validators'
@@ -132,11 +132,12 @@ const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacem
 
 const FormContent = (props) => {
   const {
+    classes,
+    toolbarStyle,
     i18nMap,
     columns,
     rows,
     rowList,
-    classes,
     submitting,
     hasValidationErrors,
     showToolbar,
@@ -144,7 +145,10 @@ const FormContent = (props) => {
     selectActions,
     toolbarActions,
     filterProps,
+    searchFocus,
+    searchText,
     setSearchText,
+    setSearchFocus,
     handleSelectActionClick,
     onToolbarActionClick,
     filterList,
@@ -284,12 +288,17 @@ const FormContent = (props) => {
     <Paper>
       {showToolbar && (
         <Toolbar
+          style={toolbarStyle}
+          className={classes.toolbar}
           title={title}
           selectedCount={selectedCount}
           selectActions={selectActions}
           toolbarActions={toolbarActions}
           filterProps={filterProps}
+          autoFocus={searchFocus}
+          searchText={searchText}
           onSearch={setSearchText}
+          onFocus={setSearchFocus}
           onSelectActionClick={handleSelectActionClick}
           onToolbarActionClick={onToolbarActionClick}
           i18nMap={i18nMap}
@@ -639,6 +648,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 650,
     whiteSpace: 'pre'
   },
+  toolbar: {},
   excelTable: {
     minWidth: 650,
     whiteSpace: 'pre',
@@ -932,6 +942,7 @@ MuiTable.propTypes = {
   editing: PropTypes.bool, // To Open table in editable mode
   i18nMap: PropTypes.object, // i18n object containing key and values
 
+  toolbarStyle: PropTypes.object,
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
@@ -943,7 +954,6 @@ MuiTable.propTypes = {
   onTreeExapand: PropTypes.func, // (event, row, isExpanded) => any
   defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
-  hasRowsChanged: PropTypes.func, // (rows) => Key: String Function to detect whether rows props has changed
   handleSubmitRef: PropTypes.func // When Form is submited externally, get hold of ReactFinalForm handleSubmit function by passing this function.
 }
 
@@ -989,8 +999,7 @@ MuiTable.defaultProps = {
   rowStyle: {},
   cellStyle: {},
   onSubmit: () => {},
-  comparator: (a, b) => 0,
-  hasRowsChanged
+  comparator: (a, b) => 0
 }
 
 export default React.memo(MuiTable)

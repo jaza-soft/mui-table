@@ -276,10 +276,12 @@ rows = rows.map((row) => {
 const FilterSearchTable = () => {
   return (
     <MuiTable
+      title="My Table"
       columns={columns}
       rows={rows}
       pageable={true}
       toolbarDivider={false}
+      // toolbarStyle={{backgroundColor: 'yellow'}}
       searchable={true}
       searchKeys={['style', 'label', 'width']}
       chipOptions={{ color: 'secondary' }}

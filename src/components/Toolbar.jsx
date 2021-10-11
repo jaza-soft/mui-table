@@ -46,11 +46,23 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Toolbar = (props) => {
-  const { title, selectedCount, selectActions, toolbarActions, filterProps, onSearch, onSelectActionClick, onToolbarActionClick } = props
+  const {
+    style,
+    className,
+    title,
+    selectedCount,
+    selectActions,
+    toolbarActions,
+    filterProps,
+    onSearch,
+    onFocus,
+    onSelectActionClick,
+    onToolbarActionClick
+  } = props
   const classes = useStyles()
 
   const [filterActive, setFilterActive] = React.useState(false)
-  const [searchText, setSearchText] = React.useState('')
+  const [searchText, setSearchText] = React.useState(props.searchText)
 
   const handleSearchText = (event) => {
     const value = event.target.value
@@ -76,7 +88,8 @@ const Toolbar = (props) => {
 
   return (
     <MuiToolbar
-      className={clsx(classes.root, {
+      style={style}
+      className={clsx(classes.root, className, {
         [classes.highlight]: selectedCount > 0
       })}
     >
@@ -86,7 +99,7 @@ const Toolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
-          {getLabel(`text.title`, null, i18nMap, { _: title })}
+          {getLabel(title, null, i18nMap, { _: title })}
         </Typography>
       )}
 
@@ -129,6 +142,9 @@ const Toolbar = (props) => {
                   className={classes.search}
                   value={searchText}
                   onChange={handleSearchText}
+                  autoFocus={props.autoFocus}
+                  onFocus={() => onFocus(true)}
+                  onBlur={() => onFocus(false)}
                   placeholder={getLabel(`text.search`, null, i18nMap, { _: 'Search' })}
                   startAdornment={
                     <InputAdornment position='start'>
@@ -189,4 +205,4 @@ Toolbar.defaultProps = {
   toolbarActions: [{ name: 'search' }]
 }
 
-export default Toolbar
+export default React.memo(Toolbar)

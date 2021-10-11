@@ -8,6 +8,6 @@ import Toolbar from './components/Toolbar'
 import Filter from './components/Filter'
 import FilterList from './components/FilterList'
 
-export * from "./utils/validators";
+export * from './utils/validators'
 
 export { MuiTable, TextInput, SelectInput, BooleanInput, TextField, TableHead, Toolbar, Filter, FilterList }

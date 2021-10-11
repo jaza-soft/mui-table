@@ -72,6 +72,23 @@ const EditableTable = () => {
     onSubmitComplete(rows)
   }
 
+  const onValidate = (values, form, onSubmitComplete) => {
+    const errors = values?.rows.map((e) => {
+      let error = {}
+      if (!e.dessert) {
+        error.dessert = 'Required'
+      }
+      if (e.calories < 0) {
+        error.calories = 'Must be at least 0'
+      }
+      return error
+    })
+    if (errors.some((e) => Object.keys(e).length > 0)) {
+      return { rows: errors }
+    }
+    return {}
+  }
+
   return (
     <MuiTable
       columns={columns}
@@ -81,6 +98,7 @@ const EditableTable = () => {
       footerActions={[{ name: 'edit', tooltip: 'Update', options: { variant: 'outlined', color: 'secondary' } }]}
       showEditableActions={true}
       onRowAdd={(rows) => ({ sweet: true })}
+      validate={onValidate}
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
       onInlineActionClick={onInlineActionClick}

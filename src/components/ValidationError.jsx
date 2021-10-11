@@ -7,7 +7,7 @@ const ValidationError = ({ error, i18nMap }) => {
     const { message, args } = error
     return <React.Fragment>{translate(message, i18nMap, { ...args })}</React.Fragment>
   } else if (typeof error === 'string') {
-    return <React.Fragment>{translate(error, i18nMap)}</React.Fragment>
+    return <React.Fragment>{translate(error, i18nMap, { _: error })}</React.Fragment>
   }
   return null
 }

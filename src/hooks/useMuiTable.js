@@ -102,7 +102,6 @@ const useMuiTable = (props) => {
     onSelectActionClick,
     onInlineActionClick,
     onFooterActionClick,
-    hasRowsChanged,
     onTreeExpand,
     onRowAdd
   } = props
@@ -129,10 +128,10 @@ const useMuiTable = (props) => {
   const [key, setKey] = React.useState(0) // To Reinitialize form if sorting changes
   const [filterValues, setFilterValues] = React.useState({})
   const [searchText, setSearchText] = React.useState('')
+  const [searchFocus, setSearchFocus] = React.useState(false)
 
   const hasIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, idKey)).length > 0 // Check Whether idKey exists in rows
   const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
-  const rowsChanged = hasRowsChanged(props.rows)
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
   /**
@@ -149,7 +148,7 @@ const useMuiTable = (props) => {
       setTree(tree)
       setExpanded(expanded)
     }
-  }, [rowsChanged, setRows])
+  }, [props.rows, setRows])
   React.useEffect(() => {
     updateRows(rows)
   }, [order, orderBy, setRows])
@@ -332,13 +331,14 @@ const useMuiTable = (props) => {
   }
 
   // collective edit cancel
-  const handleEditCancel = () => {
+  const handleEditCancel = (event) => {
     setEditableState({ editing: false })
     updateRows(props.rows)
     if (hasParentIdKey) {
       const tree = buildTree(props.rows, idKey, parentIdKey)
       setTree(tree)
     }
+    onFooterActionClick && onFooterActionClick(event, 'cancel', props.rows)
   }
 
   const handleRowAdd = (form, values) => {
@@ -430,7 +430,10 @@ const useMuiTable = (props) => {
     orderBy,
     filterValues,
     expanded,
+    searchFocus,
+    searchText,
     setSearchText,
+    setSearchFocus,
     setEditableState,
     handleSelectActionClick,
     handleSubmit,

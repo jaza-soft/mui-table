@@ -158,7 +158,6 @@ class App extends Component {
 | onFooterActionClick  | `function`         |                         | Signature - `(event, action, rows, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                   |
 | rowStyle             | `object\|function` | `{}`                    | Signature - `({row, rowIdx}) => object`. function should return style object                                                                                                   |
 | cellStyle            | `object\|function` | `{}`                    | Signature - `({row, column, rowIdx, colIdx}) => object`. function should return style object                                                                                   |
-| hasRowsChanged       | `function`         | `default function`      | Signature - `(rows) => Key: String`. Function is called to detect whether rows props has changed. Default function detects changes on length of rows and id, modifiedAt fields |
 | handleSubmitRef      | `function`         |                         | Signature - `(handleSubmit) => Void`. When External Form submit is required, We get hold of React Final Form handleSubmit by calling this method.                              |
 
 ## License
