@@ -199,6 +199,7 @@ const FormContent = (props) => {
     pageable,
     handleFooterActionClick,
     totalElements,
+    rowsPerPageOptions,
     pageSize,
     page,
     totalPage,
@@ -261,7 +262,7 @@ const FormContent = (props) => {
 
       {pageable && (
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={rowsPerPageOptions}
           component='div'
           count={totalElements}
           rowsPerPage={pageSize}
@@ -469,7 +470,7 @@ const FormContent = (props) => {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length + (showActions || (editableState.editing && showEditableActions) ? 1 : 0)}>
+                    <TableCell colSpan={columns.length + (showActions || !!selectable || (editableState.editing && showEditableActions) ? 1 : 0)}>
                       <Typography className={classes.emptyMessage}>{rows?.length === 0 ? emptyMessage : 'No matching records found!'} </Typography>
                     </TableCell>
                   </TableRow>
@@ -915,7 +916,8 @@ MuiTable.propTypes = {
   sortable: PropTypes.bool,
   pageable: PropTypes.bool,
   tableProps: PropTypes.object,
-  pageSize: PropTypes.oneOf([5, 10, 25, 50]),
+  rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
+  pageSize: PropTypes.number,
   idKey: PropTypes.string, // Identifier Key in row object. This is used for selection and in tree table
   totalRowKey: PropTypes.string, // For flaging a row as total row, set true value in totalRowKey
   parentIdKey: PropTypes.string, // Identifier Key of parent in row object. This is used in tree table
@@ -974,6 +976,7 @@ MuiTable.defaultProps = {
   idKey: 'id',
   totalRowKey: 'totalRow',
   parentIdKey: 'parentId',
+  rowsPerPageOptions: [10, 25],
   pageSize: 10,
   selectActions: [{ name: 'delete' }],
   toolbarActions: [],
