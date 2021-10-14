@@ -261,7 +261,7 @@ const FormContent = (props) => {
 
       {pageable && (
         <TablePagination
-          rowsPerPageOptions={[10, 25]}
+          rowsPerPageOptions={[5, 10, 25, 50]}
           component='div'
           count={totalElements}
           rowsPerPage={pageSize}
@@ -915,7 +915,7 @@ MuiTable.propTypes = {
   sortable: PropTypes.bool,
   pageable: PropTypes.bool,
   tableProps: PropTypes.object,
-  pageSize: PropTypes.oneOf([10, 25]),
+  pageSize: PropTypes.oneOf([5, 10, 25, 50]),
   idKey: PropTypes.string, // Identifier Key in row object. This is used for selection and in tree table
   totalRowKey: PropTypes.string, // For flaging a row as total row, set true value in totalRowKey
   parentIdKey: PropTypes.string, // Identifier Key of parent in row object. This is used in tree table
