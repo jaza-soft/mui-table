@@ -950,6 +950,7 @@ MuiTable.propTypes = {
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
+  onSelect: PropTypes.func, // (event, selectedIds) => void
   onToolbarActionClick: PropTypes.func, // (event, action) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
   onFooterActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void

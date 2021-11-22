@@ -100,6 +100,7 @@ const useMuiTable = (props) => {
     rowAddCount,
     onSubmit,
     onSelectActionClick,
+    onSelect,
     onInlineActionClick,
     onFooterActionClick,
     onTreeExpand,
@@ -318,6 +319,7 @@ const useMuiTable = (props) => {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
+    onSelect && onSelect(id, newSelected)
     setSelected(newSelected)
   }
 
