@@ -71,6 +71,9 @@ const renderActions = ({
   const activeRow = eRowIdx === rowIdx
   const activeActions =
     actionPlacement === 'left' ? [{ name: 'cancel' }, { name: 'done', tooltip: 'Submit' }] : [{ name: 'done', tooltip: 'Submit' }, { name: 'cancel' }]
+
+  const finalInlineActions = typeof inlineActions === 'function' ? inlineActions(row) : inlineActions
+
   return (
     <TableCell align={actionPlacement} padding='none'>
       {editingInline && activeRow
@@ -85,7 +88,7 @@ const renderActions = ({
               </IconButton>
             </Tooltip>
           ))
-        : inlineActions.map(({ name, tooltip, icon, options }, idx) => (
+        : finalInlineActions.map(({ name, tooltip, icon, options }, idx) => (
             <Tooltip key={idx} title={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
               <span>
                 <IconButton
@@ -772,7 +775,7 @@ const MuiTable = (props) => {
 
   const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
-  const showActions = inlineActions.length > 0 && !editableState.editing
+  const showActions = (typeof inlineActions === 'function' || inlineActions.length > 0) && !editableState.editing
 
   // footer actions in editable mode
   let editingFooterActions = [
@@ -923,7 +926,7 @@ MuiTable.propTypes = {
   parentIdKey: PropTypes.string, // Identifier Key of parent in row object. This is used in tree table
   selectActions: PropTypes.arrayOf(ActionType), // standard actions - add, delete, edit
   toolbarActions: PropTypes.arrayOf(ActionType), // standard actions - column
-  inlineActions: PropTypes.arrayOf(ActionType), // standard actions - edit, delete, add, duplicate
+  inlineActions: PropTypes.oneOfType([PropTypes.arrayOf(ActionType), PropTypes.func]), // standard actions - edit, delete, add, duplicate
   footerActions: PropTypes.arrayOf(ActionType), // standard actions - edit, save, rowAdd, cancel
   chipOptions: PropTypes.object,
   actionPlacement: PropTypes.oneOf(['left', 'right']),

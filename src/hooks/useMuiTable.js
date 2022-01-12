@@ -107,7 +107,8 @@ const useMuiTable = (props) => {
     onRowAdd
   } = props
 
-  const editableInline = inlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
+  const finalInlineActions = typeof inlineActions === 'function' ? inlineActions({}) : inlineActions
+  const editableInline = finalInlineActions.findIndex((e) => e.name === 'edit' || e.name === 'add') !== -1
 
   const [editableState, setEditableState] = React.useState({
     editing: props.editing || false, // Collective Editing
