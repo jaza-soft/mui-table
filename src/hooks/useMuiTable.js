@@ -299,7 +299,10 @@ const useMuiTable = (props) => {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n[idKey])
+      let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+      rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
+
+      const newSelecteds = rowList.map((n) => n[idKey])
       setSelected(newSelecteds)
       return
     }

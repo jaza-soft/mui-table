@@ -44,6 +44,10 @@ const SelectableTable = () => {
     onActionComplete()
   }
 
+  const onSelect = (event, selectedIds) => {
+    console.log({ selectedIds })
+  }
+
   return (
     <MuiTable
       columns={columns}
@@ -56,6 +60,7 @@ const SelectableTable = () => {
         { name: 'custom', tooltip: 'Custom Action', icon: <DoneIcon /> }
       ]}
       onSelectActionClick={onSelectActionClick}
+      onSelect={onSelect}
       idKey='itemId'
     />
   )
