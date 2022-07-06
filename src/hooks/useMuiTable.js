@@ -1,7 +1,7 @@
 import React from 'react'
 import lodashMerge from 'lodash.merge'
 
-import { getDistinctValues, buildTree, flattenTree, getExpandedState } from '../utils/helper'
+import { getDistinctValues, buildTree, flattenTree, getExpandedState, isEmpty } from '../utils/helper'
 import i18nMap from '../utils/i18nMap'
 
 function descendingComparator(a, b, orderBy) {
@@ -302,8 +302,13 @@ const useMuiTable = (props) => {
       let rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
       rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
 
-      const newSelecteds = rowList.map((n) => n[idKey])
-      setSelected(newSelecteds)
+      // pagination
+      const startIdx = page * pageSize
+      const endIdx = pageable ? page * pageSize + pageSize : rowList.length
+      rowList = rowList.slice(startIdx, endIdx)
+
+      const newSelecteds = getDistinctValues(rowList.map((n) => n[idKey]).filter((id) => !isEmpty(id)))
+      setSelected((prev) => [...prev, ...newSelecteds])
       return
     }
     setSelected([])
