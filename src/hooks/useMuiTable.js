@@ -308,7 +308,15 @@ const useMuiTable = (props) => {
       rowList = rowList.slice(startIdx, endIdx)
 
       const newSelecteds = getDistinctValues(rowList.map((n) => n[idKey]).filter((id) => !isEmpty(id)))
-      setSelected((prev) => getDistinctValues([...prev, ...newSelecteds]))
+      setSelected((prev = []) => {
+        let ids = [...prev]
+        if (newSelecteds.every((id) => ids.includes(id))) {
+          ids = ids.filter((id) => !newSelecteds.includes(id))
+        } else {
+          ids = [...ids, ...newSelecteds]
+        }
+        return getDistinctValues(ids)
+      })
       return
     }
     setSelected([])
