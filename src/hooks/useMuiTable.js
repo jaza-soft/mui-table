@@ -28,8 +28,9 @@ function applySort(array, comparator) {
   return stabilizedThis.map((el) => el[0])
 }
 
-const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
+const applyFilter = (rows, filterValues, idKey, hasIdKey, csvTextColumns) => {
   const dataKeys = Object.keys(filterValues)
+  const csvColumns = csvTextColumns?.map((c) => c.dataKey) || []
   const filteredRows = rows.filter((row) => {
     let result = true
     for (let i = 0; i < dataKeys.length; i++) {
@@ -37,16 +38,43 @@ const applyFilter = (rows, filterValues, idKey, hasIdKey) => {
       const value = filterValues[dataKey]
       if (Array.isArray(value)) {
         if (value.length > 0) {
-          const matchCount = value.filter((v) => v === row[dataKey]).length
-          if (matchCount === 0) {
-            result = false
-            break
+          if (csvColumns.includes(dataKey)) {
+            const csvText = row[dataKey]
+            const valueList =
+              csvText
+                ?.split(',')
+                .map((e) => e.trim())
+                .filter((e) => !isEmpty(e)) || []
+            const match = value.some((v) => valueList.includes(v))
+            if (!match) {
+              result = false
+              break
+            }
+          } else {
+            const matchCount = value.filter((v) => v === row[dataKey]).length
+            if (matchCount === 0) {
+              result = false
+              break
+            }
           }
         }
       } else {
-        if (value !== row[dataKey]) {
-          result = false
-          break
+        if (csvColumns.includes(dataKey)) {
+          const csvText = row[dataKey]
+          const valueList =
+            csvText
+              ?.split(',')
+              .map((e) => e.trim())
+              .filter((e) => !isEmpty(e)) || []
+          if (!valueList.includes(value)) {
+            result = false
+            break
+          }
+        } else {
+          if (value !== row[dataKey]) {
+            result = false
+            break
+          }
         }
       }
     }
@@ -418,7 +446,9 @@ const useMuiTable = (props) => {
   let totalPage = 0
   let totalElements = 0
   if (!hasParentIdKey) {
-    rowList = applyFilter(rows, filterValues, idKey, hasIdKey)
+    const csvTextColumns = columns.filter((c) => c.filterOptions?.filter && c.filterOptions?.isCsvText)
+
+    rowList = applyFilter(rows, filterValues, idKey, hasIdKey, csvTextColumns)
     rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
 
     // pagination

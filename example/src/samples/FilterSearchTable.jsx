@@ -2,6 +2,7 @@ import React from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 
+// const mills = ['Vardhman', 'Monti', 'Arvind', 'Laguna', 'Ranger']
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
 const columns = [
@@ -38,7 +39,7 @@ const columns = [
   { dataKey: 'csv', title: 'CSV', filterOptions: { filter: true, showValueOnly: false } },
   { dataKey: 'width', title: 'Cuttable\nWidth (CM)' },
   { dataKey: 'shrinkage', title: 'Shrinkage' },
-  { dataKey: 'mill', title: 'Mill' }
+  { dataKey: 'mills', title: 'Mills', filterOptions: { filter: true, isCsvText: true, multiSelect: true } }
 ]
 
 let rows = [
@@ -54,7 +55,7 @@ let rows = [
     width: 150,
     wash: 'No',
     shrinkage: 'eu nulla',
-    mill: 'accumsan laoreet'
+    mills: 'Vardhman,Monti'
   },
   {
     style: 'egestas. Aliquam',
@@ -68,7 +69,7 @@ let rows = [
     width: 158,
     wash: 'No',
     shrinkage: 'nec urna',
-    mill: 'Cum sociis'
+    mills: 'Monti'
   },
   {
     style: 'non, bibendum',
@@ -82,7 +83,7 @@ let rows = [
     width: 149,
     wash: 'No',
     shrinkage: 'Sed eu',
-    mill: 'adipiscing lobortis'
+    mills: 'Arvind, Monti'
   },
   {
     style: 'metus sit',
@@ -96,7 +97,7 @@ let rows = [
     width: 160,
     wash: 'No',
     shrinkage: 'lorem, luctus',
-    mill: 'egestas. Aliquam'
+    mills: 'Arvind, Monti'
   },
   {
     style: 'torquent per',
@@ -110,7 +111,7 @@ let rows = [
     width: 147,
     wash: 'Yes',
     shrinkage: 'eu turpis.',
-    mill: 'risus. Quisque'
+    mills: 'Arvind, Laguna'
   },
   {
     style: 'lacinia. Sed',
@@ -124,7 +125,7 @@ let rows = [
     width: 149,
     wash: 'No',
     shrinkage: 'et malesuada',
-    mill: 'luctus vulputate,'
+    mills: ''
   },
   {
     style: 'ultrices sit',
@@ -138,7 +139,7 @@ let rows = [
     width: 150,
     wash: 'No',
     shrinkage: 'arcu vel',
-    mill: 'montes, nascetur'
+    mills: null
   },
   {
     style: 'urna. Ut',
@@ -152,7 +153,7 @@ let rows = [
     width: 160,
     wash: 'No',
     shrinkage: 'Cras convallis',
-    mill: 'mi fringilla'
+    mills: 'Vardhman'
   },
   {
     style: 'tincidunt, neque',
@@ -166,7 +167,7 @@ let rows = [
     width: 143,
     wash: 'No',
     shrinkage: 'Proin sed',
-    mill: 'sed sem'
+    mills: 'Vardhman,Ranger'
   },
   {
     style: 'ridiculus mus.',
@@ -180,7 +181,7 @@ let rows = [
     width: 158,
     wash: 'Yes',
     shrinkage: 'lorem ac',
-    mill: 'accumsan convallis,'
+    mills: 'Vardhman,Laguna,Monti'
   },
   {
     style: 'libero. Proin',
@@ -194,7 +195,7 @@ let rows = [
     width: 157,
     wash: 'Yes',
     shrinkage: 'ipsum dolor',
-    mill: 'eleifend non,'
+    mills: 'Monti,Laguna'
   },
   {
     style: 'sagittis lobortis',
@@ -208,7 +209,7 @@ let rows = [
     width: 154,
     wash: 'No',
     shrinkage: 'gravida. Praesent',
-    mill: 'tempor erat'
+    mills: 'Ranger,Laguna'
   },
   {
     style: 'ridiculus mus.',
@@ -222,7 +223,7 @@ let rows = [
     width: 158,
     wash: 'No',
     shrinkage: 'Integer urna.',
-    mill: 'congue a,'
+    mills: 'Vardhman,Laguna,Monti,Ranger'
   },
   {
     style: 'dolor, nonummy',
@@ -236,7 +237,7 @@ let rows = [
     width: 158,
     wash: 'No',
     shrinkage: 'sed pede.',
-    mill: 'auctor. Mauris'
+    mills: ''
   },
   {
     style: 'eget, ipsum.',
@@ -250,7 +251,7 @@ let rows = [
     width: 145,
     wash: 'Yes',
     shrinkage: 'ligula. Nullam',
-    mill: 'Integer vitae'
+    mills: 'Vardhman,Arvind,Ranger'
   },
   {
     style: 'Cum sociis',
@@ -264,7 +265,7 @@ let rows = [
     width: 150,
     wash: 'Yes',
     shrinkage: 'massa. Quisque',
-    mill: 'quis diam'
+    mills: 'Ranger'
   }
 ]
 

@@ -46,7 +46,7 @@ import TextInput from './components/TextInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
-import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize } from './utils/helper'
+import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty } from './utils/helper'
 import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
 import { composeValidators } from './utils/validators'
@@ -725,11 +725,16 @@ const MuiTable = (props) => {
   const filterColumns = columns
     .filter((c) => c.filterOptions?.filter)
     .map((c) => {
-      const distinctValues = getDistinctValues(rows.map((row) => row[c.dataKey]).filter((e) => typeof e === 'string' || typeof e === 'number'))
-      const choices = distinctValues.map((value) => ({
-        id: value,
-        name: nameFromId(c, rows, value)
-      }))
+      const isCsvText = c.filterOptions?.isCsvText || false
+      let valueList = rows.map((row) => row[c.dataKey]).filter((e) => typeof e === 'string' || typeof e === 'number')
+      if (isCsvText) {
+        valueList = valueList
+          .filter((v) => !isEmpty(v))
+          .flatMap((v) => v.split(','))
+          .filter((v) => !isEmpty(v))
+          .map((v) => v.trim())
+      }
+      const choices = getDistinctValues(valueList).map((v) => ({ id: v, name: nameFromId(c, rows, v) }))
       return {
         dataKey: c.dataKey,
         title: c.title,

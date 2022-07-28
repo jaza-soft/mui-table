@@ -1,6 +1,13 @@
 import translate from './translate'
 
-export const isEmpty = (value) => typeof value === 'undefined' || value === null || value === '' || (Array.isArray(value) && value.length === 0)
+export const isEmpty = (value) =>
+  typeof value === 'string'
+    ? value.trim() === ''
+    : typeof value === 'object'
+    ? value === null || Object.keys(value).length === 0
+    : Array.isArray(value)
+    ? value.length === 0
+    : value === undefined
 
 export const getDistinctValues = (values) => {
   if (!values) return values
