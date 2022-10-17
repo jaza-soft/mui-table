@@ -39,7 +39,7 @@ const rows = Array(30)
   }))
 
 const SortableTable = () => {
-  return <MuiTable columns={columns} rows={rows} pageable={true} sortable={true} />
+  return <MuiTable columns={columns} rows={rows} pageable={true} sortable={true} defaultSort={{ field: 'calories', order: 'desc' }} />
 }
 
 export default SortableTable

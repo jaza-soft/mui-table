@@ -118,6 +118,7 @@ const useMuiTable = (props) => {
     searchKeys,
     selectable,
     sortable,
+    defaultSort = {},
     pageable,
     idKey,
     parentIdKey,
@@ -150,8 +151,8 @@ const useMuiTable = (props) => {
   const [rows, setRows] = React.useState(props.rows || []) // original rows
   const [tree, setTree] = React.useState([]) // build tree data
   const [expanded, setExpanded] = React.useState({}) // state of expanded node
-  const [order, setOrder] = React.useState('asc')
-  const [orderBy, setOrderBy] = React.useState(columns[0]?.dataKey)
+  const [order, setOrder] = React.useState(defaultSort.order || 'asc')
+  const [orderBy, setOrderBy] = React.useState(defaultSort.field || columns[0]?.dataKey)
   const [selected, setSelected] = React.useState([])
   const [page, setPage] = React.useState(0)
   const [pageSize, setPageSize] = React.useState(props.pageSize)

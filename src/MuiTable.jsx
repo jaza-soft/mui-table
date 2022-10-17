@@ -922,6 +922,10 @@ MuiTable.propTypes = {
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
   selectAll: PropTypes.bool,
   sortable: PropTypes.bool,
+  defaultSort: PropTypes.shape({
+    field: PropTypes.string.isRequired,
+    order: PropTypes.oneOf(['asc', 'desc'])
+  }),
   pageable: PropTypes.bool,
   tableProps: PropTypes.object,
   rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
