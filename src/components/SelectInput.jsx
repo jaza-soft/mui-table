@@ -29,13 +29,17 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
   return (
     <Field name={name} validate={validate}>
       {({ input, meta }) => {
+        let value = input?.value
+        if (options.multiple) {
+          value = Array.isArray(value) ? value : []
+        }
         return (
           <FormControl className={classes.formControl} style={{ width: options?.style?.width }} error={meta.touched && !!meta.error}>
             <Select
               className={clsx(classes.select, options?.className)}
               id={`${name}-select-input`}
               input={<Input disableUnderline={variant === 'excel'} />}
-              inputProps={{ ...input }}
+              inputProps={{ ...input, value }}
               {...options}
               disabled={disabled}
             >
