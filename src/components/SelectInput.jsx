@@ -30,7 +30,7 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
     <Field name={name} validate={validate}>
       {({ input, meta }) => {
         let value = input?.value
-        if (options.multiple) {
+        if (options?.multiple) {
           value = Array.isArray(value) ? value : []
         }
         return (
