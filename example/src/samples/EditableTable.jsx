@@ -34,7 +34,14 @@ const columns = [
     disabled: (row, dataKey) => row?.id === 4
   },
   { dataKey: 'carbs', title: 'Carbohydrate (g)', align: 'right' },
-  { dataKey: 'protein', title: 'Protein', align: 'right' }
+  { dataKey: 'protein', title: 'Protein', align: 'right' },
+  {
+    dataKey: 'file',
+    title: 'File',
+    inputType: 'file-input',
+    options: { type: 'file', multiple: false },
+    disabled: (row, dataKey) => row?.id === 4
+  }
 ]
 
 const rows = Array(15)

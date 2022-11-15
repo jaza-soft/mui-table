@@ -296,7 +296,7 @@ const useMuiTable = (props) => {
       updateRows(rows)
     }
     setEditableState({ busy: true })
-    onFooterActionClick && onFooterActionClick(event, action, rows, onActionComplete)
+    onFooterActionClick && onFooterActionClick(event, action, rows, filterValues, onActionComplete)
   }
 
   // Internal Handler functions

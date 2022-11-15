@@ -43,6 +43,7 @@ import Toolbar from './components/Toolbar'
 import FilterList from './components/FilterList'
 import TextField from './components/TextField'
 import TextInput from './components/TextInput'
+import FileInput from './components/FileInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 
@@ -141,6 +142,7 @@ const FormContent = (props) => {
     columns,
     rows,
     rowList,
+    form,
     submitting,
     hasValidationErrors,
     showToolbar,
@@ -419,8 +421,14 @@ const FormContent = (props) => {
                               shortValue = texts.join('\n')
                             }
                           }
-                          const finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
+
                           const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
+                          let finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
+                          if (Array.isArray(finalValue) && finalValue.some((e) => e instanceof File)) {
+                            finalValue = finalValue.map((e) => e?.name || e).join(', ')
+                          } else if (finalValue instanceof File) {
+                            finalValue = finalValue?.name
+                          }
                           return (
                             <TableCell
                               className={clsx(
@@ -582,6 +590,17 @@ const FormContent = (props) => {
                                       validate={validate}
                                       disabled={disabled}
                                       variant={variant}
+                                      fontSize={fontSize}
+                                      i18nMap={i18nMap}
+                                      options={options}
+                                    />
+                                  )}
+                                  {element === 'file-input' && (
+                                    <FileInput
+                                      name={`${name}.${dataKey}`}
+                                      form={form}
+                                      validate={validate}
+                                      disabled={disabled}
                                       fontSize={fontSize}
                                       i18nMap={i18nMap}
                                       options={options}
@@ -834,7 +853,7 @@ const MuiTable = (props) => {
         subscription={{ submitting: true, hasValidationErrors: true }}
         initialValues={initialValues}
       >
-        {({ handleSubmit, submitting, hasValidationErrors }) => {
+        {({form, handleSubmit, submitting, hasValidationErrors }) => {
           props.handleSubmitRef && props.handleSubmitRef(handleSubmit)
           return React.createElement(
             props.component,
@@ -843,6 +862,7 @@ const MuiTable = (props) => {
               {...props}
               {...restProps}
               classes={classes}
+              form={form}
               submitting={submitting}
               hasValidationErrors={hasValidationErrors}
               columns={columns}
@@ -893,7 +913,7 @@ MuiTable.propTypes = {
     PropTypes.shape({
       dataKey: PropTypes.string,
       title: PropTypes.string,
-      inputType: PropTypes.oneOf(['text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input']),
+      inputType: PropTypes.oneOf(['text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'file-input', 'auto-complete-input']),
       // when inputType is 'select' or 'auto-complete'
       choices: PropTypes.oneOfType([PropTypes.arrayOf(OptionType), PropTypes.func]),
       render: PropTypes.func, // (value, shortValue) => ?any
@@ -965,8 +985,8 @@ MuiTable.propTypes = {
   onSelect: PropTypes.func, // (event, selectedIds) => void
   onToolbarActionClick: PropTypes.func, // (event, action) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
-  onFooterActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
-  onTreeExapand: PropTypes.func, // (event, row, isExpanded) => any
+  onFooterActionClick: PropTypes.func, // (event, action, rows, filterValues, onActionComplete) => void
+  onTreeExpand: PropTypes.func, // (event, row, isExpanded) => any
   defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
   handleSubmitRef: PropTypes.func // When Form is submited externally, get hold of ReactFinalForm handleSubmit function by passing this function.

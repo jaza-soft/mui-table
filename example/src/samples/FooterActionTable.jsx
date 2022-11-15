@@ -29,7 +29,7 @@ const rows = Array(10)
   }))
 
 const FooterActionTable = () => {
-  const onFooterActionClick = (event, action, rows, onActionComplete) => {
+  const onFooterActionClick = (event, action, rows, filterValues, onActionComplete) => {
     if (action === 'run') {
       const newRows = rows.slice(0, rows.length - 2)
       setTimeout(() => onActionComplete(newRows), 2000)

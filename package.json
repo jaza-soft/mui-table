@@ -63,6 +63,7 @@
     "lodash.get": "4.4.2",
     "lodash.memoize": "4.1.2",
     "lodash.merge": "4.6.2",
+    "react-dropzone": "^14.2.3",
     "react-final-form": "6.5.7",
     "react-final-form-arrays": "3.1.1",
     "react-perfect-scrollbar": "1.5.8"
