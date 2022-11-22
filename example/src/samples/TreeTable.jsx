@@ -36,8 +36,8 @@ let rows = [
   { id: 11, serial: 1, parentId: 1, field: 'Field 1.1' },
   { id: 12, serial: 2, parentId: 1, field: 'Field 1.2' },
   { id: 121, serial: 1, parentId: 12, field: 'Field 1.2.1' },
-  { id: 121, serial: 2, parentId: 12, field: 'Field 1.2.2' },
-  { id: 121, serial: 3, parentId: 12, field: 'Field 1.2.3' },
+  { id: 122, serial: 2, parentId: 12, field: 'Field 1.2.2' },
+  { id: 123, serial: 3, parentId: 12, field: 'Field 1.2.3' },
   { id: 2, serial: 4, field: 'Field 2' },
   { id: 21, serial: 2, parentId: 2, field: 'Field 2.1' },
   { id: 22, serial: 1, parentId: 2, field: 'Field 2.2' },
@@ -85,18 +85,29 @@ const TreeTable = () => {
     onSubmitComplete(rowList)
   }
 
+  const onSelect = (selectedIds) => {
+    console.log({ selectedIds })
+  }
+
+  const onSelectActionClick = (event, action, rows, onActionComplete) => {
+    console.log({ action, rows })
+  }
+
   // const defaultExpanded = (row, level) => level <= 0
-  const rowList = addTotalRow(rows).sort((a, b) => a.serial - b.serial)
+  // const rowList = addTotalRow(rows).sort((a, b) => a.serial - b.serial)
   return (
     <MuiTable
       columns={columns}
-      rows={rowList}
+      rows={rows}
       editable={true}
+      selectable={true}
       showEditableActions={true}
       defaultExpanded={true}
       expandedColor={['#92BFF6', '#C1DBFA', '#F0F6FE']}
       // initialExpandedState={{ 1: true, 2: true }}
       onSubmit={onSubmit}
+      onSelect={onSelect}
+      onSelectActionClick={onSelectActionClick}
     />
   )
 }

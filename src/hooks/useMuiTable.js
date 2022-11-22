@@ -116,6 +116,7 @@ const useMuiTable = (props) => {
   const {
     columns,
     searchKeys,
+    isTreeTable,
     selectable,
     sortable,
     defaultSort = {},
@@ -356,19 +357,41 @@ const useMuiTable = (props) => {
 
   const handleClick = (event, id) => {
     if (!selectable) return
-    const selectedIndex = selected.indexOf(id)
-    let newSelected = []
+    if (isTreeTable) {
+      const childIds = rows.filter((row) => row[parentIdKey] === id).map((row) => row[idKey])
+      const selectedIndex = selected.indexOf(id)
+      let newSelected = []
 
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id)
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1))
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1))
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
+      if (selectedIndex === -1) {
+        newSelected = [...selected, ...childIds, id]
+      } else {
+        const ids = [...childIds, id]
+        newSelected = selected.filter((e) => !ids.includes(e))
+      }
+      /* Select Parent if all the children are selected */
+      const parentIds = getDistinctValues(rows.filter((row) => newSelected.includes(row[idKey])).map((row) => row[parentIdKey]))
+      const selectedParentIds = parentIds.filter((parentId) => {
+        const childIds = rows.filter((row) => row[parentIdKey] === parentId).map((row) => row[idKey])
+        return childIds.every((e) => newSelected.includes(e))
+      })
+      // Remove parentIds and add only selectedParentIds
+      newSelected = [...newSelected.filter((e) => !parentIds.includes(e)), ...selectedParentIds]
+      setSelected(newSelected)
+    } else {
+      const selectedIndex = selected.indexOf(id)
+      let newSelected = []
+
+      if (selectedIndex === -1) {
+        newSelected = newSelected.concat(selected, id)
+      } else if (selectedIndex === 0) {
+        newSelected = newSelected.concat(selected.slice(1))
+      } else if (selectedIndex === selected.length - 1) {
+        newSelected = newSelected.concat(selected.slice(0, -1))
+      } else if (selectedIndex > 0) {
+        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
+      }
+      setSelected(newSelected)
     }
-    setSelected(newSelected)
   }
 
   const handleChangePage = (event, newPage) => {

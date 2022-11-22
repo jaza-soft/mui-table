@@ -725,14 +725,13 @@ const MuiTable = (props) => {
 
   // Disable these features in Tree Table
   const searchable = isTreeTable ? false : props.searchable
-  const selectable = isTreeTable ? false : props.selectable
   const sortable = isTreeTable ? false : props.sortable
   const pageable = isTreeTable ? false : props.pageable
 
   const { rowList, key, updateFilter, resetFilter, editableState, selected, filterValues, handleSubmit, i18nMap, ...restProps } = useMuiTable({
     ...props,
+    isTreeTable,
     searchable,
-    selectable,
     pageable,
     sortable
   })
