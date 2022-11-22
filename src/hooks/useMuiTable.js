@@ -183,6 +183,9 @@ const useMuiTable = (props) => {
   React.useEffect(() => {
     updateRows(rows)
   }, [order, orderBy, setRows])
+  React.useEffect(() => {
+    onSelect && onSelect(selected)
+  }, [JSON.stringify(selected)])
 
   const updateRows = (rows) => {
     let rowList = applySort(rows, comparator)
@@ -365,7 +368,6 @@ const useMuiTable = (props) => {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
-    onSelect && onSelect(id, newSelected)
     setSelected(newSelected)
   }
 

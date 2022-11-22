@@ -44,7 +44,7 @@ const SelectableTable = () => {
     onActionComplete()
   }
 
-  const onSelect = (event, selectedIds) => {
+  const onSelect = (selectedIds) => {
     console.log({ selectedIds })
   }
 
