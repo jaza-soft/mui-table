@@ -252,7 +252,7 @@ const FormContent = (props) => {
                   key={name}
                   className={classes.button}
                   variant='text'
-                  onClick={(event) => (name === 'edit' ? setEditableState({ editing: true }) : handleFooterActionClick(event, name))}
+                  onClick={(event) => handleFooterActionClick(event, name)}
                   disabled={disabled}
                   {...options}
                 >

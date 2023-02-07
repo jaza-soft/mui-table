@@ -295,12 +295,17 @@ const useMuiTable = (props) => {
   }
 
   const handleFooterActionClick = (event, action) => {
-    const onActionComplete = (rows) => {
-      setEditableState({ busy: false })
-      updateRows(rows)
+    if (action === 'edit') {
+      setEditableState({ editing: true })
+      onFooterActionClick && onFooterActionClick(event, action, rows, filterValues)
+    } else {
+      const onActionComplete = (rows) => {
+        setEditableState({ busy: false })
+        updateRows(rows)
+      }
+      setEditableState({ busy: true })
+      onFooterActionClick && onFooterActionClick(event, action, rows, filterValues, onActionComplete)
     }
-    setEditableState({ busy: true })
-    onFooterActionClick && onFooterActionClick(event, action, rows, filterValues, onActionComplete)
   }
 
   // Internal Handler functions

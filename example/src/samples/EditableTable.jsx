@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { MuiTable, required, minValue } from '@jazasoft/mui-table'
+import { useState } from 'react'
 
 const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
 
@@ -70,6 +71,7 @@ const addTotalRow = (rows) => {
 }
 
 const EditableTable = () => {
+  const [editing, setEditing] = useState(false)
   const onInlineActionClick = (event, action, row, onActionComplete) => {
     onActionComplete()
   }
@@ -77,6 +79,10 @@ const EditableTable = () => {
   const onSubmit = (values, form, onSubmitComplete) => {
     const rows = addTotalRow(values)
     onSubmitComplete(rows)
+  }
+
+  const onFooterActionClick = (event, action, rows) => {
+    setEditing(action === 'edit')
   }
 
   const onValidate = (values, form, onSubmitComplete) => {
@@ -96,12 +102,15 @@ const EditableTable = () => {
     return {}
   }
 
+  const finalColumns = editing ? columns.map((c) => ({ ...c, title: c.dataKey === 'protein' ? 'Proton' : c.title })) : columns
+
   return (
     <MuiTable
-      columns={columns}
+      columns={finalColumns}
       rows={addTotalRow(rows)}
       pageable={true}
       editable={true}
+      editing={editing}
       footerActions={[{ name: 'edit', tooltip: 'Update', options: { variant: 'outlined', color: 'secondary' } }]}
       showEditableActions={true}
       onRowAdd={(rows) => ({ sweet: true })}
@@ -109,6 +118,7 @@ const EditableTable = () => {
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
       onInlineActionClick={onInlineActionClick}
+      onFooterActionClick={onFooterActionClick}
     />
   )
 }
