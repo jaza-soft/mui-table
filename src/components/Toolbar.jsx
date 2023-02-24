@@ -1,10 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
+import { FormSpy } from 'react-final-form'
+
 import { lighten, makeStyles } from '@material-ui/core/styles'
 import MuiToolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
+import Button from '@material-ui/core/Button'
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import AddIcon from '@material-ui/icons/Add'
@@ -79,105 +82,142 @@ const Toolbar = (props) => {
     onSelectActionClick && onSelectActionClick(event, action)
   }
 
-  const createToolbarActionHandler = (action) => (event) => {
+  const createToolbarActionHandler = (action, values) => (event) => {
     if (action === 'filter') {
       setFilterActive(true)
     }
-    onToolbarActionClick && onToolbarActionClick(event, action)
+    onToolbarActionClick && onToolbarActionClick(event, action, values?.rows)
   }
 
   return (
-    <MuiToolbar
-      style={style}
-      className={clsx(classes.root, className, {
-        [classes.highlight]: selectedCount > 0
-      })}
-    >
-      {selectedCount > 0 ? (
-        <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
-          {getLabel(`text.selected`, null, i18nMap, { _: `${selectedCount} items Selected`, count: selectedCount })}
-        </Typography>
-      ) : (
-        <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
-          {getLabel(title, null, i18nMap, { _: title })}
-        </Typography>
-      )}
+    <FormSpy subscription={{ values: true }}>
+      {({ values }) => (
+        <MuiToolbar
+          style={style}
+          className={clsx(classes.root, className, {
+            [classes.highlight]: selectedCount > 0
+          })}
+        >
+          {selectedCount > 0 ? (
+            <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
+              {getLabel(`text.selected`, null, i18nMap, { _: `${selectedCount} items Selected`, count: selectedCount })}
+            </Typography>
+          ) : (
+            <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
+              {getLabel(title, null, i18nMap, { _: title })}
+            </Typography>
+          )}
 
-      {selectedCount > 0
-        ? selectActions.map(({ name, tooltip, icon, options }, idx) => (
-            <Tooltip key={idx} title={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
-              <IconButton
-                aria-label={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
-                onClick={createSelectActionHandler(name)}
-                {...options}
-              >
-                {name === 'add' && <AddIcon />}
-                {name === 'edit' && <EditIcon />}
-                {name === 'delete' && <DeleteIcon />}
-                {!['add', 'edit', 'delete'].includes(name) && icon}
-              </IconButton>
-            </Tooltip>
-          ))
-        : toolbarActions.map(({ name, tooltip, icon, options }, idx) => (
-            <div key={idx}>
-              {name === 'filter' && (
-                <Popover
-                  onExited={() => setFilterActive(false)}
-                  hide={!filterActive}
-                  trigger={
-                    <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
-                      <IconButton
-                        aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
-                        onClick={createToolbarActionHandler(name)}
-                      >
-                        <FilterListIcon />
-                      </IconButton>
-                    </Tooltip>
-                  }
-                  content={<Filter {...filterProps} />}
-                />
-              )}
-              {name === 'search' && (
-                <Input
-                  className={classes.search}
-                  value={searchText}
-                  onChange={handleSearchText}
-                  autoFocus={props.autoFocus}
-                  onFocus={() => onFocus(true)}
-                  onBlur={() => onFocus(false)}
-                  placeholder={getLabel(`text.search`, null, i18nMap, { _: 'Search' })}
-                  startAdornment={
-                    <InputAdornment position='start'>
-                      <IconButton size='small'>
-                        <SearchIcon fontSize='small' />
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  endAdornment={
-                    searchText ? (
-                      <InputAdornment position='end'>
-                        <IconButton size='small' onClick={clearSearchText}>
-                          <ClearIcon fontSize='small' />
-                        </IconButton>
-                      </InputAdornment>
-                    ) : null
-                  }
-                />
-              )}
-              {!['search', 'filter', 'column'].includes(name) && icon && (
-                <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
-                  <IconButton
-                    aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
-                    onClick={createToolbarActionHandler(name)}
+          {selectedCount > 0
+            ? selectActions.map(({ name, tooltip, icon, options, showLabel = false }, idx) =>
+                showLabel ? (
+                  <Button
+                    aria-label={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                    onClick={createSelectActionHandler(name)}
+                    startIcon={
+                      <span>
+                        {name === 'add' && <AddIcon />}
+                        {name === 'edit' && <EditIcon />}
+                        {name === 'delete' && <DeleteIcon />}
+                        {!['add', 'edit', 'delete'].includes(name) && icon}
+                      </span>
+                    }
                     {...options}
+                    style={{ whiteSpace: 'pre', ...options?.style }}
                   >
-                    {icon}
-                  </IconButton>
-                </Tooltip>
-              )}
-            </div>
-          ))}
-    </MuiToolbar>
+                    {getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                  </Button>
+                ) : (
+                  <Tooltip key={idx} title={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
+                    <IconButton
+                      aria-label={getLabel(`selectAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                      onClick={createSelectActionHandler(name)}
+                      {...options}
+                    >
+                      {name === 'add' && <AddIcon />}
+                      {name === 'edit' && <EditIcon />}
+                      {name === 'delete' && <DeleteIcon />}
+                      {!['add', 'edit', 'delete'].includes(name) && icon}
+                    </IconButton>
+                  </Tooltip>
+                )
+              )
+            : toolbarActions.map(({ name, tooltip, icon, options, showLabel = false }, idx) => (
+                <div key={idx}>
+                  {name === 'filter' && (
+                    <Popover
+                      onExited={() => setFilterActive(false)}
+                      hide={!filterActive}
+                      trigger={
+                        <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
+                          <IconButton
+                            aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                            onClick={createToolbarActionHandler(name, values)}
+                          >
+                            <FilterListIcon />
+                          </IconButton>
+                        </Tooltip>
+                      }
+                      content={<Filter {...filterProps} />}
+                    />
+                  )}
+                  {name === 'search' && (
+                    <Input
+                      className={classes.search}
+                      value={searchText}
+                      onChange={handleSearchText}
+                      autoFocus={props.autoFocus}
+                      onFocus={() => onFocus(true)}
+                      onBlur={() => onFocus(false)}
+                      placeholder={getLabel(`text.search`, null, i18nMap, { _: 'Search' })}
+                      startAdornment={
+                        <InputAdornment position='start'>
+                          <IconButton size='small'>
+                            <SearchIcon fontSize='small' />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      endAdornment={
+                        searchText ? (
+                          <InputAdornment position='end'>
+                            <IconButton size='small' onClick={clearSearchText}>
+                              <ClearIcon fontSize='small' />
+                            </IconButton>
+                          </InputAdornment>
+                        ) : null
+                      }
+                    />
+                  )}
+                  {!['search', 'filter', 'column'].includes(name) && icon && (
+                    <div>
+                      {showLabel ? (
+                        <Button
+                          aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                          onClick={createToolbarActionHandler(name, values)}
+                          startIcon={icon}
+                          {...options}
+                          style={{ whiteSpace: 'pre', ...options?.style }}
+                        >
+                          {getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                        </Button>
+                      ) : (
+                        <Tooltip title={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} disableFocusListener>
+                          <IconButton
+                            aria-label={getLabel(`toolbarAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })}
+                            onClick={createToolbarActionHandler(name, values)}
+                            {...options}
+                          >
+                            {icon}
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+        </MuiToolbar>
+      )}
+    </FormSpy>
   )
 }
 

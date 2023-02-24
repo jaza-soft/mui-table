@@ -796,7 +796,7 @@ const MuiTable = (props) => {
     toolbarActions.push({ name: 'filter' })
   }
 
-  const showToolbar = toolbar || selected.length > 0 || searchable || filterColumns.length > 0
+  const showToolbar = toolbar || !isEmpty(toolbarActions) || selected.length > 0 || searchable || filterColumns.length > 0
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
   const showActions = (typeof inlineActions === 'function' || inlineActions.length > 0) && !editableState.editing
 
@@ -903,6 +903,7 @@ const ActionType = PropTypes.shape({
   serialNo: PropTypes.number,
   name: PropTypes.string,
   tooltip: PropTypes.string,
+  showLabel: PropTypes.bool,
   icon: PropTypes.any,
   options: PropTypes.object
 })
@@ -982,7 +983,7 @@ MuiTable.propTypes = {
   onSubmit: PropTypes.func,
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onSelect: PropTypes.func, // (selectedIds) => void
-  onToolbarActionClick: PropTypes.func, // (event, action) => void
+  onToolbarActionClick: PropTypes.func, // (event, action, rows) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
   onFooterActionClick: PropTypes.func, // (event, action, rows, filterValues, onActionComplete) => void
   onTreeExpand: PropTypes.func, // (event, row, isExpanded) => any
