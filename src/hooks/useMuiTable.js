@@ -461,9 +461,13 @@ const useMuiTable = (props) => {
         rowList.splice(rowIdx, 1)
         setEditableState((prev) => ({ ...prev, newRowCount: prev.newRowCount ? prev.newRowCount - 1 : -1 }))
       }
-      const updatedRows = [...rows]
-      updatedRows.splice(page * pageSize, size, ...rowList)
-      updateRows(updatedRows)
+      if (pageable) {
+        const updatedRows = [...rows]
+        updatedRows.splice(page * pageSize, size, ...rowList)
+        updateRows(updatedRows)
+      } else {
+        updateRows(rowList)
+      }
     }
   }
 
