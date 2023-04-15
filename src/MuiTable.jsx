@@ -565,7 +565,7 @@ const FormContent = (props) => {
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
-                              const finalChoices = typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey }) : choices
+                              const finalChoices = typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value }) : choices
                               return (
                                 <TableCell
                                   className={clsx({
