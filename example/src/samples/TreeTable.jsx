@@ -58,6 +58,10 @@ rows = rows.map((row) => ({
   protein: (Math.random() * 10).toFixed(1)
 }))
 
+const showChildAddAction = (row, rows) => {
+  return row?.sweet === true;
+}
+
 const addTotalRow = (rows) => {
   let parentIdSet = new Set()
   rows.forEach((row) => parentIdSet.add(row.parentId))
@@ -108,6 +112,7 @@ const TreeTable = () => {
       onSubmit={onSubmit}
       onSelect={onSelect}
       onSelectActionClick={onSelectActionClick}
+      showChildAddAction={showChildAddAction}
     />
   )
 }
