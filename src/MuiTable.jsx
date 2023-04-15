@@ -559,13 +559,14 @@ const FormContent = (props) => {
                               },
                               colIdx
                             ) => {
-                              const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey) : options?.disabled
+                              const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey, fields?.value) : options?.disabled
 
                               let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
-                              const finalChoices = typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value }) : choices
+                              const finalChoices =
+                                typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value }) : choices
                               return (
                                 <TableCell
                                   className={clsx({
@@ -869,7 +870,7 @@ const MuiTable = (props) => {
           ? rowList.filter((row) => !row[totalRowKey])
           : Array(rowAddCount)
               .fill('')
-              .map(() => ({[props.idKey]: isTreeTable ? new Date().getTime() : undefined}))
+              .map(() => ({ [props.idKey]: isTreeTable ? new Date().getTime() : undefined }))
     }
   }, [JSON.stringify(rowList)])
 
