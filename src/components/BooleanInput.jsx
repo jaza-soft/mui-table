@@ -4,7 +4,11 @@ import { Field } from 'react-final-form'
 
 import Switch from '@material-ui/core/Switch'
 
-const TextInput = React.memo(({ name, validate, disabled, options }) => {
+const BooleanInput = React.memo(({ name, validate, disabled, form, handleOnChange, options }) => {
+  const onChange = (input) => (_, value) => {
+    handleOnChange && handleOnChange(name, value, form)
+    input?.onChange(value)
+  }
   return (
     <Field name={name} validate={validate}>
       {({ input }) => {
@@ -14,9 +18,7 @@ const TextInput = React.memo(({ name, validate, disabled, options }) => {
             id={`${name}-switch`}
             {...inputProps}
             checked={!!value}
-            onChange={(_, value) => {
-              input?.onChange(value)
-            }}
+            onChange={onChange(input)}
             color='primary'
             {...options}
             disabled={disabled}
@@ -27,4 +29,4 @@ const TextInput = React.memo(({ name, validate, disabled, options }) => {
   )
 })
 
-export default TextInput
+export default BooleanInput

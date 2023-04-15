@@ -51,7 +51,7 @@ const useStyles = makeStyles({
   }
 })
 
-const FileInput = React.memo(({ name, form, validate, disabled, variant, fontSize, options }) => {
+const FileInput = React.memo(({ name, form, disabled, variant, fontSize, handleOnChange, options }) => {
   const classes = useStyles({ variant, fontSize })
 
   return (
@@ -62,20 +62,29 @@ const FileInput = React.memo(({ name, form, validate, disabled, variant, fontSiz
 
         const onDrop = (acceptedFiles) => {
           const finalValue = multiple ? [...(value || []), ...acceptedFiles] : acceptedFiles[0]
+          handleOnChange && handleOnChange(name, finalValue, form)
           form.change(name, finalValue)
         }
 
         const onRemove = (file) => {
           if (multiple) {
             if (Array.isArray(value)) {
+              handleOnChange &&
+                handleOnChange(
+                  name,
+                  value.filter((e) => e.name !== file?.name),
+                  form
+                )
               form.change(
                 name,
                 value.filter((e) => e.name !== file?.name)
               )
             } else {
+              handleOnChange && handleOnChange(name, [], form)
               form.change(name, [])
             }
           } else {
+            handleOnChange && handleOnChange(name, [], form)
             form.change(name, null)
           }
         }

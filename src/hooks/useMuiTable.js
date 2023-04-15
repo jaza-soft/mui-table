@@ -201,6 +201,17 @@ const useMuiTable = (props) => {
     onSelectActionClick && onSelectActionClick(event, action, selectedRows, onActionComplete)
   }
 
+  const handleOnChange = (name, value, form) => {
+    const dataKey = name?.split('.')[1]
+
+    const split1 = name?.split('.')[0] || ''
+    const rowIdx = Number(split1.replace('rows[', '').replace(']', '').trim())
+    const rows = form.getState().values?.rows || []
+    const row = rows[rowIdx]
+
+    props.onChange && props.onChange(row, dataKey, value, form)
+  }
+
   const handleSubmit = (values, form, complete) => {
     const onSubmitComplete = (rowList) => {
       if (!(props.editing && props.handleSubmitRef)) {
@@ -521,6 +532,7 @@ const useMuiTable = (props) => {
     setEditableState,
     handleSelectActionClick,
     handleSubmit,
+    handleOnChange,
     handleInlineActionClick,
     handleFooterActionClick,
     handleRequestSort,

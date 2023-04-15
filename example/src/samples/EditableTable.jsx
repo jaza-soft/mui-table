@@ -95,6 +95,10 @@ const EditableTable = () => {
     console.log({rows, calories})
   }
 
+  const onChange = (row, dataKey, value, form) => {
+    console.log({row, dataKey, value, form});
+  }
+
   const onValidate = (values, form, onSubmitComplete) => {
     const errors = values?.rows.map((e) => {
       let error = {}
@@ -127,6 +131,7 @@ const EditableTable = () => {
       showEditableActions={true}
       onRowAdd={(rows) => ({ sweet: true })}
       validate={onValidate}
+      onChange={onChange}
       onSubmit={onSubmit}
       inlineActions={[{ name: 'delete', tooltip: 'Delete Row' }]}
       onInlineActionClick={onInlineActionClick}

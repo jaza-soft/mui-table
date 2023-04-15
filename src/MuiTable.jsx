@@ -213,7 +213,8 @@ const FormContent = (props) => {
     page,
     totalPage,
     handleChangePage,
-    handleChangePageSize
+    handleChangePageSize,
+    handleOnChange
   } = props
 
   const selectedCount = selected.length
@@ -592,12 +593,14 @@ const FormContent = (props) => {
                                   {element === 'text-input' && (
                                     <TextInput
                                       name={`${name}.${dataKey}`}
+                                      form={form}
                                       validate={validate}
                                       disabled={disabled}
                                       variant={variant}
                                       fontSize={fontSize}
                                       i18nMap={i18nMap}
                                       options={options}
+                                      handleOnChange={handleOnChange}
                                     />
                                   )}
                                   {element === 'file-input' && (
@@ -609,11 +612,13 @@ const FormContent = (props) => {
                                       fontSize={fontSize}
                                       i18nMap={i18nMap}
                                       options={options}
+                                      handleOnChange={handleOnChange}
                                     />
                                   )}
                                   {element === 'select-input' && (
                                     <SelectInput
                                       name={`${name}.${dataKey}`}
+                                      form={form}
                                       choices={finalChoices}
                                       validate={validate}
                                       disabled={disabled}
@@ -621,9 +626,18 @@ const FormContent = (props) => {
                                       fontSize={fontSize}
                                       i18nMap={i18nMap}
                                       options={options}
+                                      handleOnChange={handleOnChange}
                                     />
                                   )}
-                                  {element === 'boolean-input' && <BooleanInput name={`${name}.${dataKey}`} disabled={disabled} options={options} />}
+                                  {element === 'boolean-input' && (
+                                    <BooleanInput
+                                      name={`${name}.${dataKey}`}
+                                      form={form}
+                                      disabled={disabled}
+                                      options={options}
+                                      handleOnChange={handleOnChange}
+                                    />
+                                  )}
                                 </TableCell>
                               )
                             }
@@ -737,7 +751,19 @@ const MuiTable = (props) => {
   const sortable = isTreeTable ? false : props.sortable
   const pageable = isTreeTable ? false : props.pageable
 
-  const { rowList, key, updateFilter, resetFilter, editableState, selected, filterValues, handleSubmit, i18nMap, ...restProps } = useMuiTable({
+  const {
+    rowList,
+    key,
+    updateFilter,
+    resetFilter,
+    editableState,
+    selected,
+    filterValues,
+    handleSubmit,
+    handleOnChange,
+    i18nMap,
+    ...restProps
+  } = useMuiTable({
     ...props,
     isTreeTable,
     searchable,
@@ -871,6 +897,7 @@ const MuiTable = (props) => {
               {...restProps}
               classes={classes}
               form={form}
+              handleOnChange={handleOnChange}
               submitting={submitting}
               hasValidationErrors={hasValidationErrors}
               columns={columns}
@@ -992,6 +1019,7 @@ MuiTable.propTypes = {
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
+  onChange: PropTypes.func, // (row, dataKey, value, form) => {}
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onSelect: PropTypes.func, // (selectedIds) => void
   onToolbarActionClick: PropTypes.func, // (event, action, rows) => void

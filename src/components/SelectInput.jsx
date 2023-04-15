@@ -23,8 +23,14 @@ const useStyles = makeStyles((theme) => ({
   })
 }))
 
-const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, i18nMap, options }) => {
+const SelectInput = React.memo(({ name, validate, choices = [], disabled, variant, fontSize, i18nMap, form, handleOnChange, options }) => {
   const classes = useStyles({ variant, fontSize })
+
+  const onChange = (input) => (event) => {
+    const value = event?.target?.value
+    handleOnChange && handleOnChange(name, value, form)
+    input.onChange(event)
+  }
 
   return (
     <Field name={name} validate={validate}>
@@ -39,7 +45,7 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
               className={clsx(classes.select, options?.className)}
               id={`${name}-select-input`}
               input={<Input disableUnderline={variant === 'excel'} />}
-              inputProps={{ ...input, value }}
+              inputProps={{ ...input, value, onChange: onChange(input) }}
               {...options}
               disabled={disabled}
             >

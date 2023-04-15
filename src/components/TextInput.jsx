@@ -25,8 +25,14 @@ const useStyles = makeStyles((theme) => ({
   })
 }))
 
-const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18nMap, options }) => {
+const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18nMap, form, handleOnChange, options }) => {
   const classes = useStyles({ variant, fontSize })
+
+  const onChange = (input) => (event) => {
+    const value = event?.target?.value
+    handleOnChange && handleOnChange(name, value, form)
+    input.onChange(event)
+  }
 
   return (
     <Field name={name} validate={validate}>
@@ -37,7 +43,7 @@ const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18
               <Input
                 className={clsx(classes.input, options?.className)}
                 id={`${name}-text-input`}
-                inputProps={{ ...input }}
+                inputProps={{ ...input, onChange: onChange(input) }}
                 {...options}
                 disabled={disabled}
               />
@@ -48,6 +54,7 @@ const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18
                 id={`${name}-text-input`}
                 {...input}
                 {...options}
+                onChange={onChange(input)}
                 disabled={disabled}
               />
             )}
