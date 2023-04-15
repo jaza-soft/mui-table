@@ -163,7 +163,7 @@ const useMuiTable = (props) => {
   const [searchFocus, setSearchFocus] = React.useState(false)
 
   const hasIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, idKey)).length > 0 // Check Whether idKey exists in rows
-  const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
+  // const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
   /**
@@ -174,7 +174,7 @@ const useMuiTable = (props) => {
    */
   React.useEffect(() => {
     updateRows(props.rows)
-    if (hasParentIdKey) {
+    if (isTreeTable) {
       const tree = buildTree(props.rows, idKey, parentIdKey)
       const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
       setTree(tree)
@@ -208,7 +208,7 @@ const useMuiTable = (props) => {
       }
       complete()
       if (rowList) {
-        if (hasParentIdKey) {
+        if (isTreeTable) {
           const tree = buildTree(rowList, idKey, parentIdKey)
           const expanded = initialExpandedState || getExpandedState(tree, defaultExpanded, idKey)
           updateRows(rowList)
@@ -412,7 +412,7 @@ const useMuiTable = (props) => {
   const handleEditCancel = (event) => {
     setEditableState({ editing: false })
     updateRows(props.rows)
-    if (hasParentIdKey) {
+    if (isTreeTable) {
       const tree = buildTree(props.rows, idKey, parentIdKey)
       setTree(tree)
     }
@@ -432,7 +432,7 @@ const useMuiTable = (props) => {
 
   const handleEditableActionClick = (event, name, fields, row, rowIdx) => {
     const rowList = fields?.value
-    if (hasParentIdKey) {
+    if (isTreeTable) {
       if (name === 'add') {
         let newRow = { [idKey]: new Date().getTime(), [parentIdKey]: row[parentIdKey] }
         if (typeof onRowAdd === 'function') {
@@ -480,7 +480,7 @@ const useMuiTable = (props) => {
   let rowList = []
   let totalPage = 0
   let totalElements = 0
-  if (!hasParentIdKey) {
+  if (!isTreeTable) {
     const csvTextColumns = columns.filter((c) => c.filterOptions?.filter && c.filterOptions?.isCsvText)
 
     rowList = applyFilter(rows, filterValues, idKey, hasIdKey, csvTextColumns)

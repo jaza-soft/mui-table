@@ -111,10 +111,13 @@ const renderActions = ({
   )
 }
 
-const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacement, handleEditableActionClick, i18nMap }) => {
+const renderEditableActions = ({ fields, row, rowIdx, actions = [], actionPlacement, showChildAddAction, handleEditableActionClick, i18nMap }) => {
+  const finalActions = actions.filter(
+    (action) => action?.name !== 'addChild' || typeof showChildAddAction !== 'function' || showChildAddAction(row, fields?.value)
+  )
   return (
     <TableCell align={actionPlacement} padding='none'>
-      {actions.map(({ name, tooltip, options }, idx) => (
+      {finalActions.map(({ name, tooltip, options }, idx) => (
         <Tooltip key={idx} title={getLabel(`inlineAction.${name}`, tooltip, i18nMap, { _: capitalize(name) })} arrow>
           <span>
             <IconButton
@@ -171,6 +174,7 @@ const FormContent = (props) => {
     orderBy,
     showActions,
     showEditableActions,
+    showChildAddAction,
     actionPlacement,
     handleSelectAllClick,
     handleRequestSort,
@@ -523,6 +527,7 @@ const FormContent = (props) => {
                                 rowIdx,
                                 actions: editableActions,
                                 actionPlacement,
+                                showChildAddAction,
                                 handleEditableActionClick,
                                 i18nMap
                               })
@@ -645,6 +650,7 @@ const FormContent = (props) => {
                                 rowIdx,
                                 actions: editableActions,
                                 actionPlacement,
+                                showChildAddAction,
                                 handleEditableActionClick,
                                 i18nMap
                               })
@@ -717,7 +723,10 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const MuiTable = (props) => {
-  const isTreeTable = props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey)).length > 0 // Check Whether idKey exists in rows
+  const isTreeTable =
+    props.isTreeTable ||
+    !isEmpty(props.parentIdKey) ||
+    props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey)).length > 0 // Check Whether idKey exists in rows
 
   const { rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
 
@@ -834,7 +843,7 @@ const MuiTable = (props) => {
           ? rowList.filter((row) => !row[totalRowKey])
           : Array(rowAddCount)
               .fill('')
-              .map(() => ({}))
+              .map(() => ({[props.idKey]: isTreeTable ? new Date().getTime() : undefined}))
     }
   }, [JSON.stringify(rowList)])
 
@@ -933,6 +942,7 @@ MuiTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   title: PropTypes.string,
+  isTreeTable: PropTypes.bool,
   toolbar: PropTypes.bool,
   toolbarDivider: PropTypes.bool,
   editable: PropTypes.bool,
@@ -975,6 +985,7 @@ MuiTable.propTypes = {
   component: PropTypes.string, // HTML component to use for FormContent
   editing: PropTypes.bool, // To Open table in editable mode
   i18nMap: PropTypes.object, // i18n object containing key and values
+  showChildAddAction: PropTypes.func, // For TreeTable whether addChild action should be shown. (row, rows) => bool
 
   toolbarStyle: PropTypes.object,
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
@@ -996,6 +1007,7 @@ MuiTable.defaultProps = {
   columns: [],
   rows: [],
   title: 'Mui Table',
+  isTreeTable: false,
   toolbar: false,
   toolbarDivider: true,
   searchable: false,
