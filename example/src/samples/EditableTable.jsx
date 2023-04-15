@@ -89,14 +89,14 @@ const EditableTable = () => {
   }
 
   const onToolbarActionClick = (event, action, rows) => {
-    console.log({row: {...rows[0]}})
-    const calories = rows[0]?.calories;
-    setRowList(rows.map(e => ({...e, calories})))
-    console.log({rows, calories})
+    console.log({ row: { ...rows[0] } })
+    const calories = rows[0]?.calories
+    setRowList(rows.map((e) => ({ ...e, calories })))
+    console.log({ rows, calories })
   }
 
-  const onChange = (row, dataKey, value, form) => {
-    console.log({row, dataKey, value, form});
+  const onChange = (name, value, row, form) => {
+    console.log({ row, name, value, form })
   }
 
   const onValidate = (values, form, onSubmitComplete) => {
@@ -126,7 +126,9 @@ const EditableTable = () => {
       pageable={true}
       editable={true}
       editing={editing}
-      toolbarActions={[{ name: 'copy', tooltip: 'Copy Date', icon: <CopyIcon />, showLabel: true, options: {variant: 'outlined', style: {color: 'green'}} }]}
+      toolbarActions={[
+        { name: 'copy', tooltip: 'Copy Date', icon: <CopyIcon />, showLabel: true, options: { variant: 'outlined', style: { color: 'green' } } }
+      ]}
       footerActions={[{ name: 'edit', tooltip: 'Update', options: { variant: 'outlined', color: 'secondary' } }]}
       showEditableActions={true}
       onRowAdd={(rows) => ({ sweet: true })}

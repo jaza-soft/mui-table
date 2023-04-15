@@ -202,14 +202,12 @@ const useMuiTable = (props) => {
   }
 
   const handleOnChange = (name, value, form) => {
-    const dataKey = name?.split('.')[1]
-
     const split1 = name?.split('.')[0] || ''
     const rowIdx = Number(split1.replace('rows[', '').replace(']', '').trim())
     const rows = form.getState().values?.rows || []
     const row = rows[rowIdx]
 
-    props.onChange && props.onChange(row, dataKey, value, form)
+    props.onChange && props.onChange(name, value, row, form)
   }
 
   const handleSubmit = (values, form, complete) => {
