@@ -741,7 +741,7 @@ const MuiTable = (props) => {
   const isTreeTable =
     props.isTreeTable ||
     !isEmpty(props.parentIdKey) ||
-    props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey)).length > 0 // Check Whether idKey exists in rows
+    props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey || 'parentId')).length > 0 // Check Whether idKey exists in rows
 
   const { rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
 
@@ -1049,7 +1049,6 @@ MuiTable.defaultProps = {
   pageable: false,
   idKey: 'id',
   totalRowKey: 'totalRow',
-  parentIdKey: 'parentId',
   rowsPerPageOptions: [10, 25],
   pageSize: 10,
   selectActions: [{ name: 'delete' }],

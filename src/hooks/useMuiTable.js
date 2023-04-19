@@ -122,7 +122,7 @@ const useMuiTable = (props) => {
     defaultSort = {},
     pageable,
     idKey,
-    parentIdKey,
+    parentIdKey = "parentId",
     initialExpandedState,
     defaultExpanded,
     inlineActions,
@@ -163,7 +163,6 @@ const useMuiTable = (props) => {
   const [searchFocus, setSearchFocus] = React.useState(false)
 
   const hasIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, idKey)).length > 0 // Check Whether idKey exists in rows
-  // const hasParentIdKey = props.rows?.filter((row) => Object.prototype.hasOwnProperty.call(row, parentIdKey)).length > 0 // Check Whether idKey exists in rows
   const comparator = sortable ? getComparator(order, orderBy) : props.comparator
 
   /**
