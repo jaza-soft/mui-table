@@ -150,6 +150,7 @@ const FormContent = (props) => {
     hasValidationErrors,
     showToolbar,
     title,
+    titleSelected,
     selectActions,
     toolbarActions,
     filterProps,
@@ -218,6 +219,7 @@ const FormContent = (props) => {
   } = props
 
   const selectedCount = selected.length
+  const selectedRows = rows.filter((row) => selected.includes(row[idKey]))
 
   const editFooterActions =
     props.editing && props.handleSubmitRef ? editingFooterActions.filter((e) => !['save', 'cancel'].includes(e.name)) : editingFooterActions
@@ -302,7 +304,9 @@ const FormContent = (props) => {
           style={toolbarStyle}
           className={classes.toolbar}
           title={title}
+          titleSelected={titleSelected}
           selectedCount={selectedCount}
+          selectedRows={selectedRows}
           selectActions={selectActions}
           toolbarActions={toolbarActions}
           filterProps={filterProps}
@@ -970,6 +974,7 @@ MuiTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   title: PropTypes.string,
+  titleSelected: PropTypes.func,
   isTreeTable: PropTypes.bool,
   toolbar: PropTypes.bool,
   toolbarDivider: PropTypes.bool,

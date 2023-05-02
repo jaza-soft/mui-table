@@ -50,6 +50,7 @@ const SelectableTable = () => {
 
   return (
     <MuiTable
+      titleSelected={(rows) => `${rows?.length} items selected`}
       columns={columns}
       rows={rows}
       pageable={true}

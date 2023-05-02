@@ -53,7 +53,9 @@ const Toolbar = (props) => {
     style,
     className,
     title,
+    titleSelected,
     selectedCount,
+    selectedRows,
     selectActions,
     toolbarActions,
     filterProps,
@@ -89,6 +91,11 @@ const Toolbar = (props) => {
     onToolbarActionClick && onToolbarActionClick(event, action, values?.rows)
   }
 
+  const finalTitleSelected =
+    typeof titleSelected === 'function'
+      ? titleSelected(selectedRows)
+      : getLabel(`text.selected`, null, i18nMap, { _: `${selectedCount} items Selected`, count: selectedCount })
+
   return (
     <FormSpy subscription={{ values: true }}>
       {({ values }) => (
@@ -100,7 +107,7 @@ const Toolbar = (props) => {
         >
           {selectedCount > 0 ? (
             <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
-              {getLabel(`text.selected`, null, i18nMap, { _: `${selectedCount} items Selected`, count: selectedCount })}
+              {finalTitleSelected}
             </Typography>
           ) : (
             <Typography className={classes.title} variant='h6' id='tableTitle' component='div'>
