@@ -143,6 +143,7 @@ const FormContent = (props) => {
     toolbarStyle,
     i18nMap,
     columns,
+    headerRows,
     rows,
     rowList,
     form,
@@ -337,6 +338,7 @@ const FormContent = (props) => {
               sortable={sortable}
               isTreeTable={isTreeTable}
               columns={columns}
+              headerRows={headerRows}
               classes={classes}
               selectedCount={selectedCount}
               order={order}
@@ -747,7 +749,7 @@ const MuiTable = (props) => {
     !isEmpty(props.parentIdKey) ||
     props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey || 'parentId')).length > 0 // Check Whether idKey exists in rows
 
-  const { rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
+  const {headerRows, rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
 
   const columns = props.columns?.map((c) => ({ ...c, validate: Array.isArray(c.validate) ? composeValidators(c.validate) : c.validate }))
 
@@ -906,6 +908,7 @@ const MuiTable = (props) => {
               submitting={submitting}
               hasValidationErrors={hasValidationErrors}
               columns={columns}
+              headerRows={headerRows}
               rows={rows}
               rowList={rowList}
               isTreeTable={isTreeTable}
@@ -972,6 +975,7 @@ MuiTable.propTypes = {
       rowCellProps: PropTypes.object
     })
   ).isRequired,
+  headerRows: PropTypes.arrayOf(PropTypes.object),
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   title: PropTypes.string,
   titleSelected: PropTypes.func,
@@ -1022,6 +1026,7 @@ MuiTable.propTypes = {
 
   toolbarStyle: PropTypes.object,
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
+  headerCellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
