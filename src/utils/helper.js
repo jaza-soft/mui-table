@@ -9,6 +9,13 @@ export const isEmpty = (value) =>
     ? value.length === 0
     : value === undefined
 
+export const isPromise = (p) => {
+  if (p !== null && typeof p === 'object' && typeof p.then === 'function' && typeof p.catch === 'function') {
+    return true
+  }
+  return false
+}
+
 export const getDistinctValues = (values) => {
   if (!values) return values
   if (!Array.isArray(values)) return values

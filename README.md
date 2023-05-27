@@ -14,7 +14,7 @@
 - [x] Filter & Search
 - [x] Inline Editing - Edit one row at once
 - [x] Add/Remove Row
-- [x] Horizonatl Scroll/ Force Line Wrap on Specified characters
+- [x] Horizontal Scroll/ Force Line Wrap on Specified characters
 - [x] Variant - default, excel
 - [x] Tree Table
 - [x] Custom Footer Actions
@@ -30,9 +30,9 @@
   - [x] TextInput
   - [x] SelectInput
   - [x] BooleanInput
+  - [x] AutoCompleteInput
+  - [x] On Demand loading from remote for AutoCompleteInput
   - [ ] DateInput
-  - [ ] AutoCompleteInput
-  - [ ] On Demand loading from remote for SelectInput and AutoCompleteInput
 
 [Examples](https://codesandbox.io/s/optimistic-shamir-u78kl)
 
@@ -79,7 +79,7 @@ class App extends Component {
 **Action**
 
 | Name    | Type           | Default Value | Description                                                 |
-| ------- | -------------- | ------------- | ----------------------------------------------------------- |
+|---------|----------------|---------------|-------------------------------------------------------------|
 | name    | `string`       |               | `Required`. Name of action                                  |
 | tooltip | `string`       |               | `Optional`. Tooltip for the action                          |
 | icon    | `ReactElement` |               | Icon for this action. Required for custom actions.          |
@@ -88,11 +88,12 @@ class App extends Component {
 **Column**
 
 | Name            | Type                   | Default Value  | Description                                                                                                                                                                                       |
-| --------------- | ---------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------------|------------------------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | dataKey         | `string`               |                | Key in Object for this column                                                                                                                                                                     |
 | title           | `string`               |                | Label for this column                                                                                                                                                                             |
 | titleSelected   | `function`             |                | Title when rows are selected. Signature - `(selectedRows) => string`                                                                                                                              |
 | inputType       | `string`               | `'text-field'` | Type of Input when table is editable. Values - `'text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input'`                                                 |
+| fetchChoices    | `function`             |                | function to fetch choices on demand for auto-complete-input. `(searchText) => Promise(Choices)`                                                                                                   |
 | choices         | `function\|object[]`   | `[]`           | List of Choices when inputType is `'select-input'` or `'auto-complete-input'`. Object Type - `{id: string\|number, name: string}`. Function: `({row, rowIdx, rows, colIdx, dataKey}) => object[]` |
 | render          | `function`             |                | render function if custom rendering is required. signature - `(value) => ?any`                                                                                                                    |
 | validate        | `function\|function[]` |                | field validation function. `(value: ?any, allValues: Object, meta: ?FieldState) => ?any`                                                                                                          |
@@ -108,7 +109,7 @@ class App extends Component {
 ## Props
 
 | Name                 | Type                                  | Default Value           | Description                                                                                                                                                                  |
-| -------------------- | ------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------------------|---------------------------------------|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | columns              | `column[]`                            | `[]`                    | List of Columns                                                                                                                                                              |
 | rows                 | `object[]`                            | `[]`                    | List of objects                                                                                                                                                              |
 | toolbar              | `bool`                                | `false`                 | Whether to show toolbar                                                                                                                                                      |
@@ -160,10 +161,11 @@ class App extends Component {
 | onSelectActionClick  | `function`                            |                         | Signature - `(event, action, selectedRows, onActionComplete: func) => void`. call `onActionComplete` to indicate that action is completed                                    |
 | onSelect             | `function`                            |                         | Function called on row select with selected ids. Signature - `(event, selectedIds) => void`.                                                                                 |
 | onToolbarActionClick | `function`                            |                         | Signature - `(event, action) => void`.                                                                                                                                       |
-| onTreeExapand        | `function`                            |                         | Function called on expand click. Signature - `(event, row, isExpanded) => void`.                                                                                             |
+| onTreeExpand         | `function`                            |                         | Function called on expand click. Signature - `(event, row, isExpanded) => void`.                                                                                             |
 | onInlineActionClick  | `function`                            |                         | Signature - `(event, action, row, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                  |
 | onFooterActionClick  | `function`                            |                         | Signature - `(event, action, rows, onActionComplete: func) => void`. call `onActionComplete` with updated row data after action is completed                                 |
 | rowStyle             | `object\|function`                    | `{}`                    | Signature - `({row, rowIdx}) => object`. function should return style object                                                                                                 |
+| headerCellStyle      | `object\|function`                    | `{}`                    | Signature - `({row, column, rowIdx, colIdx}) => object`. function should return style object                                                                                 |
 | cellStyle            | `object\|function`                    | `{}`                    | Signature - `({row, column, rowIdx, colIdx}) => object`. function should return style object                                                                                 |
 | handleSubmitRef      | `function`                            |                         | Signature - `(handleSubmit) => Void`. When External Form submit is required, We get hold of React Final Form handleSubmit by calling this method.                            |
 

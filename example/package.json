@@ -13,6 +13,7 @@
     "@jazasoft/mui-table": "link:..",
     "@material-ui/core": "link:../node_modules/@material-ui/core",
     "@material-ui/icons": "link:../node_modules/@material-ui/icons",
+    "@material-ui/lab": "link:../node_modules/@material-ui/lab",
     "react": "link:../node_modules/react",
     "react-dom": "link:../node_modules/react-dom",
     "react-scripts": "link:../node_modules/react-scripts"

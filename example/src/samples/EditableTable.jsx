@@ -11,8 +11,17 @@ const columns = [
   {
     dataKey: 'dessert',
     title: 'Dessert',
-    inputType: 'select-input',
-    choices: ({ row, rowIdx }) => (rowIdx === 0 ? desserts.slice(0, 2).map((e) => ({ id: e, name: e })) : desserts.map((e) => ({ id: e, name: e }))),
+    inputType: 'auto-complete-input',
+    fetchChoices: (searchText) => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const filteredDessert = desserts
+            .filter((e) => searchText === '' || e.toLowerCase().includes(searchText?.toLowerCase()))
+            .map((e) => ({ id: e, name: e }))
+          resolve(filteredDessert)
+        }, 100)
+      })
+    },
     options: { displayEmpty: true },
     validate: required(),
     disabled: (row, dataKey) => row?.id === 3

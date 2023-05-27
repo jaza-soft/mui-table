@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 
@@ -46,8 +46,9 @@ import TextInput from './components/TextInput'
 import FileInput from './components/FileInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
+import AutoCompleteInput from './components/AutoCompleteInput'
 
-import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty } from './utils/helper'
+import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty, isPromise } from './utils/helper'
 import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
 import { composeValidators } from './utils/validators'
@@ -205,9 +206,10 @@ const FormContent = (props) => {
     editingFooterActions,
     viewFooterActions,
     selected,
+    choiceData,
+    setChoiceData,
     handleRowAdd,
     handleEditCancel,
-    setEditableState,
     pageable,
     handleFooterActionClick,
     totalElements,
@@ -557,6 +559,7 @@ const FormContent = (props) => {
                                 dataKey,
                                 inputType = 'text-field',
                                 render,
+                                fetchChoices,
                                 choices,
                                 align,
                                 rowCellProps,
@@ -569,12 +572,32 @@ const FormContent = (props) => {
                             ) => {
                               const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey, fields?.value) : options?.disabled
 
+                              const handleChoiceFetch = (searchText) => {
+                                if (typeof fetchChoices !== 'function') return
+                                const result = fetchChoices(searchText)
+                                if (isPromise(result)) {
+                                  result.then((choiceList) => {
+                                    if (Array.isArray(choiceList)) {
+                                      const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
+                                      setChoiceData((prev) => ({ ...prev, [dataKey]: { ...prev[dataKey], ...data } }))
+                                    }
+                                  })
+                                }
+                              }
+
                               let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
-                              const finalChoices =
-                                typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value }) : choices
+
+                              let finalChoices
+                              if (typeof choices === 'function') {
+                                finalChoices = choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value })
+                              } else if (Array.isArray(choices)) {
+                                finalChoices = choices
+                              } else if (element === 'auto-complete-input' && !isEmpty(choiceData) && !isEmpty(choiceData[dataKey])) {
+                                finalChoices = Object.values(choiceData[dataKey])
+                              }
                               return (
                                 <TableCell
                                   className={clsx({
@@ -629,6 +652,21 @@ const FormContent = (props) => {
                                       name={`${name}.${dataKey}`}
                                       form={form}
                                       choices={finalChoices}
+                                      validate={validate}
+                                      disabled={disabled}
+                                      variant={variant}
+                                      fontSize={fontSize}
+                                      i18nMap={i18nMap}
+                                      options={options}
+                                      handleOnChange={handleOnChange}
+                                    />
+                                  )}
+                                  {element === 'auto-complete-input' && (
+                                    <AutoCompleteInput
+                                      name={`${name}.${dataKey}`}
+                                      form={form}
+                                      choices={finalChoices}
+                                      updateChoices={handleChoiceFetch}
                                       validate={validate}
                                       disabled={disabled}
                                       variant={variant}
@@ -782,6 +820,26 @@ const MuiTable = (props) => {
 
   const classes = useStyles({ variant, pageable, editable, fontSize, footerActions })
 
+  const [choiceData, setChoiceData] = useState({}) // {[dataKey]: {[id]: choice}}
+
+  // Initialize Initial Choices for AutoComplete Input with empty searchText //
+  useEffect(() => {
+    if (isEmpty(columns)) return
+    columns
+      .filter((c) => c.inputType === 'auto-complete-input' && typeof c.fetchChoices === 'function')
+      .forEach((column) => {
+        const result = column.fetchChoices('')
+        if (isPromise(result)) {
+          result.then((choiceList) => {
+            if (Array.isArray(choiceList)) {
+              const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
+              setChoiceData((prev) => ({ ...prev, [column.dataKey]: { ...prev[column.dataKey], ...data } }))
+            }
+          })
+        }
+      })
+  }, [JSON.stringify(columns)])
+
   const isSelected = (id) => selected.indexOf(id) !== -1
 
   const filterColumns = columns
@@ -928,6 +986,8 @@ const MuiTable = (props) => {
               selected={selected}
               isSelected={isSelected}
               totalRowKey={totalRowKey}
+              choiceData={choiceData}
+              setChoiceData={setChoiceData}
               variant={variant}
               fontSize={fontSize}
               i18nMap={i18nMap}
