@@ -46,6 +46,7 @@ import TextInput from './components/TextInput'
 import FileInput from './components/FileInput'
 import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
+import AutoCompleteInput from './components/AutoCompleteInput'
 
 import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty } from './utils/helper'
 import translate from './utils/translate'
@@ -569,8 +570,9 @@ const FormContent = (props) => {
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
+                              const argsChoiceFn = { row, rowIdx, colIdx, dataKey, rows: fields?.value };
                               const finalChoices =
-                                typeof choices === 'function' ? choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value }) : choices
+                                typeof choices === 'function' ? choices(argsChoiceFn) : choices
                               return (
                                 <TableCell
                                   className={clsx({
@@ -625,6 +627,21 @@ const FormContent = (props) => {
                                       name={`${name}.${dataKey}`}
                                       form={form}
                                       choices={finalChoices}
+                                      validate={validate}
+                                      disabled={disabled}
+                                      variant={variant}
+                                      fontSize={fontSize}
+                                      i18nMap={i18nMap}
+                                      options={options}
+                                      handleOnChange={handleOnChange}
+                                    />
+                                  )}
+                                  {element === 'auto-complete-input' && (
+                                    <AutoCompleteInput
+                                      name={`${name}.${dataKey}`}
+                                      form={form}
+                                      argsChoiceFn={argsChoiceFn}
+                                      choices={choices} // Pass choices as it is
                                       validate={validate}
                                       disabled={disabled}
                                       variant={variant}

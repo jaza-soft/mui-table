@@ -11,8 +11,19 @@ const columns = [
   {
     dataKey: 'dessert',
     title: 'Dessert',
-    inputType: 'select-input',
-    choices: ({ row, rowIdx }) => (rowIdx === 0 ? desserts.slice(0, 2).map((e) => ({ id: e, name: e })) : desserts.map((e) => ({ id: e, name: e }))),
+    inputType: 'auto-complete-input',
+    // choices: ({ row, rowIdx }) => (rowIdx === 0 ? desserts.slice(0, 2).map((e) => ({ id: e, name: e })) : desserts.map((e) => ({ id: e, name: e }))),
+    choices: (args) => {
+      const q = args?.searchText
+      console.log({q});
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const filteredDessert = desserts.filter((e) => q === '' || e.toLowerCase().includes(q?.toLowerCase())).map((e) => ({ id: e, name: e }))
+          console.log({filteredDessert})
+          resolve(filteredDessert)
+        }, 100)
+      })
+    },
     options: { displayEmpty: true },
     validate: required(),
     disabled: (row, dataKey) => row?.id === 3
