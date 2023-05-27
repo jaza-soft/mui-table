@@ -141,6 +141,7 @@ const FormContent = (props) => {
   const {
     classes,
     toolbarStyle,
+    headerCellStyle,
     i18nMap,
     columns,
     headerRows,
@@ -339,6 +340,7 @@ const FormContent = (props) => {
               isTreeTable={isTreeTable}
               columns={columns}
               headerRows={headerRows}
+              headerCellStyle={headerCellStyle}
               classes={classes}
               selectedCount={selectedCount}
               order={order}
@@ -749,7 +751,7 @@ const MuiTable = (props) => {
     !isEmpty(props.parentIdKey) ||
     props?.rows.filter((row) => Object.prototype.hasOwnProperty.call(row, props.parentIdKey || 'parentId')).length > 0 // Check Whether idKey exists in rows
 
-  const {headerRows, rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
+  const { rows, editable, enableRowAddition, inlineActions, footerActions, toolbar, totalRowKey, variant, fontSize, rowAddCount, validate } = props
 
   const columns = props.columns?.map((c) => ({ ...c, validate: Array.isArray(c.validate) ? composeValidators(c.validate) : c.validate }))
 
@@ -908,7 +910,6 @@ const MuiTable = (props) => {
               submitting={submitting}
               hasValidationErrors={hasValidationErrors}
               columns={columns}
-              headerRows={headerRows}
               rows={rows}
               rowList={rowList}
               isTreeTable={isTreeTable}

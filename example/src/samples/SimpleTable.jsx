@@ -53,6 +53,7 @@ const SimpleTable = () => {
       columns={columns}
       headerRows={headerRows}
       rows={rows}
+      headerCellStyle={{backgroundColor: '#C6D0DA'}}
       rowStyle={({ rowIdx }) => ({ backgroundColor: rowIdx % 2 === 0 ? '#f0f0f0' : 'none' })}
     />
   )
