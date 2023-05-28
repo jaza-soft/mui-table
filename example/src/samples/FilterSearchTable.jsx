@@ -275,13 +275,17 @@ rows = rows.map((row) => {
 })
 
 const FilterSearchTable = () => {
+  const onFilter = (filterValues) => {
+    console.log({ filterValues })
+  }
   return (
     <MuiTable
-      title="My Table"
+      title='My Table'
       columns={columns}
       rows={rows}
       pageable={true}
       toolbarDivider={false}
+      onFilter={onFilter}
       // toolbarStyle={{backgroundColor: 'yellow'}}
       searchable={true}
       searchKeys={['style', 'label', 'width']}

@@ -219,7 +219,8 @@ const FormContent = (props) => {
     totalPage,
     handleChangePage,
     handleChangePageSize,
-    handleOnChange
+    handleOnChange,
+    onRowClick
   } = props
 
   const selectedCount = selected.length
@@ -374,7 +375,7 @@ const FormContent = (props) => {
                         role='checkbox'
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={rowIdx}
+                        key={`${rowIdx}-${JSON.stringify(style)}`}
                         selected={isItemSelected}
                         style={{
                           backgroundColor: isTreeTable && row?.hasChild && expanded[row[idKey]] ? bgColor : undefined,
@@ -458,7 +459,9 @@ const FormContent = (props) => {
                               padding={selectable && colIdx === 0 ? 'none' : 'default'}
                               key={`${rowIdx}-${colIdx}`}
                               align={align}
-                              onClick={() => (typeof linkPath === 'function' ? linkPath(row, dataKey) : null)}
+                              onClick={() =>
+                                typeof linkPath === 'function' ? linkPath(row, dataKey) : typeof onRowClick === 'function' ? onRowClick(row) : null
+                              }
                               {...rowCellProps}
                               style={{
                                 fontWeight,
@@ -797,6 +800,7 @@ const MuiTable = (props) => {
   const searchable = isTreeTable ? false : props.searchable
   const sortable = isTreeTable ? false : props.sortable
   const pageable = isTreeTable ? false : props.pageable
+  const selectAll = props.multiSelect ? props.selectAll : false
 
   const {
     rowList,
@@ -907,7 +911,7 @@ const MuiTable = (props) => {
     toolbarActions.push({ name: 'filter' })
   }
 
-  const showToolbar = toolbar || !isEmpty(toolbarActions) || selected.length > 0 || searchable || filterColumns.length > 0
+  const showToolbar = toolbar || !isEmpty(toolbarActions) || (selected.length > 0 && !isEmpty(props.selectActions)) || searchable || filterColumns.length > 0
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
   const showActions = (typeof inlineActions === 'function' || inlineActions.length > 0) && !editableState.editing
 
@@ -981,6 +985,7 @@ const MuiTable = (props) => {
               rowList={rowList}
               isTreeTable={isTreeTable}
               editable={editable}
+              selectAll={selectAll}
               pageable={pageable}
               inlineActions={inlineActions}
               editableActions={editableActions}
@@ -1058,6 +1063,8 @@ MuiTable.propTypes = {
   searchKeys: PropTypes.arrayOf(PropTypes.string),
   selectable: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // boolean | (row) => boolean
   selectAll: PropTypes.bool,
+  multiSelect: PropTypes.bool, // Whether multiple rows can be selected for selectable table
+  pageSelect: PropTypes.bool, // Select Current page only on selectAll
   sortable: PropTypes.bool,
   defaultSort: PropTypes.shape({
     field: PropTypes.string.isRequired,
@@ -1103,6 +1110,8 @@ MuiTable.propTypes = {
   onChange: PropTypes.func, // (row, dataKey, value, form) => {}
   onSelectActionClick: PropTypes.func, // (event, action, rows, onActionComplete) => void
   onSelect: PropTypes.func, // (selectedIds) => void
+  onRowClick: PropTypes.func, // (row) => void
+  onFilter: PropTypes.func, // (filterValues) => void
   onToolbarActionClick: PropTypes.func, // (event, action, rows) => void
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
   onFooterActionClick: PropTypes.func, // (event, action, rows, filterValues, onActionComplete) => void
@@ -1125,13 +1134,15 @@ MuiTable.defaultProps = {
   enableRowAddition: false,
   selectable: false,
   selectAll: true,
+  multiSelect: true,
+  pageSelect: true,
   sortable: false,
   pageable: false,
   idKey: 'id',
   totalRowKey: 'totalRow',
   rowsPerPageOptions: [10, 25],
   pageSize: 10,
-  selectActions: [{ name: 'delete' }],
+  selectActions: [],
   toolbarActions: [],
   inlineActions: [],
   footerActions: [],

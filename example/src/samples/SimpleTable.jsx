@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { MuiTable } from '@jazasoft/mui-table'
 // import { columns, rows } from '../data'
@@ -48,13 +48,20 @@ const SimpleTable = () => {
   const groupRow = { dessert: 'G1', sweet: 'G2' }
   const headerRows = [groupRow, columns.reduce((acc, c) => ({ ...acc, [c.dataKey]: c.title }), {})]
 
+  const [selectedId, setSelectedId] = useState(1)
+
+  const onRowClick = (row) => {
+    setSelectedId(row.id)
+  }
+
   return (
     <MuiTable
       columns={columns}
       headerRows={headerRows}
       rows={rows}
-      headerCellStyle={{backgroundColor: '#C6D0DA'}}
-      rowStyle={({ rowIdx }) => ({ backgroundColor: rowIdx % 2 === 0 ? '#f0f0f0' : 'none' })}
+      onRowClick={onRowClick}
+      headerCellStyle={{ backgroundColor: '#C6D0DA' }}
+      rowStyle={({ row }) => ({ backgroundColor: row?.id === selectedId ? '#f0f0f0' : 'none' })}
     />
   )
 }

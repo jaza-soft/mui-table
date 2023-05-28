@@ -118,11 +118,13 @@ const useMuiTable = (props) => {
     searchKeys,
     isTreeTable,
     selectable,
+    pageSelect,
+    multiSelect,
     sortable,
     defaultSort = {},
     pageable,
     idKey,
-    parentIdKey = "parentId",
+    parentIdKey = 'parentId',
     initialExpandedState,
     defaultExpanded,
     inlineActions,
@@ -134,7 +136,8 @@ const useMuiTable = (props) => {
     onInlineActionClick,
     onFooterActionClick,
     onTreeExpand,
-    onRowAdd
+    onRowAdd,
+    onFilter
   } = props
 
   const finalInlineActions = typeof inlineActions === 'function' ? inlineActions({}) : inlineActions
@@ -325,11 +328,13 @@ const useMuiTable = (props) => {
   }
 
   const updateFilter = (dataKey, value) => {
+    onFilter && onFilter({ ...filterValues, [dataKey]: value })
     setFilterValues((prevValues) => ({ ...prevValues, [dataKey]: value }))
   }
 
   const resetFilter = () => {
     setFilterValues({})
+    onFilter && onFilter({})
   }
 
   const removeFilter = (dataKey, value) => {
@@ -349,9 +354,11 @@ const useMuiTable = (props) => {
       rowList = applySearch(rowList, searchText, searchKeys, idKey, hasIdKey)
 
       // pagination
-      const startIdx = page * pageSize
-      const endIdx = pageable ? page * pageSize + pageSize : rowList.length
-      rowList = rowList.slice(startIdx, endIdx)
+      if (pageSelect) {
+        const startIdx = page * pageSize
+        const endIdx = pageable ? page * pageSize + pageSize : rowList.length
+        rowList = rowList.slice(startIdx, endIdx)
+      }
 
       const newSelecteds = getDistinctValues(rowList.map((n) => n[idKey]).filter((id) => !isEmpty(id)))
       setSelected((prev = []) => {
@@ -391,19 +398,23 @@ const useMuiTable = (props) => {
       newSelected = [...newSelected.filter((e) => !parentIds.includes(e)), ...selectedParentIds]
       setSelected(newSelected)
     } else {
-      const selectedIndex = selected.indexOf(id)
-      let newSelected = []
+      if (multiSelect) {
+        const selectedIndex = selected.indexOf(id)
+        let newSelected = []
 
-      if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id)
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1))
-      } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1))
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
+        if (selectedIndex === -1) {
+          newSelected = newSelected.concat(selected, id)
+        } else if (selectedIndex === 0) {
+          newSelected = newSelected.concat(selected.slice(1))
+        } else if (selectedIndex === selected.length - 1) {
+          newSelected = newSelected.concat(selected.slice(0, -1))
+        } else if (selectedIndex > 0) {
+          newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
+        }
+        setSelected(newSelected)
+      } else {
+        setSelected([id])
       }
-      setSelected(newSelected)
     }
   }
 
@@ -484,6 +495,11 @@ const useMuiTable = (props) => {
     onTreeExpand && onTreeExpand(event, row, isExpanded)
   }
 
+  const onSearch = (searchText) => {
+    setPage(0)
+    setSearchText(searchText)
+  }
+
   // Filter & Sort
   let rowList = []
   let totalPage = 0
@@ -524,7 +540,7 @@ const useMuiTable = (props) => {
     expanded,
     searchFocus,
     searchText,
-    setSearchText,
+    setSearchText: onSearch,
     setSearchFocus,
     setEditableState,
     handleSelectActionClick,

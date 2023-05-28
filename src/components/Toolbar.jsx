@@ -21,7 +21,7 @@ import Tooltip from './Tooltip'
 import Popover from './Popover'
 import Filter from './Filter'
 
-import { capitalize, getLabel } from '../utils/helper'
+import { capitalize, getLabel, isEmpty } from '../utils/helper'
 import i18nMap from '../utils/i18nMap'
 
 const useStyles = makeStyles((theme) => ({
@@ -102,10 +102,10 @@ const Toolbar = (props) => {
         <MuiToolbar
           style={style}
           className={clsx(classes.root, className, {
-            [classes.highlight]: selectedCount > 0
+            [classes.highlight]: selectedCount > 0 && !isEmpty(selectActions)
           })}
         >
-          {selectedCount > 0 ? (
+          {selectedCount > 0 && !isEmpty(selectActions) ? (
             <Typography className={classes.title} color='inherit' variant='subtitle1' component='div'>
               {finalTitleSelected}
             </Typography>

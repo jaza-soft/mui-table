@@ -56,6 +56,8 @@ const SelectableTable = () => {
       pageable={true}
       selectable={(row) => row?.id % 2 === 1}
       selectAll={false}
+      pageSelect={false}
+//       multiSelect={false}
       selectActions={[
         { name: 'delete', tooltip: 'Delete Rows' },
         { name: 'custom', tooltip: 'Custom Action', icon: <DoneIcon /> }
