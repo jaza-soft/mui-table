@@ -1,8 +1,8 @@
 {
   "name": "@jazasoft/mui-table",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Advanced React Data Table using Material UI",
-  "author": "zahidraza",
+  "author": "Md Zahid Raza",
   "license": "MIT",
   "repository": "jaza-soft/mui-table",
   "main": "dist/index.js",
