@@ -847,7 +847,7 @@ const MuiTable = (props) => {
           })
         }
       })
-  }, [JSON.stringify(columns)])
+  }, [JSON.stringify(columns), JSON.stringify(rowList)])
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
