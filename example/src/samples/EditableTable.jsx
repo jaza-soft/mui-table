@@ -12,14 +12,12 @@ const columns = [
     dataKey: 'dessert',
     title: 'Dessert',
     inputType: 'auto-complete-input',
-    // choices: ({ row, rowIdx }) => (rowIdx === 0 ? desserts.slice(0, 2).map((e) => ({ id: e, name: e })) : desserts.map((e) => ({ id: e, name: e }))),
-    choices: (args) => {
-      const q = args?.searchText
-      console.log({q});
+    fetchChoices: (searchText) => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
-          const filteredDessert = desserts.filter((e) => q === '' || e.toLowerCase().includes(q?.toLowerCase())).map((e) => ({ id: e, name: e }))
-          console.log({filteredDessert})
+          const filteredDessert = desserts
+            .filter((e) => searchText === '' || e.toLowerCase().includes(searchText?.toLowerCase()))
+            .map((e) => ({ id: e, name: e }))
           resolve(filteredDessert)
         }, 100)
       })
