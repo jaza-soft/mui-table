@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow'
 import TableSortLabel from '@material-ui/core/TableSortLabel'
 import Checkbox from '@material-ui/core/Checkbox'
 
-import { getLabel } from '../utils/helper'
+import { getLabel, isEmpty } from '../utils/helper'
 
 const useStyles = makeStyles({
   visuallyHidden: {
@@ -34,6 +34,8 @@ const TableHead = (props) => {
     sortable,
     isTreeTable,
     columns,
+    headerRows,
+    headerCellStyle,
     onSelectAllClick,
     order,
     orderBy,
@@ -51,49 +53,94 @@ const TableHead = (props) => {
 
   return (
     <MuiTableHead>
-      <TableRow>
-        {!!selectable && !editing && (
-          <TableCell padding={selectAll ? 'checkbox' : undefined}>
-            {selectAll && (
-              <Checkbox
-                indeterminate={selectedCount > 0 && selectedCount < rowCount}
-                checked={rowCount > 0 && selectedCount === rowCount}
-                onChange={onSelectAllClick}
-                inputProps={{ 'aria-label': 'select all desserts' }}
-              />
-            )}
-          </TableCell>
-        )}
-        {isTreeTable && <TableCell padding='checkbox' />}
+      {isEmpty(headerRows) && (
+        <TableRow>
+          {!!selectable && !editing && (
+            <TableCell padding={selectAll ? 'checkbox' : undefined}>
+              {selectAll && (
+                <Checkbox
+                  indeterminate={selectedCount > 0 && selectedCount < rowCount}
+                  checked={rowCount > 0 && selectedCount === rowCount}
+                  onChange={onSelectAllClick}
+                  inputProps={{ 'aria-label': 'select all desserts' }}
+                />
+              )}
+            </TableCell>
+          )}
+          {isTreeTable && <TableCell padding='checkbox' />}
 
-        {showActions && actionPlacement === 'left' && <TableCell align='left'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>}
+          {showActions && actionPlacement === 'left' && (
+            <TableCell align='left'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
+          )}
 
-        {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
-          <TableCell
-            key={idx}
-            className={clsx(props.classes?.headerCell, props.options?.className)}
-            align={align}
-            padding={selectable && !editing && idx === 0 ? 'none' : 'default'}
-            sortDirection={orderBy === dataKey ? order : false}
-            {...headerCellProps}
-          >
-            {sortable && !editing ? (
-              <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
-                {getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}
-                {orderBy === dataKey ? (
-                  <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
-                ) : null}
-              </TableSortLabel>
-            ) : (
-              getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })
-            )}
-          </TableCell>
-        ))}
+          {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
+            <TableCell
+              key={idx}
+              className={clsx(props.classes?.headerCell, props.options?.className)}
+              align={align}
+              padding={selectable && !editing && idx === 0 ? 'none' : 'default'}
+              sortDirection={orderBy === dataKey ? order : false}
+              {...headerCellProps}
+            >
+              {sortable && !editing ? (
+                <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
+                  {getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}
+                  {orderBy === dataKey ? (
+                    <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
+                  ) : null}
+                </TableSortLabel>
+              ) : (
+                getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })
+              )}
+            </TableCell>
+          ))}
 
-        {showActions && actionPlacement === 'right' && (
-          <TableCell align='right'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
-        )}
-      </TableRow>
+          {showActions && actionPlacement === 'right' && (
+            <TableCell align='right'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
+          )}
+        </TableRow>
+      )}
+
+      {!isEmpty(headerRows) &&
+        headerRows.map((headerRow, rowIdx) => {
+          const cols = columns.flatMap((c, colIdx) => {
+            let colSpan = 1
+            if (typeof c.colSpan === 'function') {
+              colSpan = c.colSpan({ column: c, row: headerRow, colIdx, rowIdx })
+            }
+            return colSpan === 0 ? [] : { ...c, colSpan }
+          })
+          return (
+            <TableRow key={rowIdx}>
+              {cols.map(({ dataKey, title, align, colSpan, headerCellProps }, colIdx) => {
+                const value = headerRow[dataKey]
+                const style =
+                  typeof headerCellStyle === 'function'
+                    ? headerCellStyle({
+                        row: headerRow,
+                        column: { dataKey, title, align, colSpan, headerCellProps },
+                        rowIdx,
+                        colIdx
+                      })
+                    : headerCellStyle
+                return (
+                  <TableCell
+                    key={`${rowIdx}-${colIdx}`}
+                    colSpan={colSpan}
+                    align={align}
+                    className={clsx(props.classes?.headerCell, props.options?.className)}
+                    padding={selectable && !editing && colIdx === 0 ? 'none' : 'default'}
+                    sortDirection={orderBy === dataKey ? order : false}
+                    {...headerCellProps}
+                    style={{ ...headerCellProps?.style, ...style }}
+                  >
+                    {value}
+                  </TableCell>
+                )
+              })}
+            </TableRow>
+          )
+        })}
     </MuiTableHead>
   )
 }

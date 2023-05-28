@@ -142,8 +142,10 @@ const FormContent = (props) => {
   const {
     classes,
     toolbarStyle,
+    headerCellStyle,
     i18nMap,
     columns,
+    headerRows,
     rows,
     rowList,
     form,
@@ -338,6 +340,8 @@ const FormContent = (props) => {
               sortable={sortable}
               isTreeTable={isTreeTable}
               columns={columns}
+              headerRows={headerRows}
+              headerCellStyle={headerCellStyle}
               classes={classes}
               selectedCount={selectedCount}
               order={order}
@@ -989,6 +993,7 @@ MuiTable.propTypes = {
       rowCellProps: PropTypes.object
     })
   ).isRequired,
+  headerRows: PropTypes.arrayOf(PropTypes.object),
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   title: PropTypes.string,
   titleSelected: PropTypes.func,
@@ -1039,6 +1044,7 @@ MuiTable.propTypes = {
 
   toolbarStyle: PropTypes.object,
   rowStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, rowIdx}) => Object
+  headerCellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   cellStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // ({row, column, rowIdx, columnIdx}) => Object
   validate: PropTypes.func, // (values: FormValues) => Object | Promise<Object>
   onSubmit: PropTypes.func,
