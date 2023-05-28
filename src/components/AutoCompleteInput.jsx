@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const AutoCompleteInput = React.memo(
-  ({ name, validate, choices = [], disabled, variant, fontSize, i18nMap, form, handleOnChange, options, updateChoices, argsChoiceFn = {} }) => {
+  ({ name, validate, choices = [], disabled, variant, fontSize, i18nMap, form, handleOnChange, options, updateChoices }) => {
     const classes = useStyles({ variant, fontSize })
 
     const [searchText, setSearchText] = useState('')

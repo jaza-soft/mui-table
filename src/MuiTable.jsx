@@ -589,10 +589,10 @@ const FormContent = (props) => {
                               if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
                                 element = 'text-field'
                               }
-                              const argsChoiceFn = { row, rowIdx, colIdx, dataKey, rows: fields?.value }
+
                               let finalChoices
                               if (typeof choices === 'function') {
-                                finalChoices = choices(argsChoiceFn)
+                                finalChoices = choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value })
                               } else if (Array.isArray(choices)) {
                                 finalChoices = choices
                               } else if (element === 'auto-complete-input' && !isEmpty(choiceData) && !isEmpty(choiceData[dataKey])) {
@@ -665,7 +665,6 @@ const FormContent = (props) => {
                                     <AutoCompleteInput
                                       name={`${name}.${dataKey}`}
                                       form={form}
-                                      argsChoiceFn={argsChoiceFn}
                                       choices={finalChoices}
                                       updateChoices={handleChoiceFetch}
                                       validate={validate}
