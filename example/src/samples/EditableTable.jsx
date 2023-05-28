@@ -5,7 +5,13 @@ import { useState } from 'react'
 
 import CopyIcon from '@material-ui/icons/FileCopy'
 
-const desserts = ['Frozen yoghurt', 'Ice cream sandwich', 'Eclair', 'Cupcake', 'Gingerbread']
+const desserts = [
+  { id: `1`, name: 'Frozen yoghurt' },
+  { id: `2`, name: 'Ice cream sandwich' },
+  { id: `3`, name: 'Eclair' },
+  { id: `4`, name: 'Cupcake' },
+  { id: `5`, name: 'Gingerbread' }
+]
 
 const columns = [
   {
@@ -13,18 +19,16 @@ const columns = [
     title: 'Dessert',
     inputType: 'auto-complete-input',
     fetchChoices: (searchText) => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         setTimeout(() => {
-          const filteredDessert = desserts
-            .filter((e) => searchText === '' || e.toLowerCase().includes(searchText?.toLowerCase()))
-            .map((e) => ({ id: e, name: e }))
+          const filteredDessert = desserts.filter((e) => searchText === '' || e.name.toLowerCase().includes(searchText?.toLowerCase()))
           resolve(filteredDessert)
         }, 100)
       })
     },
-    options: { displayEmpty: true },
     validate: required(),
-    disabled: (row, dataKey) => row?.id === 3
+    disabled: (row, dataKey) => row?.id === 3,
+    render: (value) => desserts.find((e) => e.id === value)?.name
   },
   {
     dataKey: 'calories',
@@ -60,7 +64,7 @@ const rows = Array(15)
   .fill('')
   .map((_, idx) => ({
     id: idx + 1,
-    dessert: desserts[Math.round(Math.random() * 10) % 5],
+    dessert: desserts[Math.round(Math.random() * 10) % 5]?.id,
     // calories: Math.round(Math.random() * 500),
     fat: Math.round(Math.random() * 10),
     carbs: Math.round(Math.random() * 100),

@@ -53,12 +53,17 @@ const AutoCompleteInput = React.memo(
           if (options?.multiple) {
             value = Array.isArray(value) ? value : []
           }
+          const key = choices
+            .filter((e) => (Array.isArray(value) ? value.includes(e.id) : e.id === value))
+            .map((e) => e.name)
+            .join(', ')
           return (
             <FormControl className={classes.formControl} style={{ width: options?.style?.width }} error={meta.touched && !!meta.error}>
               <Autocomplete
+                key={key}
                 value={value}
                 onChange={onChange(input)}
-                inputValue={searchText || value}
+                inputValue={searchText || ''}
                 onInputChange={onInputChange}
                 options={choices.map((e) => e.id)}
                 getOptionLabel={(option) => choices.find((e) => e.id === option)?.name || ''}
