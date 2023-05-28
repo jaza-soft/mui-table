@@ -828,7 +828,7 @@ const MuiTable = (props) => {
     columns
       .filter((c) => c.inputType === 'auto-complete-input' && typeof c.fetchChoices === 'function')
       .forEach((column) => {
-        let result = column.fetchChoices(rowList)
+        let result = column.fetchChoices('', rowList)
         if (isPromise(result)) {
           result.then((choiceList) => {
             if (Array.isArray(choiceList)) {
@@ -837,7 +837,7 @@ const MuiTable = (props) => {
             }
           })
         }
-        result = column.fetchChoices('')
+        result = column.fetchChoices('', [])
         if (isPromise(result)) {
           result.then((choiceList) => {
             if (Array.isArray(choiceList)) {

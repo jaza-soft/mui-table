@@ -18,12 +18,10 @@ const columns = [
     dataKey: 'dessert',
     title: 'Dessert',
     inputType: 'auto-complete-input',
-    fetchChoices: (rowsOrsearchText) => {
-      const rowList = Array.isArray(rowsOrsearchText) ? rowsOrsearchText : []
-      const searchText = Array.isArray(rowsOrsearchText) ? '' : rowsOrsearchText
+    fetchChoices: (searchText, rowList) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          if (rowList.length > 0) {
+          if (rowList?.length > 0) {
             const rowMap = rowList.reduce((acc, row) => ({ ...acc, [row.id]: row.id }), {})
             const rowIds = Object.values(rowMap)
             const filteredDessert = desserts.filter((e) => rowIds.includes(e.id))
