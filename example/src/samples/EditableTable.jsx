@@ -6,11 +6,11 @@ import { useState } from 'react'
 import CopyIcon from '@material-ui/icons/FileCopy'
 
 const desserts = [
-  { id: `1`, name: 'Frozen yoghurt' },
-  { id: `2`, name: 'Ice cream sandwich' },
-  { id: `3`, name: 'Eclair' },
-  { id: `4`, name: 'Cupcake' },
-  { id: `5`, name: 'Gingerbread' }
+  { id: 1, name: 'Frozen yoghurt' },
+  { id: 2, name: 'Ice cream sandwich' },
+  { id: 3, name: 'Eclair' },
+  { id: 4, name: 'Cupcake' },
+  { id: 5, name: 'Gingerbread' }
 ]
 
 const columns = [
@@ -18,11 +18,20 @@ const columns = [
     dataKey: 'dessert',
     title: 'Dessert',
     inputType: 'auto-complete-input',
-    fetchChoices: (searchText) => {
+    fetchChoices: (rowsOrsearchText) => {
+      const rowList = Array.isArray(rowsOrsearchText) ? rowsOrsearchText : []
+      const searchText = Array.isArray(rowsOrsearchText) ? '' : rowsOrsearchText
       return new Promise((resolve) => {
         setTimeout(() => {
-          const filteredDessert = desserts.filter((e) => searchText === '' || e.name.toLowerCase().includes(searchText?.toLowerCase()))
-          resolve(filteredDessert)
+          if (rowList.length > 0) {
+            const rowMap = rowList.reduce((acc, row) => ({ ...acc, [row.id]: row.id }), {})
+            const rowIds = Object.values(rowMap)
+            const filteredDessert = desserts.filter((e) => rowIds.includes(e.id))
+            resolve(filteredDessert)
+          } else {
+            const filteredDessert = desserts.filter((e) => searchText === '' || e.name.toLowerCase().includes(searchText?.toLowerCase()))
+            resolve(filteredDessert)
+          }
         }, 100)
       })
     },
@@ -138,7 +147,7 @@ const EditableTable = () => {
       rows={rowList}
       pageable={true}
       editable={true}
-      editing={editing}
+      editing={true}
       toolbarActions={[
         { name: 'copy', tooltip: 'Copy Date', icon: <CopyIcon />, showLabel: true, options: { variant: 'outlined', style: { color: 'green' } } }
       ]}

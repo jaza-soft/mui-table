@@ -824,11 +824,20 @@ const MuiTable = (props) => {
 
   // Initialize Initial Choices for AutoComplete Input with empty searchText //
   useEffect(() => {
-    if (isEmpty(columns)) return
+    if (isEmpty(columns) || !editableState.editing) return
     columns
       .filter((c) => c.inputType === 'auto-complete-input' && typeof c.fetchChoices === 'function')
       .forEach((column) => {
-        const result = column.fetchChoices('')
+        let result = column.fetchChoices(rowList)
+        if (isPromise(result)) {
+          result.then((choiceList) => {
+            if (Array.isArray(choiceList)) {
+              const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
+              setChoiceData((prev) => ({ ...prev, [column.dataKey]: { ...prev[column.dataKey], ...data } }))
+            }
+          })
+        }
+        result = column.fetchChoices('')
         if (isPromise(result)) {
           result.then((choiceList) => {
             if (Array.isArray(choiceList)) {
