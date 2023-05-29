@@ -189,6 +189,9 @@ const useMuiTable = (props) => {
   React.useEffect(() => {
     onSelect && onSelect(selected)
   }, [JSON.stringify(selected)])
+  React.useEffect(() => {
+    setPage(0)
+  }, [props.rows?.length])
 
   const updateRows = (rows) => {
     let rowList = applySort(rows, comparator)
