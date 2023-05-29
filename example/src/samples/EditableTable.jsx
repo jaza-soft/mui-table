@@ -145,7 +145,7 @@ const EditableTable = () => {
       rows={rowList}
       pageable={true}
       editable={true}
-      editing={true}
+      editing={false}
       toolbarActions={[
         { name: 'copy', tooltip: 'Copy Date', icon: <CopyIcon />, showLabel: true, options: { variant: 'outlined', style: { color: 'green' } } }
       ]}
