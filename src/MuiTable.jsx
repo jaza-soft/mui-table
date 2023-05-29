@@ -832,18 +832,18 @@ const MuiTable = (props) => {
     columns
       .filter((c) => c.inputType === 'auto-complete-input' && typeof c.fetchChoices === 'function')
       .forEach((column) => {
-        let result = column.fetchChoices('', rowList)
-        if (isPromise(result)) {
-          result.then((choiceList) => {
+        const result1 = column.fetchChoices('', rowList)
+        if (isPromise(result1)) {
+          result1.then((choiceList) => {
             if (Array.isArray(choiceList)) {
               const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
               setChoiceData((prev) => ({ ...prev, [column.dataKey]: { ...prev[column.dataKey], ...data } }))
             }
           })
         }
-        result = column.fetchChoices('', [])
-        if (isPromise(result)) {
-          result.then((choiceList) => {
+        const result2 = column.fetchChoices('', [])
+        if (isPromise(result2)) {
+          result2.then((choiceList) => {
             if (Array.isArray(choiceList)) {
               const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
               setChoiceData((prev) => ({ ...prev, [column.dataKey]: { ...prev[column.dataKey], ...data } }))
@@ -851,7 +851,7 @@ const MuiTable = (props) => {
           })
         }
       })
-  }, [JSON.stringify(columns), JSON.stringify(rowList)])
+  }, [JSON.stringify(columns), JSON.stringify(rowList), editableState.editing])
 
   const isSelected = (id) => selected.indexOf(id) !== -1
 
@@ -911,7 +911,8 @@ const MuiTable = (props) => {
     toolbarActions.push({ name: 'filter' })
   }
 
-  const showToolbar = toolbar || !isEmpty(toolbarActions) || (selected.length > 0 && !isEmpty(props.selectActions)) || searchable || filterColumns.length > 0
+  const showToolbar =
+    toolbar || !isEmpty(toolbarActions) || (selected.length > 0 && !isEmpty(props.selectActions)) || searchable || filterColumns.length > 0
   // when actions are provided and not in colletive editing mode. (i.e - hide actions in collective editing mode)
   const showActions = (typeof inlineActions === 'function' || inlineActions.length > 0) && !editableState.editing
 
