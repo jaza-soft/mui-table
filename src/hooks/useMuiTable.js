@@ -349,6 +349,7 @@ const useMuiTable = (props) => {
       delete newFilterValues[dataKey]
     }
     setFilterValues(newFilterValues)
+    onFilter && onFilter(newFilterValues)
   }
 
   const handleSelectAllClick = (event) => {
