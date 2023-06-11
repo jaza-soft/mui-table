@@ -97,6 +97,10 @@ const TreeTable = () => {
     console.log({ action, rows })
   }
 
+  const onRowAdd = (rows, currRow) => {
+    console.log({rows,currRow })
+  }
+
   // const defaultExpanded = (row, level) => level <= 0
   // const rowList = addTotalRow(rows).sort((a, b) => a.serial - b.serial)
   return (
@@ -109,6 +113,7 @@ const TreeTable = () => {
       defaultExpanded={true}
       expandedColor={['#92BFF6', '#C1DBFA', '#F0F6FE']}
       // initialExpandedState={{ 1: true, 2: true }}
+      onRowAdd={onRowAdd}
       onSubmit={onSubmit}
       onSelect={onSelect}
       onSelectActionClick={onSelectActionClick}
