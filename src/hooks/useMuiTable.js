@@ -459,14 +459,14 @@ const useMuiTable = (props) => {
       if (name === 'add') {
         let newRow = { [idKey]: new Date().getTime(), [parentIdKey]: row[parentIdKey] }
         if (typeof onRowAdd === 'function') {
-          const nRow = onRowAdd(rowList, row) || {}
+          const nRow = onRowAdd(rowList, rowIdx, row) || {}
           newRow = { ...nRow, ...newRow }
         }
         rowList.splice(rowIdx + 1, 0, newRow)
       } else if (name === 'addChild') {
         let newRow = { [idKey]: new Date().getTime(), [parentIdKey]: row[idKey] }
         if (typeof onRowAdd === 'function') {
-          const nRow = onRowAdd(rowList, row) || {}
+          const nRow = onRowAdd(rowList, rowIdx, row) || {}
           newRow = { ...nRow, ...newRow }
         }
         rowList.splice(rowIdx + 1, 0, newRow)
@@ -481,7 +481,7 @@ const useMuiTable = (props) => {
       if (name === 'add') {
         let newRow = {}
         if (typeof onRowAdd === 'function') {
-          newRow = onRowAdd(rowList, rowIdx) || {}
+          newRow = onRowAdd(rowList, rowIdx, row) || {}
         }
         rowList.splice(rowIdx + 1, 0, newRow)
         setEditableState((prev) => ({ ...prev, newRowCount: prev.newRowCount ? prev.newRowCount + 1 : 1 }))

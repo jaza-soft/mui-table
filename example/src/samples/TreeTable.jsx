@@ -59,7 +59,7 @@ rows = rows.map((row) => ({
 }))
 
 const showChildAddAction = (row, rows) => {
-  return row?.sweet === true;
+  return row?.sweet === true
 }
 
 const addTotalRow = (rows) => {
@@ -97,8 +97,8 @@ const TreeTable = () => {
     console.log({ action, rows })
   }
 
-  const onRowAdd = (rows, currRow) => {
-    console.log({rows,currRow })
+  const onRowAdd = (rows, rowIdx, currRow) => {
+    console.log({ rows, rowIdx, currRow })
   }
 
   // const defaultExpanded = (row, level) => level <= 0
