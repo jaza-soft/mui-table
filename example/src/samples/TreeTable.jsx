@@ -109,6 +109,9 @@ const TreeTable = () => {
       rows={rows}
       editable={true}
       selectable={true}
+      searchable={true}
+      searchKeys={['field']}
+      pageable={true}
       showEditableActions={true}
       defaultExpanded={true}
       expandedColor={['#92BFF6', '#C1DBFA', '#F0F6FE']}

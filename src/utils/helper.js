@@ -96,6 +96,13 @@ export const nameFromId = (column, rows, value) => {
   return name
 }
 
+export const findParentIds = (row, fullRowList, idKey = 'id', parentIdKey = 'parentId') => {
+  if (isEmpty(row[parentIdKey])) return []
+  const parent = fullRowList.find((e) => e[idKey] === row[parentIdKey])
+  const parentIds = findParentIds(parent, fullRowList, idKey, parentIdKey)
+  return [...parentIds, parent[idKey]]
+}
+
 export const buildTree = (rows, idKey = 'id', parentIdKey = 'parentId') => {
   const rootRows = rows.filter((row) => row[parentIdKey] === null || row[parentIdKey] === undefined)
   const tree = rootRows.map((root) => createChild(root, rows, 0, idKey, parentIdKey))

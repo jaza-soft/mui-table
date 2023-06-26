@@ -797,9 +797,9 @@ const MuiTable = (props) => {
   const columns = props.columns?.map((c) => ({ ...c, validate: Array.isArray(c.validate) ? composeValidators(c.validate) : c.validate }))
 
   // Disable these features in Tree Table
-  const searchable = isTreeTable ? false : props.searchable
-  const sortable = isTreeTable ? false : props.sortable
-  const pageable = isTreeTable ? false : props.pageable
+  const searchable = props.searchable
+  const sortable = props.sortable
+  const pageable = props.pageable
   const selectAll = props.multiSelect ? props.selectAll : false
 
   const {
@@ -907,7 +907,7 @@ const MuiTable = (props) => {
     toolbarActions.push({ name: 'search' })
   }
   toolbarActions = toolbarActions.concat(props.toolbarActions)
-  if (filterColumns.length > 0 && !isTreeTable) {
+  if (filterColumns.length > 0) {
     toolbarActions.push({ name: 'filter' })
   }
 

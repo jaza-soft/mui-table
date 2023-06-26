@@ -1,7 +1,7 @@
 import React from 'react'
 import lodashMerge from 'lodash.merge'
 
-import { getDistinctValues, buildTree, flattenTree, getExpandedState, isEmpty } from '../utils/helper'
+import { getDistinctValues, buildTree, flattenTree, getExpandedState, isEmpty, findParentIds } from '../utils/helper'
 import i18nMap from '../utils/i18nMap'
 
 function descendingComparator(a, b, orderBy) {
@@ -527,7 +527,35 @@ const useMuiTable = (props) => {
     const endIdx = pageable ? page * size + size : rowList.length
     rowList = rowList.slice(startIdx, endIdx)
   } else {
-    rowList = flattenTree(tree, editableState.editing || expanded, idKey)
+    const fullRowList = flattenTree(tree, editableState.editing || expanded, idKey)
+
+    const csvTextColumns = columns.filter((c) => c.filterOptions?.filter && c.filterOptions?.isCsvText)
+
+    let tRowList = applyFilter(fullRowList, filterValues, idKey, hasIdKey, csvTextColumns)
+    tRowList = applySearch(tRowList, searchText, searchKeys, idKey, hasIdKey)
+
+    // pagination
+    const size = pageSize + (editableState.newRowCount || 0)
+    totalPage = tRowList.length % size === 0 ? tRowList.length / size : Math.ceil(tRowList.length / size)
+    totalElements = tRowList.length
+    const startIdx = page * size
+    const endIdx = pageable ? page * size + size : tRowList.length
+    tRowList = tRowList.slice(startIdx, endIdx)
+
+    // Add Parent Ids
+    tRowList = tRowList.flatMap((row) => {
+      const parentIds = findParentIds(row, fullRowList, idKey, parentIdKey)
+      const parentList = fullRowList.filter((e) => parentIds.includes(e[idKey]))
+      return [...parentList, row]
+    })
+    // Remove Duplicates
+    const addedKeys = []
+    tRowList.forEach((row) => {
+      if (!addedKeys.includes(row[idKey])) {
+        rowList.push(row)
+        addedKeys.push(row[idKey])
+      }
+    })
   }
 
   const mergedI18nMap = lodashMerge(i18nMap, props.i18nMap || {})
