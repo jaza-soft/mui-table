@@ -61,7 +61,7 @@ const TextInput = React.memo(({ name, validate, disabled, variant, fontSize, i18
 
             {meta.touched && meta.error && (
               <FormHelperText id={`${name}-error`}>
-                <ValidationError error={meta.error} i18nMap={i18nMap} />
+                <ValidationError error={meta.error?.message || meta.error} i18nMap={i18nMap} />
               </FormHelperText>
             )}
           </FormControl>

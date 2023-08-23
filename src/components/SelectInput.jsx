@@ -63,7 +63,7 @@ const SelectInput = React.memo(({ name, validate, choices = [], disabled, varian
 
             {meta.touched && meta.error && (
               <FormHelperText id={`${name}-error`}>
-                <ValidationError error={meta.error} i18nMap={i18nMap} />
+                <ValidationError error={meta.error?.message || meta.error} i18nMap={i18nMap} />
               </FormHelperText>
             )}
           </FormControl>
