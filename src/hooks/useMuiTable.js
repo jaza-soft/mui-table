@@ -1,7 +1,7 @@
 import React from 'react'
 import lodashMerge from 'lodash.merge'
 
-import { getDistinctValues, buildTree, flattenTree, getExpandedState, isEmpty, findParentIds } from '../utils/helper'
+import { getDistinctValues, buildTree, flattenTree, getExpandedState, isEmpty, findParentIds, isPromise } from '../utils/helper'
 import i18nMap from '../utils/i18nMap'
 
 function descendingComparator(a, b, orderBy) {
@@ -136,6 +136,7 @@ const useMuiTable = (props) => {
     onInlineActionClick,
     onFooterActionClick,
     onTreeExpand,
+    fetchChildren,
     onRowAdd,
     onFilter
   } = props
@@ -155,6 +156,7 @@ const useMuiTable = (props) => {
   const [rows, setRows] = React.useState(props.rows || []) // original rows
   const [tree, setTree] = React.useState([]) // build tree data
   const [expanded, setExpanded] = React.useState({}) // state of expanded node
+  const [busy, setBusy] = React.useState({}) // Fetching status of node being expanded
   const [order, setOrder] = React.useState(defaultSort.order || 'asc')
   const [orderBy, setOrderBy] = React.useState(defaultSort.field || columns[0]?.dataKey)
   const [selected, setSelected] = React.useState([])
@@ -500,6 +502,43 @@ const useMuiTable = (props) => {
   }
 
   const handleTreeExpand = (event, row, isExpanded) => {
+    const fullRowList = flattenTree(tree, true, idKey)
+    const children = fullRowList.filter((e) => e[parentIdKey] === row[idKey])
+    if (isEmpty(children) && busy[row[idKey]]) {
+      return
+    }
+
+    if (isEmpty(children) && typeof fetchChildren === 'function') {
+      const result = fetchChildren(row)
+      if (isPromise(result)) {
+        setBusy((prev) => ({ ...prev, [row[idKey]]: true }))
+        result
+          .then((rowList) => {
+            if (Array.isArray(rowList)) {
+              setTree((prevTree) => {
+                const prevRowList = flattenTree(prevTree, true, idKey)
+                return buildTree([...prevRowList, ...rowList], idKey, parentIdKey)
+              })
+            } else {
+              console.warn('Response of fetchChildren must be of type array')
+            }
+            setBusy((prev) => ({ ...prev, [row[idKey]]: false }))
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      } else {
+        if (Array.isArray(result)) {
+          setTree((prevTree) => {
+            const prevRowList = flattenTree(prevTree, true, idKey)
+            return buildTree([...prevRowList, ...result], idKey, parentIdKey)
+          })
+        } else {
+          console.warn('Response of fetchChildren must be of type array')
+        }
+      }
+    }
+
     setExpanded((expanded) => ({ ...expanded, [row[idKey]]: !isExpanded }))
     onTreeExpand && onTreeExpand(event, row, isExpanded)
   }
@@ -575,6 +614,7 @@ const useMuiTable = (props) => {
     orderBy,
     filterValues,
     expanded,
+    busy,
     searchFocus,
     searchText,
     setSearchText: onSearch,

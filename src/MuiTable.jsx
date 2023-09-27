@@ -23,6 +23,8 @@ import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
 
 // material-ui/icons
+import CircularProgress from '@material-ui/core/CircularProgress'
+
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import AddIcon from '@material-ui/icons/Add'
@@ -188,6 +190,7 @@ const FormContent = (props) => {
     rowStyle,
     totalRowKey,
     expanded,
+    busy,
     handleClick,
     handleTreeExpand,
     inlineActions,
@@ -402,8 +405,9 @@ const FormContent = (props) => {
                                 style={{ paddingLeft: 8 * (row?.level || 0), display: 'flex', alignItems: 'center' }}
                                 onClick={(event) => handleTreeExpand(event, row, expanded[row[idKey]])}
                               >
-                                {expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}
-                                {!expanded[row[idKey]] && <ChevronRight style={{ color: '#65819D' }} />}
+                                {busy[row[idKey]] && <CircularProgress color='secondary' size={20} />}
+                                {!busy[row[idKey]] && expanded[row[idKey]] && <ChevronDown style={{ color: '#65819D' }} />}
+                                {!busy[row[idKey]] && !expanded[row[idKey]] && <ChevronRight style={{ color: '#65819D' }} />}
                               </div>
                             ) : null}
                           </TableCell>
@@ -1036,6 +1040,7 @@ MuiTable.propTypes = {
       inputType: PropTypes.oneOf(['text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'file-input', 'auto-complete-input']),
       // when inputType is 'select' or 'auto-complete'
       choices: PropTypes.oneOfType([PropTypes.arrayOf(OptionType), PropTypes.func]),
+      fetchChoices: PropTypes.func,
       render: PropTypes.func, // (value, shortValue) => ?any
       disabled: PropTypes.func, // (row, dataKey) => boolean . If any normal cell has to disabled conditionally. It will have higher priority than disabled in options
       align: PropTypes.oneOf(['center', 'inherit', 'justify', 'left', 'right']),
@@ -1117,6 +1122,7 @@ MuiTable.propTypes = {
   onInlineActionClick: PropTypes.func, // (event, action, row, onActionComplete) => void
   onFooterActionClick: PropTypes.func, // (event, action, rows, filterValues, onActionComplete) => void
   onTreeExpand: PropTypes.func, // (event, row, isExpanded) => any
+  fetchChildren: PropTypes.func, // Fetch children if children placeholder is only there
   defaultExpanded: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]), // bool | (row, level) => bool
   comparator: PropTypes.func,
   handleSubmitRef: PropTypes.func // When Form is submited externally, get hold of ReactFinalForm handleSubmit function by passing this function.

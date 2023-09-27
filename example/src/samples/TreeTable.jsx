@@ -32,21 +32,21 @@ const columns = [
 // ].sort((a, b) => a.serial - b.serial)
 
 let rows = [
-  { id: 1, serial: 1, field: 'Field 1' },
-  { id: 11, serial: 1, parentId: 1, field: 'Field 1.1' },
-  { id: 12, serial: 2, parentId: 1, field: 'Field 1.2' },
-  { id: 121, serial: 1, parentId: 12, field: 'Field 1.2.1' },
-  { id: 122, serial: 2, parentId: 12, field: 'Field 1.2.2' },
-  { id: 123, serial: 3, parentId: 12, field: 'Field 1.2.3' },
+  { id: 1, serial: 1, field: 'Field 1', hasChild: true },
+  // { id: 11, serial: 1, parentId: 1, field: 'Field 1.1' },
+  // { id: 12, serial: 2, parentId: 1, field: 'Field 1.2' },
+  // { id: 121, serial: 1, parentId: 12, field: 'Field 1.2.1' },
+  // { id: 122, serial: 2, parentId: 12, field: 'Field 1.2.2' },
+  // { id: 123, serial: 3, parentId: 12, field: 'Field 1.2.3' },
   { id: 2, serial: 4, field: 'Field 2' },
   { id: 21, serial: 2, parentId: 2, field: 'Field 2.1' },
   { id: 22, serial: 1, parentId: 2, field: 'Field 2.2' },
   { id: 3, serial: 2, field: 'Field 3' },
   { id: 31, serial: 1, parentId: 3, field: 'Field 3.1' },
   { id: 32, serial: 2, parentId: 3, field: 'Field 3.2' },
-  { id: 4, serial: 3, field: 'Field 4' },
-  { id: 41, serial: 1, parentId: 4, field: 'Field 4.1' },
-  { id: 42, serial: 2, parentId: 4, field: 'Field 4.2' }
+  { id: 4, serial: 3, field: 'Field 4', hasChild: true }
+  // { id: 41, serial: 1, parentId: 4, field: 'Field 4.1' },
+  // { id: 42, serial: 2, parentId: 4, field: 'Field 4.2' }
 ]
 
 rows = rows.map((row) => ({
@@ -101,6 +101,34 @@ const TreeTable = () => {
     console.log({ rows, rowIdx, currRow })
   }
 
+  const fetchChildren = (row) => {
+    if (row.id === 4) {
+      const children = [
+        { id: 41, serial: 1, parentId: 4, field: 'Field 4.1' },
+        { id: 42, serial: 2, parentId: 4, field: 'Field 4.2' }
+      ]
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(children)
+        }, 1000)
+      })
+    } else if (row.id === 1) {
+      const children = [
+        { id: 11, serial: 1, parentId: 1, field: 'Field 1.1' },
+        { id: 12, serial: 2, parentId: 1, field: 'Field 1.2' },
+        { id: 121, serial: 1, parentId: 12, field: 'Field 1.2.1' },
+        { id: 122, serial: 2, parentId: 12, field: 'Field 1.2.2' },
+        { id: 123, serial: 3, parentId: 12, field: 'Field 1.2.3' }
+      ]
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(children)
+        }, 1000)
+      })
+    }
+    return []
+  }
+
   // const defaultExpanded = (row, level) => level <= 0
   // const rowList = addTotalRow(rows).sort((a, b) => a.serial - b.serial)
   return (
@@ -113,9 +141,10 @@ const TreeTable = () => {
       searchKeys={['field']}
       pageable={true}
       showEditableActions={true}
-      defaultExpanded={true}
+      // defaultExpanded={true}
       expandedColor={['#92BFF6', '#C1DBFA', '#F0F6FE']}
       // initialExpandedState={{ 1: true, 2: true }}
+      fetchChildren={fetchChildren}
       onRowAdd={onRowAdd}
       onSubmit={onSubmit}
       onSelect={onSelect}

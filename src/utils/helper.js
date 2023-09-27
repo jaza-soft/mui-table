@@ -129,7 +129,7 @@ const expandedChild = (root, expanded, defaultExpanded, idKey) => {
 const flattenChild = ({ children, ...root }, expanded = {}, idKey) => {
   const isExpanded = typeof expanded === 'object' ? expanded[root[idKey]] : expanded
   if (!children || children.length === 0 || !isExpanded) {
-    return [{ ...root, hasChild: children.length > 0 }]
+    return [{ ...root, hasChild: root.hasChild || children.length > 0 }]
   } else {
     return [{ ...root, hasChild: true }, ...children.flatMap((child) => flattenChild(child, expanded, idKey))]
   }
@@ -140,6 +140,7 @@ const createChild = (root, rows, level, idKey, parentIdKey) => {
   return {
     ...root,
     level,
+    hasChild: root?.hasChild || children?.length > 0,
     children: children.map((child) => createChild(child, rows, level + 1, idKey, parentIdKey))
   }
 }
