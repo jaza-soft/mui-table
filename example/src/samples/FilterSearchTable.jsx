@@ -39,7 +39,7 @@ const columns = [
   { dataKey: 'csv', title: 'CSV', filterOptions: { filter: true, showValueOnly: false } },
   { dataKey: 'width', title: 'Cuttable\nWidth (CM)' },
   { dataKey: 'shrinkage', title: 'Shrinkage' },
-  { dataKey: 'mills', title: 'Mills', filterOptions: { filter: true, isCsvText: true, multiSelect: true } }
+  { dataKey: 'mills', title: 'Mills', hidden: true, filterOptions: { filter: true, isCsvText: true, multiSelect: true } }
 ]
 
 let rows = [

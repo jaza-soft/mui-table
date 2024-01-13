@@ -79,7 +79,7 @@ class App extends Component {
 **Action**
 
 | Name    | Type           | Default Value | Description                                                 |
-|---------|----------------|---------------|-------------------------------------------------------------|
+| ------- | -------------- | ------------- | ----------------------------------------------------------- |
 | name    | `string`       |               | `Required`. Name of action                                  |
 | tooltip | `string`       |               | `Optional`. Tooltip for the action                          |
 | icon    | `ReactElement` |               | Icon for this action. Required for custom actions.          |
@@ -88,9 +88,10 @@ class App extends Component {
 **Column**
 
 | Name            | Type                   | Default Value  | Description                                                                                                                                                                                       |
-|-----------------|------------------------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------- | ---------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | dataKey         | `string`               |                | Key in Object for this column                                                                                                                                                                     |
 | title           | `string`               |                | Label for this column                                                                                                                                                                             |
+| hidden          | `boolean`              |                | To hide columns. There are cases where, search and filter on some field is required without showing Column                                                                                        |
 | titleSelected   | `function`             |                | Title when rows are selected. Signature - `(selectedRows) => string`                                                                                                                              |
 | inputType       | `string`               | `'text-field'` | Type of Input when table is editable. Values - `'text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'auto-complete-input'`                                                 |
 | fetchChoices    | `function`             |                | function to fetch choices on demand for auto-complete-input. `(searchText, rows) => Promise(Choices)`                                                                                             |
@@ -109,7 +110,7 @@ class App extends Component {
 ## Props
 
 | Name                 | Type                                  | Default Value           | Description                                                                                                                                                                  |
-|----------------------|---------------------------------------|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------- | ------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | columns              | `column[]`                            | `[]`                    | List of Columns                                                                                                                                                              |
 | rows                 | `object[]`                            | `[]`                    | List of objects                                                                                                                                                              |
 | toolbar              | `bool`                                | `false`                 | Whether to show toolbar                                                                                                                                                      |

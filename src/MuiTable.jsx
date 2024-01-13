@@ -428,61 +428,63 @@ const FormContent = (props) => {
                             })
                           : null}
 
-                        {columns.map((column, colIdx) => {
-                          const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
-                          const finalLength = length || cellLength
-                          const value = row[dataKey]
-                          let shortValue = value
-                          if (typeof value === 'string') {
-                            const texts = multiLineText(value, finalLength)
-                            if (cellOverFlow === 'tooltip') {
-                              shortValue = texts[0]
-                            } else if (cellOverFlow === 'wrap') {
-                              shortValue = texts.join('\n')
-                            }
-                          }
-
-                          const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
-                          let finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
-                          if (Array.isArray(finalValue) && finalValue.some((e) => e instanceof File)) {
-                            finalValue = finalValue.map((e) => e?.name || e).join(', ')
-                          } else if (finalValue instanceof File) {
-                            finalValue = finalValue?.name
-                          }
-                          return (
-                            <TableCell
-                              className={clsx(
-                                {
-                                  [classes.link]: typeof linkPath === 'function',
-                                  [classes.rowCell]: true
-                                },
-                                options?.className
-                              )}
-                              component={colIdx === 0 ? 'th' : undefined}
-                              scope={colIdx === 0 ? 'row' : undefined}
-                              padding={selectable && colIdx === 0 ? 'none' : 'default'}
-                              key={`${rowIdx}-${colIdx}`}
-                              align={align}
-                              onClick={() =>
-                                typeof linkPath === 'function' ? linkPath(row, dataKey) : typeof onRowClick === 'function' ? onRowClick(row) : null
+                        {columns
+                          .filter((c) => isEmpty(c.hidden) || c.hidden === false)
+                          .map((column, colIdx) => {
+                            const { dataKey, render, align, linkPath, length, rowCellProps, options } = column
+                            const finalLength = length || cellLength
+                            const value = row[dataKey]
+                            let shortValue = value
+                            if (typeof value === 'string') {
+                              const texts = multiLineText(value, finalLength)
+                              if (cellOverFlow === 'tooltip') {
+                                shortValue = texts[0]
+                              } else if (cellOverFlow === 'wrap') {
+                                shortValue = texts.join('\n')
                               }
-                              {...rowCellProps}
-                              style={{
-                                fontWeight,
-                                paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
-                                ...style,
-                                ...rowCellProps?.style
-                              }}
-                            >
-                              {cellOverFlow === 'tooltip' && value !== shortValue && (
-                                <Tooltip title={value}>
-                                  <span>{finalValue}...</span>
-                                </Tooltip>
-                              )}
-                              {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
-                            </TableCell>
-                          )
-                        })}
+                            }
+
+                            const style = typeof cellStyle === 'function' ? cellStyle({ row, rowIdx, column, colIdx }) : {}
+                            let finalValue = typeof render === 'function' ? render(value, shortValue, row) : shortValue
+                            if (Array.isArray(finalValue) && finalValue.some((e) => e instanceof File)) {
+                              finalValue = finalValue.map((e) => e?.name || e).join(', ')
+                            } else if (finalValue instanceof File) {
+                              finalValue = finalValue?.name
+                            }
+                            return (
+                              <TableCell
+                                className={clsx(
+                                  {
+                                    [classes.link]: typeof linkPath === 'function',
+                                    [classes.rowCell]: true
+                                  },
+                                  options?.className
+                                )}
+                                component={colIdx === 0 ? 'th' : undefined}
+                                scope={colIdx === 0 ? 'row' : undefined}
+                                padding={selectable && colIdx === 0 ? 'none' : 'default'}
+                                key={`${rowIdx}-${colIdx}`}
+                                align={align}
+                                onClick={() =>
+                                  typeof linkPath === 'function' ? linkPath(row, dataKey) : typeof onRowClick === 'function' ? onRowClick(row) : null
+                                }
+                                {...rowCellProps}
+                                style={{
+                                  fontWeight,
+                                  paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined,
+                                  ...style,
+                                  ...rowCellProps?.style
+                                }}
+                              >
+                                {cellOverFlow === 'tooltip' && value !== shortValue && (
+                                  <Tooltip title={value}>
+                                    <span>{finalValue}...</span>
+                                  </Tooltip>
+                                )}
+                                {!(cellOverFlow === 'tooltip' && value !== shortValue) && finalValue}
+                              </TableCell>
+                            )
+                          })}
 
                         {actionPlacement === 'right'
                           ? renderActions({
@@ -560,142 +562,144 @@ const FormContent = (props) => {
                             </TableCell>
                           )}
 
-                          {columns.map(
-                            (
-                              {
-                                dataKey,
-                                inputType = 'text-field',
-                                render,
-                                fetchChoices,
-                                choices,
-                                align,
-                                rowCellProps,
-                                options,
-                                validate,
-                                length,
-                                disabled: disabledFunc
-                              },
-                              colIdx
-                            ) => {
-                              const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey, fields?.value) : options?.disabled
+                          {columns
+                            .filter((c) => isEmpty(c.hidden) || c.hidden === false)
+                            .map(
+                              (
+                                {
+                                  dataKey,
+                                  inputType = 'text-field',
+                                  render,
+                                  fetchChoices,
+                                  choices,
+                                  align,
+                                  rowCellProps,
+                                  options,
+                                  validate,
+                                  length,
+                                  disabled: disabledFunc
+                                },
+                                colIdx
+                              ) => {
+                                const disabled = typeof disabledFunc === 'function' ? disabledFunc(row, dataKey, fields?.value) : options?.disabled
 
-                              const handleChoiceFetch = (searchText) => {
-                                if (typeof fetchChoices !== 'function') return
-                                const result = fetchChoices(searchText)
-                                if (isPromise(result)) {
-                                  result.then((choiceList) => {
-                                    if (Array.isArray(choiceList)) {
-                                      const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
-                                      setChoiceData((prev) => ({ ...prev, [dataKey]: { ...prev[dataKey], ...data } }))
-                                    }
-                                  })
+                                const handleChoiceFetch = (searchText) => {
+                                  if (typeof fetchChoices !== 'function') return
+                                  const result = fetchChoices(searchText)
+                                  if (isPromise(result)) {
+                                    result.then((choiceList) => {
+                                      if (Array.isArray(choiceList)) {
+                                        const data = choiceList.reduce((acc, e) => ({ ...acc, [e.id]: e }), {})
+                                        setChoiceData((prev) => ({ ...prev, [dataKey]: { ...prev[dataKey], ...data } }))
+                                      }
+                                    })
+                                  }
                                 }
-                              }
 
-                              let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
-                              if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
-                                element = 'text-field'
-                              }
+                                let element = disabled && disabledElement === 'field' ? 'text-field' : inputType
+                                if (editableState.editingInline && editableState.rowIdx !== rowIdx) {
+                                  element = 'text-field'
+                                }
 
-                              let finalChoices
-                              if (typeof choices === 'function') {
-                                finalChoices = choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value })
-                              } else if (Array.isArray(choices)) {
-                                finalChoices = choices
-                              } else if (element === 'auto-complete-input' && !isEmpty(choiceData) && !isEmpty(choiceData[dataKey])) {
-                                finalChoices = Object.values(choiceData[dataKey])
+                                let finalChoices
+                                if (typeof choices === 'function') {
+                                  finalChoices = choices({ row, rowIdx, colIdx, dataKey, rows: fields?.value })
+                                } else if (Array.isArray(choices)) {
+                                  finalChoices = choices
+                                } else if (element === 'auto-complete-input' && !isEmpty(choiceData) && !isEmpty(choiceData[dataKey])) {
+                                  finalChoices = Object.values(choiceData[dataKey])
+                                }
+                                return (
+                                  <TableCell
+                                    className={clsx({
+                                      [classes.rowCell]: element === 'text-field',
+                                      [classes.inputPadding]: element !== 'text-field'
+                                    })}
+                                    key={`${rowIdx}-${colIdx}`}
+                                    align={align}
+                                    style={{
+                                      paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined
+                                    }}
+                                    {...rowCellProps}
+                                  >
+                                    {element === 'text-field' && (
+                                      <TextField
+                                        name={`${name}.${dataKey}`}
+                                        row={row}
+                                        render={render}
+                                        cellOverFlow={cellOverFlow}
+                                        cellLength={cellLength}
+                                        length={length}
+                                        options={options}
+                                      />
+                                    )}
+                                    {element === 'text-input' && (
+                                      <TextInput
+                                        name={`${name}.${dataKey}`}
+                                        form={form}
+                                        validate={validate}
+                                        disabled={disabled}
+                                        variant={variant}
+                                        fontSize={fontSize}
+                                        i18nMap={i18nMap}
+                                        options={options}
+                                        handleOnChange={handleOnChange}
+                                      />
+                                    )}
+                                    {element === 'file-input' && (
+                                      <FileInput
+                                        name={`${name}.${dataKey}`}
+                                        form={form}
+                                        validate={validate}
+                                        disabled={disabled}
+                                        fontSize={fontSize}
+                                        i18nMap={i18nMap}
+                                        options={options}
+                                        handleOnChange={handleOnChange}
+                                      />
+                                    )}
+                                    {element === 'select-input' && (
+                                      <SelectInput
+                                        name={`${name}.${dataKey}`}
+                                        form={form}
+                                        choices={finalChoices}
+                                        validate={validate}
+                                        disabled={disabled}
+                                        variant={variant}
+                                        fontSize={fontSize}
+                                        i18nMap={i18nMap}
+                                        options={options}
+                                        handleOnChange={handleOnChange}
+                                      />
+                                    )}
+                                    {element === 'auto-complete-input' && (
+                                      <AutoCompleteInput
+                                        name={`${name}.${dataKey}`}
+                                        form={form}
+                                        choices={finalChoices}
+                                        updateChoices={handleChoiceFetch}
+                                        validate={validate}
+                                        disabled={disabled}
+                                        variant={variant}
+                                        fontSize={fontSize}
+                                        i18nMap={i18nMap}
+                                        options={options}
+                                        handleOnChange={handleOnChange}
+                                      />
+                                    )}
+                                    {element === 'boolean-input' && (
+                                      <BooleanInput
+                                        name={`${name}.${dataKey}`}
+                                        form={form}
+                                        disabled={disabled}
+                                        options={options}
+                                        handleOnChange={handleOnChange}
+                                      />
+                                    )}
+                                  </TableCell>
+                                )
                               }
-                              return (
-                                <TableCell
-                                  className={clsx({
-                                    [classes.rowCell]: element === 'text-field',
-                                    [classes.inputPadding]: element !== 'text-field'
-                                  })}
-                                  key={`${rowIdx}-${colIdx}`}
-                                  align={align}
-                                  style={{
-                                    paddingLeft: isTreeTable && colIdx === 0 ? childIndent * (row?.level ? row.level + 1 : 1) : undefined
-                                  }}
-                                  {...rowCellProps}
-                                >
-                                  {element === 'text-field' && (
-                                    <TextField
-                                      name={`${name}.${dataKey}`}
-                                      row={row}
-                                      render={render}
-                                      cellOverFlow={cellOverFlow}
-                                      cellLength={cellLength}
-                                      length={length}
-                                      options={options}
-                                    />
-                                  )}
-                                  {element === 'text-input' && (
-                                    <TextInput
-                                      name={`${name}.${dataKey}`}
-                                      form={form}
-                                      validate={validate}
-                                      disabled={disabled}
-                                      variant={variant}
-                                      fontSize={fontSize}
-                                      i18nMap={i18nMap}
-                                      options={options}
-                                      handleOnChange={handleOnChange}
-                                    />
-                                  )}
-                                  {element === 'file-input' && (
-                                    <FileInput
-                                      name={`${name}.${dataKey}`}
-                                      form={form}
-                                      validate={validate}
-                                      disabled={disabled}
-                                      fontSize={fontSize}
-                                      i18nMap={i18nMap}
-                                      options={options}
-                                      handleOnChange={handleOnChange}
-                                    />
-                                  )}
-                                  {element === 'select-input' && (
-                                    <SelectInput
-                                      name={`${name}.${dataKey}`}
-                                      form={form}
-                                      choices={finalChoices}
-                                      validate={validate}
-                                      disabled={disabled}
-                                      variant={variant}
-                                      fontSize={fontSize}
-                                      i18nMap={i18nMap}
-                                      options={options}
-                                      handleOnChange={handleOnChange}
-                                    />
-                                  )}
-                                  {element === 'auto-complete-input' && (
-                                    <AutoCompleteInput
-                                      name={`${name}.${dataKey}`}
-                                      form={form}
-                                      choices={finalChoices}
-                                      updateChoices={handleChoiceFetch}
-                                      validate={validate}
-                                      disabled={disabled}
-                                      variant={variant}
-                                      fontSize={fontSize}
-                                      i18nMap={i18nMap}
-                                      options={options}
-                                      handleOnChange={handleOnChange}
-                                    />
-                                  )}
-                                  {element === 'boolean-input' && (
-                                    <BooleanInput
-                                      name={`${name}.${dataKey}`}
-                                      form={form}
-                                      disabled={disabled}
-                                      options={options}
-                                      handleOnChange={handleOnChange}
-                                    />
-                                  )}
-                                </TableCell>
-                              )
-                            }
-                          )}
+                            )}
                           {actionPlacement === 'right' && editableState.editingInline
                             ? renderActions({
                                 showActions,
@@ -1037,6 +1041,7 @@ MuiTable.propTypes = {
     PropTypes.shape({
       dataKey: PropTypes.string,
       title: PropTypes.string,
+      hidden: PropTypes.bool,
       inputType: PropTypes.oneOf(['text-field', 'text-input', 'select-input', 'boolean-input', 'date-input', 'file-input', 'auto-complete-input']),
       // when inputType is 'select' or 'auto-complete'
       choices: PropTypes.oneOfType([PropTypes.arrayOf(OptionType), PropTypes.func]),

@@ -73,27 +73,29 @@ const TableHead = (props) => {
             <TableCell align='left'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
           )}
 
-          {columns.map(({ dataKey, title, align, headerCellProps }, idx) => (
-            <TableCell
-              key={idx}
-              className={clsx(props.classes?.headerCell, props.options?.className)}
-              align={align}
-              padding={selectable && !editing && idx === 0 ? 'none' : 'default'}
-              sortDirection={orderBy === dataKey ? order : false}
-              {...headerCellProps}
-            >
-              {sortable && !editing ? (
-                <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
-                  {getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}
-                  {orderBy === dataKey ? (
-                    <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
-                  ) : null}
-                </TableSortLabel>
-              ) : (
-                getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })
-              )}
-            </TableCell>
-          ))}
+          {columns
+            .filter((c) => isEmpty(c.hidden) || c.hidden === false)
+            .map(({ dataKey, title, align, headerCellProps }, idx) => (
+              <TableCell
+                key={idx}
+                className={clsx(props.classes?.headerCell, props.options?.className)}
+                align={align}
+                padding={selectable && !editing && idx === 0 ? 'none' : 'default'}
+                sortDirection={orderBy === dataKey ? order : false}
+                {...headerCellProps}
+              >
+                {sortable && !editing ? (
+                  <TableSortLabel active={orderBy === dataKey} direction={orderBy === dataKey ? order : 'asc'} onClick={createSortHandler(dataKey)}>
+                    {getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })}
+                    {orderBy === dataKey ? (
+                      <span className={classes.visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
+                    ) : null}
+                  </TableSortLabel>
+                ) : (
+                  getLabel(`fields.${dataKey}`, null, i18nMap, { _: title })
+                )}
+              </TableCell>
+            ))}
 
           {showActions && actionPlacement === 'right' && (
             <TableCell align='right'>{getLabel(`text.actions`, null, i18nMap, { _: 'Actions' })}</TableCell>
