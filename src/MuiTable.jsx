@@ -50,7 +50,7 @@ import SelectInput from './components/SelectInput'
 import BooleanInput from './components/BooleanInput'
 import AutoCompleteInput from './components/AutoCompleteInput'
 
-import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty, isPromise } from './utils/helper'
+import { multiLineText, getDistinctValues, nameFromId, mergeArray, getLabel, capitalize, isEmpty, isPromise, truncate } from './utils/helper'
 import translate from './utils/translate'
 import useMuiTable from './hooks/useMuiTable'
 import { composeValidators } from './utils/validators'
@@ -438,7 +438,7 @@ const FormContent = (props) => {
                             if (typeof value === 'string') {
                               const texts = multiLineText(value, finalLength)
                               if (cellOverFlow === 'tooltip') {
-                                shortValue = texts[0]
+                                shortValue = truncate(texts[0], finalLength)
                               } else if (cellOverFlow === 'wrap') {
                                 shortValue = texts.join('\n')
                               }

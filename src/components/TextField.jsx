@@ -2,7 +2,7 @@ import React from 'react'
 import { Field } from 'react-final-form'
 
 import Tooltip from './Tooltip'
-import { multiLineText } from '../utils/helper'
+import { multiLineText, truncate } from '../utils/helper'
 
 const sanitizeOptions = ({ displayEmpty, ...restOptions }) => restOptions
 
@@ -16,7 +16,7 @@ const TextField = React.memo(({ name, row, render, cellOverFlow, length, cellLen
         if (typeof value === 'string') {
           const texts = multiLineText(value, finalLength)
           if (cellOverFlow === 'tooltip') {
-            shortValue = texts[0]
+            shortValue = truncate(texts[0], finalLength)
           } else if (cellOverFlow === 'wrap') {
             shortValue = texts.join('\n')
           }
