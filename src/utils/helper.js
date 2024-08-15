@@ -36,7 +36,7 @@ export const multiLineText = (text, length) => {
   if (!text) return [text]
   const result = []
   if (text) {
-    while (text.length > length) {
+    while (text.length >= length) {
       let idx = text.substring(0, length).lastIndexOf(' ')
       if (idx === -1) {
         idx = text.indexOf(' ')
