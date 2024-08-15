@@ -52,7 +52,7 @@ export const multiLineText = (text, length) => {
 
 export const truncate = (str, length = 20) => {
   if (!str || typeof str !== 'string' || str.length < length) return str
-  if (str.length > length) return `${str.substring(0, length - 3)}...`
+  if (str.length > length) return `${str.substring(0, length)}`
 }
 
 export const mergeArray = (arr1, arr2, idKey) => {
