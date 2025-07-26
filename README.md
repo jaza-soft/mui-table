@@ -177,4 +177,4 @@ class App extends Component {
 
 ## License
 
-MIT © [Jaza Software](https://jaza-soft.com)
+MIT © [Jaza Software](https://jazasoft.com)
